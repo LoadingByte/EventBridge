@@ -20,7 +20,7 @@ package com.quartercode.eventbridge.test.def.channel;
 
 import static org.junit.Assert.assertEquals;
 import org.jmock.Expectations;
-import org.jmock.States;
+import org.jmock.Sequence;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
@@ -51,14 +51,14 @@ public class ChannelTest {
         final TestInterceptor interceptor = context.mock(TestInterceptor.class);
         channel.addInterceptor(interceptor, 0);
 
-        context.checking(new Expectations() {
+        // @formatter:off
+        context.checking(new Expectations() {{
 
-            {
-                oneOf(interceptor).run(with(any(ChannelInvocation.class)), with(testArguments));
+            oneOf(interceptor).run(with(any(ChannelInvocation.class)), with(testArguments));
                 will(returnValue("testResult"));
-            }
 
-        });
+        }});
+        // @formatter:on
 
         ChannelInvocation<TestInterceptor> invocation = channel.invoke();
         String result = invocation.next().run(invocation, testArguments);
@@ -83,30 +83,46 @@ public class ChannelTest {
         channel.addInterceptor(new DummyTestInterceptor(interceptor2), 2);
         channel.addInterceptor(new DummyTestInterceptor(interceptor1), 1);
 
-        context.checking(new Expectations() {
+        // @formatter:off
+        context.checking(new Expectations() {{
 
-            {
-                final States interceptorStates = context.states("interceptorStateMachine").startsAs("interceptor2");
+            final Sequence interceptorCalls = context.sequence("interceptorCalls");
 
-                oneOf(interceptor2).run(with(any(ChannelInvocation.class)), with(testArguments));
+            oneOf(interceptor2).run(with(any(ChannelInvocation.class)), with(testArguments)); inSequence(interceptorCalls);
                 will(returnValue("testResult"));
-                when(interceptorStates.is("interceptor2"));
-                then(interceptorStates.is("interceptor1"));
+            oneOf(interceptor1).run(with(any(ChannelInvocation.class)), with(testArguments)); inSequence(interceptorCalls);
+            oneOf(interceptor0).run(with(any(ChannelInvocation.class)), with(testArguments)); inSequence(interceptorCalls);
 
-                oneOf(interceptor1).run(with(any(ChannelInvocation.class)), with(testArguments));
-                when(interceptorStates.is("interceptor1"));
-                then(interceptorStates.is("interceptor0"));
-
-                oneOf(interceptor0).run(with(any(ChannelInvocation.class)), with(testArguments));
-                when(interceptorStates.is("interceptor0"));
-            }
-
-        });
+        }});
+        // @formatter:on
 
         ChannelInvocation<TestInterceptor> invocation = channel.invoke();
         String result = invocation.next().run(invocation, testArguments);
 
         assertEquals("Value that was returned by the channel", "testResult", result);
+    }
+
+    @SuppressWarnings ("unchecked")
+    @Test
+    public void testInvokeInterceptorTwice() {
+
+        final String[] testArguments = { "test1", "test2", "test3" };
+
+        final TestInterceptor interceptor = context.mock(TestInterceptor.class);
+
+        channel.addInterceptor(new DummyTestInterceptor(interceptor), 0);
+        channel.addInterceptor(new DummyTestInterceptor(interceptor), 1);
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            exactly(2).of(interceptor).run(with(any(ChannelInvocation.class)), with(testArguments));
+
+        }});
+        // @formatter:on
+
+        ChannelInvocation<TestInterceptor> invocation = channel.invoke();
+        invocation.next().run(invocation, testArguments);
     }
 
     @Test
@@ -149,6 +165,13 @@ public class ChannelTest {
         String result = invocation.next().run(invocation, null);
 
         assertEquals("Value that was returned by the channel", "012", result);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void testAddInterceptorsWithSamePriority() {
+
+        channel.addInterceptor(context.mock(TestInterceptor.class, "interceptor1"), 0);
+        channel.addInterceptor(context.mock(TestInterceptor.class, "interceptor2"), 0);
     }
 
 }
