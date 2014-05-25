@@ -29,6 +29,7 @@ import org.junit.Test;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
+import com.quartercode.eventbridge.bridge.HandlerModule;
 import com.quartercode.eventbridge.bridge.SenderModule;
 import com.quartercode.eventbridge.bridge.SenderModule.ConnectorSendInterceptor;
 import com.quartercode.eventbridge.bridge.SenderModule.GlobalSendInterceptor;
@@ -57,23 +58,27 @@ public class DefaultSenderModuleTest {
         final EmptyEvent1 event = new EmptyEvent1();
 
         final GlobalSendInterceptor globalInterceptor = context.mock(GlobalSendInterceptor.class);
-        senderModule.getGlobalSendChannel().addInterceptor(new DummyGlobalSendInterceptor(globalInterceptor), 1);
+        senderModule.getGlobalSendChannel().addInterceptor(new DummyGlobalSendInterceptor(globalInterceptor), 10);
 
         final ConnectorSendInterceptor connectorInterceptor = context.mock(ConnectorSendInterceptor.class);
-        senderModule.getConnectorSendChannel().addInterceptor(new DummyConnectorSendInterceptor(connectorInterceptor), 1);
+        senderModule.getConnectorSendChannel().addInterceptor(new DummyConnectorSendInterceptor(connectorInterceptor), 10);
 
         final BridgeConnector connector = context.mock(BridgeConnector.class);
+        final HandlerModule handlerModule = context.mock(HandlerModule.class);
 
         // @formatter:off
         context.checking(new Expectations() {{
 
             allowing(bridge).getConnectors();
                 will(returnValue(Arrays.asList(connector)));
+            allowing(bridge).getHandlerModule();
+                will(returnValue(handlerModule));
 
             final Sequence sendChain = context.sequence("sendChain");
             oneOf(globalInterceptor).send(with(any(ChannelInvocation.class)), with(event)); inSequence(sendChain);
             oneOf(connectorInterceptor).send(with(any(ChannelInvocation.class)), with(connector), with(event)); inSequence(sendChain);
             oneOf(connector).send(event); inSequence(sendChain);
+            oneOf(handlerModule).handle(event); inSequence(sendChain);
 
         }});
         // @formatter:on
@@ -87,15 +92,19 @@ public class DefaultSenderModuleTest {
         final EmptyEvent1 event = new EmptyEvent1();
 
         final BridgeConnector connector = context.mock(BridgeConnector.class);
+        final HandlerModule handlerModule = context.mock(HandlerModule.class);
 
         // @formatter:off
         context.checking(new Expectations() {{
 
             allowing(bridge).getConnectors();
                 will(returnValue(Arrays.asList(connector)));
+            allowing(bridge).getHandlerModule();
+                will(returnValue(handlerModule));
 
             oneOf(connector).send(event);
                 will(throwException(new BridgeConnectorException(connector)));
+            allowing(handlerModule).handle(event);
 
         }});
         // @formatter:on

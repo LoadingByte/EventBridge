@@ -50,6 +50,7 @@ public class DefaultSenderModule extends BridgeModuleBase implements SenderModul
 
         super(parent);
 
+        // Send events over bridge connectors
         globalSendChannel.addInterceptor(new GlobalSendInterceptor() {
 
             @Override
@@ -59,6 +60,19 @@ public class DefaultSenderModule extends BridgeModuleBase implements SenderModul
                     ChannelInvocation<ConnectorSendInterceptor> newInvocation = connectorSendChannel.invoke();
                     newInvocation.next().send(newInvocation, connector, event);
                 }
+
+                invocation.next().send(invocation, event);
+            }
+
+        }, 5);
+
+        // Send events to local handlers
+        globalSendChannel.addInterceptor(new GlobalSendInterceptor() {
+
+            @Override
+            public void send(ChannelInvocation<GlobalSendInterceptor> invocation, Event event) {
+
+                getParent().getHandlerModule().handle(event);
 
                 invocation.next().send(invocation, event);
             }
