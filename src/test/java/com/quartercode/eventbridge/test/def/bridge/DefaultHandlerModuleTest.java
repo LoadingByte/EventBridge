@@ -36,6 +36,7 @@ import com.quartercode.eventbridge.bridge.HandlerModule.GlobalHandleInterceptor;
 import com.quartercode.eventbridge.bridge.HandlerModule.HandlerHandleInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.bridge.DefaultHandlerModule;
+import com.quartercode.eventbridge.test.def.bridge.DummyEvents.CallableEvent;
 import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent1;
 import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent2;
 import com.quartercode.eventbridge.test.def.bridge.DummyInterceptors.DummyGlobalHandleInterceptor;
@@ -61,7 +62,7 @@ public class DefaultHandlerModuleTest {
     public void testHandle() {
 
         final EmptyEvent1 regularEvent = new EmptyEvent1();
-        final EmptyEvent2 wronglyTypedEvent = new EmptyEvent2();
+        final EmptyEvent2 otherEvent = new EmptyEvent2();
 
         final GlobalHandleInterceptor globalInterceptor = context.mock(GlobalHandleInterceptor.class);
         handlerModule.getGlobalHandleChannel().addInterceptor(new DummyGlobalHandleInterceptor(globalInterceptor), 1);
@@ -80,7 +81,7 @@ public class DefaultHandlerModuleTest {
 
             allowing(predicate).test(regularEvent);
                 will(returnValue(true));
-            allowing(predicate).test(wronglyTypedEvent);
+            allowing(predicate).test(otherEvent);
                 will(returnValue(false));
 
             final Sequence handleChain = context.sequence("handleChain");
@@ -88,8 +89,8 @@ public class DefaultHandlerModuleTest {
             oneOf(globalInterceptor).handle(with(any(ChannelInvocation.class)), with(regularEvent)); inSequence(handleChain);
             oneOf(handlerInterceptor).handle(with(any(ChannelInvocation.class)), with(handler), with(regularEvent));
             oneOf(handler).handle(regularEvent); inSequence(handleChain);
-            // Wrongly typed event
-            oneOf(globalInterceptor).handle(with(any(ChannelInvocation.class)), with(wronglyTypedEvent)); inSequence(handleChain);
+            // Other event
+            oneOf(globalInterceptor).handle(with(any(ChannelInvocation.class)), with(otherEvent)); inSequence(handleChain);
 
         }});
         // @formatter:on
@@ -97,7 +98,72 @@ public class DefaultHandlerModuleTest {
         handlerModule.handle(regularEvent);
 
         // Test with wrongly typed event
-        handlerModule.handle(wronglyTypedEvent);
+        handlerModule.handle(otherEvent);
+    }
+
+    @SuppressWarnings ("unchecked")
+    @Test
+    public void testHandleWrongTypeInPredicate() {
+
+        @SuppressWarnings ("serial")
+        final EventPredicate<CallableEvent> predicate = new EventPredicate<CallableEvent>() {
+
+            @Override
+            public boolean test(CallableEvent event) {
+
+                // Provoke a ClassCastException
+                event.call();
+                return true;
+            }
+
+        };
+
+        final EventHandler<EmptyEvent1> handler = context.mock(EventHandler.class);
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            allowing(bridge).getHandlers();
+                will(returnValue(Arrays.asList(Pair.of(handler, predicate))));
+
+        }});
+        // @formatter:on
+
+        // Expect the HandlerModule to suppress the resulting ClassCastException
+        handlerModule.handle(new EmptyEvent1());
+    }
+
+    @SuppressWarnings ("unchecked")
+    @Test
+    public void testHandleWrongTypeInHandler() {
+
+        final EventHandler<CallableEvent> handler = new EventHandler<CallableEvent>() {
+
+            @Override
+            public void handle(CallableEvent event) {
+
+                // Provoke a ClassCastException
+                event.call();
+            }
+
+        };
+
+        final EventPredicate<Event> predicate = context.mock(EventPredicate.class);
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            allowing(bridge).getHandlers();
+                will(returnValue(Arrays.asList(Pair.of(handler, predicate))));
+
+            allowing(predicate).test(with(any(Event.class)));
+                will(returnValue(true));
+
+        }});
+        // @formatter:on
+
+        // Expect the HandlerModule to suppress the resulting ClassCastException
+        handlerModule.handle(new EmptyEvent1());
     }
 
 }
