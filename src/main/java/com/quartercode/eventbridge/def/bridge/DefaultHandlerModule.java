@@ -48,35 +48,8 @@ public class DefaultHandlerModule extends BridgeModuleBase implements HandlerMod
 
         super(parent);
 
-        globalHandleChannel.addInterceptor(new GlobalHandleInterceptor() {
-
-            @Override
-            public void handle(ChannelInvocation<GlobalHandleInterceptor> invocation, Event event) {
-
-                for (Pair<EventHandler<?>, EventPredicate<?>> handler : getParent().getHandlers()) {
-                    if (EventUtils.tryTest(handler.getRight(), event)) {
-                        ChannelInvocation<HandlerHandleInterceptor> newInvocation = handlerHandleChannel.invoke();
-                        newInvocation.next().handle(newInvocation, handler.getLeft(), event);
-                    }
-                }
-
-                invocation.next().handle(invocation, event);
-            }
-
-        }, 0);
-
-        handlerHandleChannel.addInterceptor(new HandlerHandleInterceptor() {
-
-            @Override
-            public void handle(ChannelInvocation<HandlerHandleInterceptor> invocation, EventHandler<?> handler, Event event) {
-
-                EventUtils.tryHandle(handler, event);
-
-                invocation.next().handle(invocation, handler, event);
-
-            }
-
-        }, 0);
+        globalHandleChannel.addInterceptor(new FinalGlobalHandleInterceptor(), 0);
+        handlerHandleChannel.addInterceptor(new FinalHandlerHandleInterceptor(), 0);
     }
 
     @Override
@@ -96,6 +69,45 @@ public class DefaultHandlerModule extends BridgeModuleBase implements HandlerMod
 
         ChannelInvocation<GlobalHandleInterceptor> invocation = globalHandleChannel.invoke();
         invocation.next().handle(invocation, event);
+    }
+
+    private class FinalGlobalHandleInterceptor implements GlobalHandleInterceptor {
+
+        @Override
+        public void handle(ChannelInvocation<GlobalHandleInterceptor> invocation, Event event) {
+
+            for (Pair<EventHandler<?>, EventPredicate<?>> handler : getParent().getHandlers()) {
+                if (EventUtils.tryTest(handler.getRight(), event)) {
+                    invokeHandlerHandleChannel(handler.getLeft(), event);
+                }
+            }
+
+            invocation.next().handle(invocation, event);
+        }
+
+        private void invokeHandlerHandleChannel(EventHandler<?> handler, Event event) {
+
+            ChannelInvocation<HandlerHandleInterceptor> newInvocation = handlerHandleChannel.invoke();
+            newInvocation.next().handle(newInvocation, handler, event);
+        }
+
+    }
+
+    /*
+     * This class is static because it doesn't need a reference to DefaultHandlerModule.
+     * -> Better performance
+     */
+    private static class FinalHandlerHandleInterceptor implements HandlerHandleInterceptor {
+
+        @Override
+        public void handle(ChannelInvocation<HandlerHandleInterceptor> invocation, EventHandler<?> handler, Event event) {
+
+            EventUtils.tryHandle(handler, event);
+
+            invocation.next().handle(invocation, handler, event);
+
+        }
+
     }
 
 }

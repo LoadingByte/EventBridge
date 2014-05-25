@@ -51,55 +51,9 @@ public class DefaultSenderModule extends BridgeModuleBase implements SenderModul
 
         super(parent);
 
-        globalSendChannel.addInterceptor(new GlobalSendInterceptor() {
-
-            @Override
-            public void send(ChannelInvocation<GlobalSendInterceptor> invocation, Event event) {
-
-                // Local handler send channel
-                {
-                    ChannelInvocation<LocalHandlerSendInterceptor> newInvocation = localHandlerSendChannel.invoke();
-                    newInvocation.next().send(newInvocation, event);
-                }
-
-                // Connector send channel
-                for (BridgeConnector connector : getParent().getConnectors()) {
-                    ChannelInvocation<ConnectorSendInterceptor> newInvocation = connectorSendChannel.invoke();
-                    newInvocation.next().send(newInvocation, connector, event);
-                }
-
-                invocation.next().send(invocation, event);
-            }
-
-        }, 0);
-
-        localHandlerSendChannel.addInterceptor(new LocalHandlerSendInterceptor() {
-
-            @Override
-            public void send(ChannelInvocation<LocalHandlerSendInterceptor> invocation, Event event) {
-
-                getParent().getHandlerModule().handle(event);
-
-                invocation.next().send(invocation, event);
-            }
-
-        }, 0);
-
-        connectorSendChannel.addInterceptor(new ConnectorSendInterceptor() {
-
-            @Override
-            public void send(ChannelInvocation<ConnectorSendInterceptor> invocation, BridgeConnector connector, Event event) {
-
-                try {
-                    connector.send(event);
-                } catch (BridgeConnectorException e) {
-                    LOGGER.error("Can't send event '{}' through bridge connector '{}'", event, connector, e);
-                }
-
-                invocation.next().send(invocation, connector, event);
-            }
-
-        }, 0);
+        globalSendChannel.addInterceptor(new FinalGlobalSendInterceptor(), 0);
+        localHandlerSendChannel.addInterceptor(new FinalLocalHandlerSendInterceptor(), 0);
+        connectorSendChannel.addInterceptor(new FinalConnectorSendInterceptor(), 0);
     }
 
     @Override
@@ -125,6 +79,65 @@ public class DefaultSenderModule extends BridgeModuleBase implements SenderModul
 
         ChannelInvocation<GlobalSendInterceptor> invocation = globalSendChannel.invoke();
         invocation.next().send(invocation, event);
+    }
+
+    private class FinalGlobalSendInterceptor implements GlobalSendInterceptor {
+
+        @Override
+        public void send(ChannelInvocation<GlobalSendInterceptor> invocation, Event event) {
+
+            invokeLocalHandlerSendChannel(event);
+            invokeConnectorSendChannel(event);
+
+            invocation.next().send(invocation, event);
+        }
+
+        private void invokeLocalHandlerSendChannel(Event event) {
+
+            ChannelInvocation<LocalHandlerSendInterceptor> newInvocation = localHandlerSendChannel.invoke();
+            newInvocation.next().send(newInvocation, event);
+        }
+
+        private void invokeConnectorSendChannel(Event event) {
+
+            for (BridgeConnector connector : getParent().getConnectors()) {
+                ChannelInvocation<ConnectorSendInterceptor> newInvocation = connectorSendChannel.invoke();
+                newInvocation.next().send(newInvocation, connector, event);
+            }
+        }
+
+    }
+
+    private class FinalLocalHandlerSendInterceptor implements LocalHandlerSendInterceptor {
+
+        @Override
+        public void send(ChannelInvocation<LocalHandlerSendInterceptor> invocation, Event event) {
+
+            getParent().getHandlerModule().handle(event);
+
+            invocation.next().send(invocation, event);
+        }
+
+    }
+
+    /*
+     * This class is static because it doesn't need a reference to DefaultSenderModule.
+     * -> Better performance
+     */
+    private static class FinalConnectorSendInterceptor implements ConnectorSendInterceptor {
+
+        @Override
+        public void send(ChannelInvocation<ConnectorSendInterceptor> invocation, BridgeConnector connector, Event event) {
+
+            try {
+                connector.send(event);
+            } catch (BridgeConnectorException e) {
+                LOGGER.error("Can't send event '{}' through bridge connector '{}'", event, connector, e);
+            }
+
+            invocation.next().send(invocation, connector, event);
+        }
+
     }
 
 }

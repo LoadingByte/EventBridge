@@ -63,7 +63,9 @@ public class EventUtils {
             @SuppressWarnings ("unchecked")
             T castedEvent = (T) event;
             handler.handle(castedEvent);
-        } catch (ClassCastException e) {}
+        } catch (ClassCastException e) {
+            // Do nothing
+        }
     }
 
     private EventUtils() {
