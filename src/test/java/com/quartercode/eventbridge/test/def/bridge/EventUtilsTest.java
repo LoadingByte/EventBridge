@@ -21,10 +21,11 @@ package com.quartercode.eventbridge.test.def.bridge;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
-import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.EventPredicate;
 import com.quartercode.eventbridge.def.bridge.EventUtils;
+import com.quartercode.eventbridge.test.def.bridge.DummyEvents.CallableEvent;
+import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent1;
 
 public class EventUtilsTest {
 
@@ -36,19 +37,19 @@ public class EventUtilsTest {
     @Test
     public void testTryTest() {
 
-        EventHandler<TestEvent> handler = new EventHandler<TestEvent>() {
+        EventHandler<CallableEvent> handler = new EventHandler<CallableEvent>() {
 
             @Override
-            public void handle(TestEvent event) {
+            public void handle(CallableEvent event) {
 
-                event.doSomething();
+                event.call();
             }
 
         };
 
-        TestEvent regularEvent = new TestEvent();
+        CallableEvent regularEvent = new CallableEvent();
         EventUtils.tryHandle(handler, regularEvent);
-        assertTrue("Regular event wasn't handled correct", regularEvent.doSomethingCalled);
+        assertTrue("Regular event wasn't handled correct", regularEvent.isCalled());
 
         // Wrong event type; EventUtils.tryHandle should catch the resulting ClassCastException
         EventUtils.tryHandle(handler, new EmptyEvent1());
@@ -58,35 +59,23 @@ public class EventUtilsTest {
     public void testTryHandle() {
 
         @SuppressWarnings ("serial")
-        EventPredicate<TestEvent> predicate = new EventPredicate<TestEvent>() {
+        EventPredicate<CallableEvent> predicate = new EventPredicate<CallableEvent>() {
 
             @Override
-            public boolean test(TestEvent event) {
+            public boolean test(CallableEvent event) {
 
-                event.doSomething();
+                event.call();
                 return true;
             }
 
         };
 
-        TestEvent regularEvent = new TestEvent();
+        CallableEvent regularEvent = new CallableEvent();
         assertTrue("Regular event wasn't tested correct", EventUtils.tryTest(predicate, regularEvent));
-        assertTrue("Regular event wasn't tested correct", regularEvent.doSomethingCalled);
+        assertTrue("Regular event wasn't tested correct", regularEvent.isCalled());
 
         // Wrong event type; EventUtils.tryTest should catch the resulting ClassCastException
         EventUtils.tryTest(predicate, new EmptyEvent1());
-    }
-
-    @SuppressWarnings ("serial")
-    private static class TestEvent implements Event {
-
-        private boolean doSomethingCalled;
-
-        private void doSomething() {
-
-            doSomethingCalled = true;
-        }
-
     }
 
 }

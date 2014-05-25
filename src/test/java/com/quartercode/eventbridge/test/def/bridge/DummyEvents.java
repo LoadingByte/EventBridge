@@ -18,25 +18,39 @@
 
 package com.quartercode.eventbridge.test.def.bridge;
 
-import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.Event;
-import com.quartercode.eventbridge.bridge.SenderModule.ConnectorSendInterceptor;
-import com.quartercode.eventbridge.channel.ChannelInvocation;
 
-public class DummyConnectorSendInterceptor implements ConnectorSendInterceptor {
+public class DummyEvents {
 
-    private final ConnectorSendInterceptor dummy;
+    @SuppressWarnings ("serial")
+    public static class EmptyEvent1 implements Event {
 
-    public DummyConnectorSendInterceptor(ConnectorSendInterceptor dummy) {
-
-        this.dummy = dummy;
     }
 
-    @Override
-    public void send(ChannelInvocation<ConnectorSendInterceptor> invocation, BridgeConnector connector, Event event) {
+    @SuppressWarnings ("serial")
+    public static class EmptyEvent2 implements Event {
 
-        dummy.send(invocation, connector, event);
-        invocation.next().send(invocation, connector, event);
+    }
+
+    @SuppressWarnings ("serial")
+    public static class CallableEvent implements Event {
+
+        private boolean called;
+
+        public void call() {
+
+            called = true;
+        }
+
+        public boolean isCalled() {
+
+            return called;
+        }
+
+    }
+
+    private DummyEvents() {
+
     }
 
 }
