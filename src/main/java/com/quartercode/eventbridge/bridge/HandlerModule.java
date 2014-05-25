@@ -31,15 +31,24 @@ import com.quartercode.eventbridge.channel.ChannelInvocation;
 public interface HandlerModule {
 
     /**
-     * Returns the {@link Channel} which delivers {@link Event}s to all local {@link EventHandler}s.
+     * Returns the {@link Channel} which delivers {@link Event}s to the handler handle channel of the module.
      * It is invoked by the {@link #handle(Event)} method.
+     * The handler handle channel can be accessed with {@link #getHandlerHandleChannel()}.
      * 
-     * @return The channel which delivers events to the local {@link EventHandler}s.
+     * @return The channel which delivers events to the handler handle channel.
      */
-    public Channel<HandleInterceptor> getHandleChannel();
+    public Channel<GlobalHandleInterceptor> getGlobalHandleChannel();
 
     /**
-     * Sends the given {@link Event} through the handle channel ({@link #getHandleChannel()}).
+     * Returns the {@link Channel} which delivers {@link Event}s to a specific local {@link EventHandler}.
+     * It is invoked by the last interceptor of the global handle channel ({@link #getGlobalHandleChannel()}).
+     * 
+     * @return The channel which delivers events to a specific local {@link EventHandler}.
+     */
+    public Channel<HandlerHandleInterceptor> getHandlerHandleChannel();
+
+    /**
+     * Sends the given {@link Event} through the handle channel ({@link #getHandlerHandleChannel()}).
      * That channel will deliver the event to all of the bridge's {@link EventHandler}s.
      * 
      * @param event The event that should be sent through the handle.
@@ -47,19 +56,37 @@ public interface HandlerModule {
     public void handle(Event event);
 
     /**
-     * The interceptor which is used in the handle channel of a {@link HandlerModule}.
+     * The interceptor which is used in the global handle channel of a {@link HandlerModule}.
      * 
-     * @see HandlerModule#getHandleChannel()
+     * @see HandlerModule#getGlobalHandleChannel()
      */
-    public static interface HandleInterceptor {
+    public static interface GlobalHandleInterceptor {
 
         /**
-         * Intercepts the delivery process of the given {@link Event} to the local {@link EventHandler}s of a bridge.
+         * Intercepts the delivery process of the given {@link Event} to the handler handle channel.
          * 
          * @param invocation The {@link ChannelInvocation} object for the current invocation chain.
-         * @param event The event which is delivered to all local handlers.
+         * @param event The event which is delivered to the handler handle channel.
          */
-        public void handle(ChannelInvocation<HandleInterceptor> invocation, Event event);
+        public void handle(ChannelInvocation<GlobalHandleInterceptor> invocation, Event event);
+
+    }
+
+    /**
+     * The interceptor which is used in the handler handle channel of a {@link HandlerModule}.
+     * 
+     * @see HandlerModule#getHandlerHandleChannel()
+     */
+    public static interface HandlerHandleInterceptor {
+
+        /**
+         * Intercepts the delivery process of the given {@link Event} to the given local {@link EventHandler} of a bridge.
+         * 
+         * @param invocation The {@link ChannelInvocation} object for the current invocation chain.
+         * @param handler The local event handler the given event is delivered to.
+         * @param event The event which is delivered to the given local handler.
+         */
+        public void handle(ChannelInvocation<HandlerHandleInterceptor> invocation, EventHandler<?> handler, Event event);
 
     }
 

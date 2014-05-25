@@ -32,12 +32,14 @@ import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.EventPredicate;
 import com.quartercode.eventbridge.bridge.HandlerModule;
-import com.quartercode.eventbridge.bridge.HandlerModule.HandleInterceptor;
+import com.quartercode.eventbridge.bridge.HandlerModule.GlobalHandleInterceptor;
+import com.quartercode.eventbridge.bridge.HandlerModule.HandlerHandleInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.bridge.DefaultHandlerModule;
 import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent1;
 import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent2;
-import com.quartercode.eventbridge.test.def.bridge.DummyInterceptors.DummyHandleInterceptor;
+import com.quartercode.eventbridge.test.def.bridge.DummyInterceptors.DummyGlobalHandleInterceptor;
+import com.quartercode.eventbridge.test.def.bridge.DummyInterceptors.DummyHandlerHandleInterceptor;
 
 public class DefaultHandlerModuleTest {
 
@@ -61,8 +63,11 @@ public class DefaultHandlerModuleTest {
         final EmptyEvent1 regularEvent = new EmptyEvent1();
         final EmptyEvent2 wronglyTypedEvent = new EmptyEvent2();
 
-        final HandleInterceptor handleInterceptor = context.mock(HandleInterceptor.class);
-        handlerModule.getHandleChannel().addInterceptor(new DummyHandleInterceptor(handleInterceptor), 1);
+        final GlobalHandleInterceptor globalInterceptor = context.mock(GlobalHandleInterceptor.class);
+        handlerModule.getGlobalHandleChannel().addInterceptor(new DummyGlobalHandleInterceptor(globalInterceptor), 1);
+
+        final HandlerHandleInterceptor handlerInterceptor = context.mock(HandlerHandleInterceptor.class);
+        handlerModule.getHandlerHandleChannel().addInterceptor(new DummyHandlerHandleInterceptor(handlerInterceptor), 1);
 
         final EventHandler<EmptyEvent1> handler = context.mock(EventHandler.class);
         final EventPredicate<Event> predicate = context.mock(EventPredicate.class);
@@ -80,10 +85,11 @@ public class DefaultHandlerModuleTest {
 
             final Sequence handleChain = context.sequence("handleChain");
             // Correct event
-            oneOf(handleInterceptor).handle(with(any(ChannelInvocation.class)), with(regularEvent)); inSequence(handleChain);
+            oneOf(globalInterceptor).handle(with(any(ChannelInvocation.class)), with(regularEvent)); inSequence(handleChain);
+            oneOf(handlerInterceptor).handle(with(any(ChannelInvocation.class)), with(handler), with(regularEvent));
             oneOf(handler).handle(regularEvent); inSequence(handleChain);
             // Wrongly typed event
-            oneOf(handleInterceptor).handle(with(any(ChannelInvocation.class)), with(wronglyTypedEvent)); inSequence(handleChain);
+            oneOf(globalInterceptor).handle(with(any(ChannelInvocation.class)), with(wronglyTypedEvent)); inSequence(handleChain);
 
         }});
         // @formatter:on

@@ -20,7 +20,9 @@ package com.quartercode.eventbridge.test.def.bridge;
 
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.Event;
-import com.quartercode.eventbridge.bridge.HandlerModule.HandleInterceptor;
+import com.quartercode.eventbridge.bridge.EventHandler;
+import com.quartercode.eventbridge.bridge.HandlerModule.GlobalHandleInterceptor;
+import com.quartercode.eventbridge.bridge.HandlerModule.HandlerHandleInterceptor;
 import com.quartercode.eventbridge.bridge.SenderModule.ConnectorSendInterceptor;
 import com.quartercode.eventbridge.bridge.SenderModule.GlobalSendInterceptor;
 import com.quartercode.eventbridge.bridge.SenderModule.LocalHandlerSendInterceptor;
@@ -28,20 +30,38 @@ import com.quartercode.eventbridge.channel.ChannelInvocation;
 
 public class DummyInterceptors {
 
-    public static class DummyHandleInterceptor implements HandleInterceptor {
+    public static class DummyGlobalHandleInterceptor implements GlobalHandleInterceptor {
 
-        private final HandleInterceptor dummy;
+        private final GlobalHandleInterceptor dummy;
 
-        public DummyHandleInterceptor(HandleInterceptor dummy) {
+        public DummyGlobalHandleInterceptor(GlobalHandleInterceptor dummy) {
 
             this.dummy = dummy;
         }
 
         @Override
-        public void handle(ChannelInvocation<HandleInterceptor> invocation, Event event) {
+        public void handle(ChannelInvocation<GlobalHandleInterceptor> invocation, Event event) {
 
             dummy.handle(invocation, event);
             invocation.next().handle(invocation, event);
+        }
+
+    }
+
+    static class DummyHandlerHandleInterceptor implements HandlerHandleInterceptor {
+
+        private final HandlerHandleInterceptor dummy;
+
+        public DummyHandlerHandleInterceptor(HandlerHandleInterceptor dummy) {
+
+            this.dummy = dummy;
+        }
+
+        @Override
+        public void handle(ChannelInvocation<HandlerHandleInterceptor> invocation, EventHandler<?> handler, Event event) {
+
+            dummy.handle(invocation, handler, event);
+            invocation.next().handle(invocation, handler, event);
         }
 
     }

@@ -36,7 +36,8 @@ import com.quartercode.eventbridge.def.channel.DefaultChannel;
  */
 public class DefaultHandlerModule extends BridgeModuleBase implements HandlerModule {
 
-    private final Channel<HandleInterceptor> handleChannel = new DefaultChannel<>(HandleInterceptor.class);
+    private final Channel<GlobalHandleInterceptor>  globalHandleChannel  = new DefaultChannel<>(GlobalHandleInterceptor.class);
+    private final Channel<HandlerHandleInterceptor> handlerHandleChannel = new DefaultChannel<>(HandlerHandleInterceptor.class);
 
     /**
      * Creates a new default sender module.
@@ -47,14 +48,15 @@ public class DefaultHandlerModule extends BridgeModuleBase implements HandlerMod
 
         super(parent);
 
-        handleChannel.addInterceptor(new HandleInterceptor() {
+        globalHandleChannel.addInterceptor(new GlobalHandleInterceptor() {
 
             @Override
-            public void handle(ChannelInvocation<HandleInterceptor> invocation, Event event) {
+            public void handle(ChannelInvocation<GlobalHandleInterceptor> invocation, Event event) {
 
                 for (Pair<EventHandler<?>, EventPredicate<?>> handler : getParent().getHandlers()) {
                     if (EventUtils.tryTest(handler.getRight(), event)) {
-                        EventUtils.tryHandle(handler.getLeft(), event);
+                        ChannelInvocation<HandlerHandleInterceptor> newInvocation = handlerHandleChannel.invoke();
+                        newInvocation.next().handle(newInvocation, handler.getLeft(), event);
                     }
                 }
 
@@ -62,18 +64,37 @@ public class DefaultHandlerModule extends BridgeModuleBase implements HandlerMod
             }
 
         }, 0);
+
+        handlerHandleChannel.addInterceptor(new HandlerHandleInterceptor() {
+
+            @Override
+            public void handle(ChannelInvocation<HandlerHandleInterceptor> invocation, EventHandler<?> handler, Event event) {
+
+                EventUtils.tryHandle(handler, event);
+
+                invocation.next().handle(invocation, handler, event);
+
+            }
+
+        }, 0);
     }
 
     @Override
-    public Channel<HandleInterceptor> getHandleChannel() {
+    public Channel<GlobalHandleInterceptor> getGlobalHandleChannel() {
 
-        return handleChannel;
+        return globalHandleChannel;
+    }
+
+    @Override
+    public Channel<HandlerHandleInterceptor> getHandlerHandleChannel() {
+
+        return handlerHandleChannel;
     }
 
     @Override
     public void handle(Event event) {
 
-        ChannelInvocation<HandleInterceptor> invocation = handleChannel.invoke();
+        ChannelInvocation<GlobalHandleInterceptor> invocation = globalHandleChannel.invoke();
         invocation.next().handle(invocation, event);
     }
 
