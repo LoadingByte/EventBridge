@@ -77,21 +77,21 @@ class DefaultChannelInvocation<T> implements ChannelInvocation<T> {
 
         private Object getDefaultValue(Class<?> type) {
 
-            if (type.equals(Byte.TYPE)) {
+            if (type.equals(Byte.TYPE) || type.equals(Byte.class)) {
                 return (byte) 0;
-            } else if (type.equals(Short.TYPE)) {
+            } else if (type.equals(Short.TYPE) || type.equals(Short.class)) {
                 return (short) 0;
-            } else if (type.equals(Integer.TYPE)) {
+            } else if (type.equals(Integer.TYPE) || type.equals(Integer.class)) {
                 return (int) 0;
-            } else if (type.equals(Long.TYPE)) {
+            } else if (type.equals(Long.TYPE) || type.equals(Long.class)) {
                 return (long) 0;
-            } else if (type.equals(Float.TYPE)) {
+            } else if (type.equals(Float.TYPE) || type.equals(Float.class)) {
                 return (float) 0;
-            } else if (type.equals(Double.TYPE)) {
+            } else if (type.equals(Double.TYPE) || type.equals(Double.class)) {
                 return (double) 0;
-            } else if (type.equals(Boolean.TYPE)) {
+            } else if (type.equals(Boolean.TYPE) || type.equals(Boolean.class)) {
                 return false;
-            } else if (type.equals(Character.TYPE)) {
+            } else if (type.equals(Character.TYPE) || type.equals(Character.class)) {
                 return '\u0000';
             } else {
                 return null;
