@@ -54,7 +54,7 @@ public class DefaultSenderModuleTest {
     @Test
     public void testSend() throws BridgeConnectorException {
 
-        final EmptyEvent event = new EmptyEvent();
+        final EmptyEvent1 event = new EmptyEvent1();
 
         final GlobalSendInterceptor globalInterceptor = context.mock(GlobalSendInterceptor.class);
         senderModule.getGlobalSendChannel().addInterceptor(new DummyGlobalSendInterceptor(globalInterceptor), 1);
@@ -84,7 +84,7 @@ public class DefaultSenderModuleTest {
     @Test
     public void testSendWithException() throws BridgeConnectorException {
 
-        final EmptyEvent event = new EmptyEvent();
+        final EmptyEvent1 event = new EmptyEvent1();
 
         final BridgeConnector connector = context.mock(BridgeConnector.class);
 

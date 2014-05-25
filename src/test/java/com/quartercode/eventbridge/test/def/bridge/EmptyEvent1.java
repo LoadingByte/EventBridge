@@ -21,6 +21,6 @@ package com.quartercode.eventbridge.test.def.bridge;
 import com.quartercode.eventbridge.bridge.Event;
 
 @SuppressWarnings ("serial")
-public class EmptyEvent implements Event {
+public class EmptyEvent1 implements Event {
 
 }

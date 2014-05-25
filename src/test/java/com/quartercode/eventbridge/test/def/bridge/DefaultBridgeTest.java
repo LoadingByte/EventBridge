@@ -76,7 +76,7 @@ public class DefaultBridgeTest {
         final SenderModule senderModule = context.mock(SenderModule.class);
         bridge.setSenderModule(senderModule);
 
-        final EmptyEvent event = new EmptyEvent();
+        final EmptyEvent1 event = new EmptyEvent1();
 
         // @formatter:off
         context.checking(new Expectations() {{
@@ -93,16 +93,16 @@ public class DefaultBridgeTest {
     @Test
     public void testHandlerStorage() {
 
-        EventHandler<TestEvent1> handler1 = context.mock(EventHandler.class, "handler1");
-        EventPredicate<TestEvent1> predicate1 = context.mock(EventPredicate.class, "predicate1");
-        EventHandler<TestEvent2> handler2 = context.mock(EventHandler.class, "handler2");
-        EventPredicate<TestEvent2> predicate2 = context.mock(EventPredicate.class, "predicate2");
-        EventHandler<TestEvent2> handler3 = context.mock(EventHandler.class, "handler3");
-        EventPredicate<TestEvent2> predicate3 = context.mock(EventPredicate.class, "predicate3");
+        EventHandler<EmptyEvent1> handler1 = context.mock(EventHandler.class, "handler1");
+        EventPredicate<EmptyEvent1> predicate1 = context.mock(EventPredicate.class, "predicate1");
+        EventHandler<EmptyEvent2> handler2 = context.mock(EventHandler.class, "handler2");
+        EventPredicate<EmptyEvent2> predicate2 = context.mock(EventPredicate.class, "predicate2");
+        EventHandler<EmptyEvent2> handler3 = context.mock(EventHandler.class, "handler3");
+        EventPredicate<EmptyEvent2> predicate3 = context.mock(EventPredicate.class, "predicate3");
 
-        Pair<EventHandler<TestEvent1>, EventPredicate<TestEvent1>> pair1 = Pair.of(handler1, predicate1);
-        Pair<EventHandler<TestEvent2>, EventPredicate<TestEvent2>> pair2 = Pair.of(handler2, predicate2);
-        Pair<EventHandler<TestEvent2>, EventPredicate<TestEvent2>> pair3 = Pair.of(handler3, predicate3);
+        Pair<EventHandler<EmptyEvent1>, EventPredicate<EmptyEvent1>> pair1 = Pair.of(handler1, predicate1);
+        Pair<EventHandler<EmptyEvent2>, EventPredicate<EmptyEvent2>> pair2 = Pair.of(handler2, predicate2);
+        Pair<EventHandler<EmptyEvent2>, EventPredicate<EmptyEvent2>> pair3 = Pair.of(handler3, predicate3);
 
         assertHandlerListEmpty(bridge);
 
@@ -136,9 +136,9 @@ public class DefaultBridgeTest {
     @Test
     public void testHandlerStorageRemoveUncheckedCast() {
 
-        EventHandler<TestEvent1> handler1 = new EqualsAllHandler<>();
-        EventPredicate<TestEvent1> predicate1 = context.mock(EventPredicate.class);
-        EqualsAllHandler<TestEvent2> handler2 = new EqualsAllHandler<>();
+        EventHandler<EmptyEvent1> handler1 = new EqualsAllHandler<>();
+        EventPredicate<EmptyEvent1> predicate1 = context.mock(EventPredicate.class);
+        EqualsAllHandler<EmptyEvent2> handler2 = new EqualsAllHandler<>();
 
         // Add handler 1 with type parameter TestEvent1
         bridge.addHandler(handler1, predicate1);
@@ -154,8 +154,8 @@ public class DefaultBridgeTest {
     @Test
     public void testHandlerStorageListeners() {
 
-        final EventHandler<TestEvent1> handler = context.mock(EventHandler.class, "handler");
-        final EventPredicate<TestEvent1> predicate = context.mock(EventPredicate.class, "predicate");
+        final EventHandler<EmptyEvent1> handler = context.mock(EventHandler.class, "handler");
+        final EventPredicate<EmptyEvent1> predicate = context.mock(EventPredicate.class, "predicate");
         final ModifyHandlerListListener listener = context.mock(ModifyHandlerListListener.class);
 
         // @formatter:off
@@ -242,16 +242,6 @@ public class DefaultBridgeTest {
         bridge.removeModifyConnectorListListener(listener);
         bridge.addConnector(connector);
         bridge.removeConnector(connector);
-    }
-
-    @SuppressWarnings ("serial")
-    private static class TestEvent1 implements Event {
-
-    }
-
-    @SuppressWarnings ("serial")
-    private static class TestEvent2 implements Event {
-
     }
 
     private static class EqualsAllHandler<T extends Event> implements EventHandler<T> {
