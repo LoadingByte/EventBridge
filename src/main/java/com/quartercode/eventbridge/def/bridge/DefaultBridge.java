@@ -29,6 +29,7 @@ import com.quartercode.eventbridge.bridge.BridgeConnectorException;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.EventPredicate;
+import com.quartercode.eventbridge.bridge.HandlerModule;
 import com.quartercode.eventbridge.bridge.SenderModule;
 
 /**
@@ -38,6 +39,7 @@ import com.quartercode.eventbridge.bridge.SenderModule;
  */
 public class DefaultBridge implements Bridge {
 
+    private HandlerModule                                        handlerModule                = new DefaultHandlerModule(this);
     private SenderModule                                         senderModule                 = new DefaultSenderModule(this);
 
     private final List<Pair<EventHandler<?>, EventPredicate<?>>> handlers                     = new CopyOnWriteArrayList<>();
@@ -59,6 +61,24 @@ public class DefaultBridge implements Bridge {
     }
 
     // ----- Modules -----
+
+    @Override
+    public HandlerModule getHandlerModule() {
+
+        return handlerModule;
+    }
+
+    /**
+     * Lets the bridge use another {@link HandlerModule} which is responsible for calling the bridge's {@link EventHandler}s when {@link Event}s are incoming.<br>
+     * <br>
+     * <i>This method is highly implementation-dependent and should not be used in production!</i>
+     * 
+     * @param handlerModule The new handler module for the bridge.
+     */
+    public void setHandlerModule(HandlerModule handlerModule) {
+
+        this.handlerModule = handlerModule;
+    }
 
     @Override
     public SenderModule getSenderModule() {

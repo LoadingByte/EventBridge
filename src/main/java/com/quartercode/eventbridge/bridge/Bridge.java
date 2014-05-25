@@ -47,6 +47,13 @@ public interface Bridge {
     // ----- Modules -----
 
     /**
+     * Returns the {@link HandlerModule} which is responsible for calling the bridge's {@link EventHandler}s when {@link Event}s are incoming.
+     * 
+     * @return The bridge's handler module.
+     */
+    public HandlerModule getHandlerModule();
+
+    /**
      * Returns the {@link SenderModule} which is responsible for sending {@link Event}s between bridges.
      * 
      * @return The bridge's sender module.

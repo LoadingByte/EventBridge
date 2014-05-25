@@ -36,6 +36,7 @@ import com.quartercode.eventbridge.bridge.BridgeConnectorException;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.EventPredicate;
+import com.quartercode.eventbridge.bridge.HandlerModule;
 import com.quartercode.eventbridge.bridge.SenderModule;
 import com.quartercode.eventbridge.def.bridge.DefaultBridge;
 
@@ -59,6 +60,15 @@ public class DefaultBridgeTest {
     public void setUp() {
 
         bridge = new DefaultBridge();
+    }
+
+    @Test
+    public void testGetHandlerModule() {
+
+        HandlerModule handlerModule = context.mock(HandlerModule.class);
+        bridge.setHandlerModule(handlerModule);
+
+        assertEquals("Bridge handler module", handlerModule, bridge.getHandlerModule());
     }
 
     @Test
