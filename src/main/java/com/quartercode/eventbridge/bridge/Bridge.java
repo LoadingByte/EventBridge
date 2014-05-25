@@ -99,7 +99,7 @@ public interface Bridge {
      * Adds the given {@link ModifyHandlerListListener} that is called when an {@link EventHandler} is added or removed.
      * 
      * @param listener The listener that should be added.
-     * @see #addHandler(EventHandler)
+     * @see #addHandler(EventHandler, EventPredicate)
      * @see #removeHandler(EventHandler)
      */
     public void addModifyHandlerListListener(ModifyHandlerListListener listener);
@@ -108,7 +108,7 @@ public interface Bridge {
      * Removes the given {@link ModifyHandlerListListener} that is called when an {@link EventHandler} is added or removed.
      * 
      * @param listener The listener that should be removed.
-     * @see #addHandler(EventHandler)
+     * @see #addHandler(EventHandler, EventPredicate)
      * @see #removeHandler(EventHandler)
      */
     public void removeModifyHandlerListListener(ModifyHandlerListListener listener);
