@@ -117,7 +117,7 @@ public class DefaultBridge implements Bridge {
     }
 
     @Override
-    public <T extends Event> void addHandler(EventHandler<T> handler, EventPredicate<T> predicate) {
+    public void addHandler(EventHandler<?> handler, EventPredicate<?> predicate) {
 
         handlers.add(Pair.<EventHandler<?>, EventPredicate<?>> of(handler, predicate));
         handlersUnmodifiableCache = null;
@@ -128,7 +128,7 @@ public class DefaultBridge implements Bridge {
     }
 
     @Override
-    public <T extends Event> void removeHandler(EventHandler<T> handler) {
+    public void removeHandler(EventHandler<?> handler) {
 
         Pair<EventHandler<?>, EventPredicate<?>> pair = null;
         for (Pair<EventHandler<?>, EventPredicate<?>> testPair : handlers) {
@@ -140,17 +140,8 @@ public class DefaultBridge implements Bridge {
 
         if (pair != null) {
             if (!modifyHandlerListListeners.isEmpty()) {
-                /*
-                 * Won't cause any problems because T is only used to satisfy the compiler.
-                 * Neither this code nor the listener code can make any type assertions that could cause ClassCastExceptions.
-                 * The listener just uses T to make sure that the handler and the predicate process the same type of event.
-                 */
-                @SuppressWarnings ("unchecked")
-                EventHandler<T> castedHandler = (EventHandler<T>) pair.getLeft();
-                @SuppressWarnings ("unchecked")
-                EventPredicate<T> castedPredicate = (EventPredicate<T>) pair.getRight();
                 for (ModifyHandlerListListener listener : modifyHandlerListListeners) {
-                    listener.onRemoveHandler(castedHandler, castedPredicate, this);
+                    listener.onRemoveHandler(pair.getLeft(), pair.getRight(), this);
                 }
             }
 

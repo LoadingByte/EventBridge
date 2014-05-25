@@ -85,7 +85,7 @@ public interface Bridge {
      * @param handler The new event handler that should start listening on the bridge.
      * @param predicate An event predicate that decides which events pass into the handler.
      */
-    public <T extends Event> void addHandler(EventHandler<T> handler, EventPredicate<T> predicate);
+    public void addHandler(EventHandler<?> handler, EventPredicate<?> predicate);
 
     /**
      * Removes the given {@link EventHandler} from the bridge.
@@ -93,7 +93,7 @@ public interface Bridge {
      * 
      * @param handler The event handler that should stop listening on the bridge.
      */
-    public <T extends Event> void removeHandler(EventHandler<T> handler);
+    public void removeHandler(EventHandler<?> handler);
 
     /**
      * Adds the given {@link ModifyHandlerListListener} that is called when an {@link EventHandler} is added or removed.
@@ -168,7 +168,7 @@ public interface Bridge {
          * @param predicate The {@link EventPredicate} matcher that belongs to the handler.
          * @param bridge The bridge the given handler is added to.
          */
-        public <T extends Event> void onAddHandler(EventHandler<T> handler, EventPredicate<T> predicate, Bridge bridge);
+        public void onAddHandler(EventHandler<?> handler, EventPredicate<?> predicate, Bridge bridge);
 
         /**
          * This method is invoked when the given {@link EventHandler} is being removed from the given {@link Bridge}.
@@ -178,7 +178,7 @@ public interface Bridge {
          * @param predicate The {@link EventPredicate} matcher that belonged to the handler.
          * @param bridge The bridge the given handler is removed from.
          */
-        public <T extends Event> void onRemoveHandler(EventHandler<T> handler, EventPredicate<T> predicate, Bridge bridge);
+        public void onRemoveHandler(EventHandler<?> handler, EventPredicate<?> predicate, Bridge bridge);
 
     }
 
