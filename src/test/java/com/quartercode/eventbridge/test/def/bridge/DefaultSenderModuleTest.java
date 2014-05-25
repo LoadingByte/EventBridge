@@ -33,11 +33,13 @@ import com.quartercode.eventbridge.bridge.HandlerModule;
 import com.quartercode.eventbridge.bridge.SenderModule;
 import com.quartercode.eventbridge.bridge.SenderModule.ConnectorSendInterceptor;
 import com.quartercode.eventbridge.bridge.SenderModule.GlobalSendInterceptor;
+import com.quartercode.eventbridge.bridge.SenderModule.LocalHandlerSendInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.bridge.DefaultSenderModule;
 import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent1;
 import com.quartercode.eventbridge.test.def.bridge.DummyInterceptors.DummyConnectorSendInterceptor;
 import com.quartercode.eventbridge.test.def.bridge.DummyInterceptors.DummyGlobalSendInterceptor;
+import com.quartercode.eventbridge.test.def.bridge.DummyInterceptors.DummyLocalHandlerSendInterceptor;
 
 public class DefaultSenderModuleTest {
 
@@ -61,10 +63,13 @@ public class DefaultSenderModuleTest {
         final EmptyEvent1 event = new EmptyEvent1();
 
         final GlobalSendInterceptor globalInterceptor = context.mock(GlobalSendInterceptor.class);
-        senderModule.getGlobalSendChannel().addInterceptor(new DummyGlobalSendInterceptor(globalInterceptor), 10);
+        senderModule.getGlobalSendChannel().addInterceptor(new DummyGlobalSendInterceptor(globalInterceptor), 1);
+
+        final LocalHandlerSendInterceptor localHandlerInterceptor = context.mock(LocalHandlerSendInterceptor.class);
+        senderModule.getLocalHandlerSendChannel().addInterceptor(new DummyLocalHandlerSendInterceptor(localHandlerInterceptor), 1);
 
         final ConnectorSendInterceptor connectorInterceptor = context.mock(ConnectorSendInterceptor.class);
-        senderModule.getConnectorSendChannel().addInterceptor(new DummyConnectorSendInterceptor(connectorInterceptor), 10);
+        senderModule.getConnectorSendChannel().addInterceptor(new DummyConnectorSendInterceptor(connectorInterceptor), 1);
 
         final BridgeConnector connector = context.mock(BridgeConnector.class);
         final HandlerModule handlerModule = context.mock(HandlerModule.class);
@@ -79,9 +84,10 @@ public class DefaultSenderModuleTest {
 
             final Sequence sendChain = context.sequence("sendChain");
             oneOf(globalInterceptor).send(with(any(ChannelInvocation.class)), with(event)); inSequence(sendChain);
+            oneOf(localHandlerInterceptor).send(with(any(ChannelInvocation.class)), with(event)); inSequence(sendChain);
+            oneOf(handlerModule).handle(event); inSequence(sendChain);
             oneOf(connectorInterceptor).send(with(any(ChannelInvocation.class)), with(connector), with(event)); inSequence(sendChain);
             oneOf(connector).send(event); inSequence(sendChain);
-            oneOf(handlerModule).handle(event); inSequence(sendChain);
 
         }});
         // @formatter:on

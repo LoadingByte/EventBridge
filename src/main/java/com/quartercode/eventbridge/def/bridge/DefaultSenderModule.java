@@ -36,10 +36,11 @@ import com.quartercode.eventbridge.def.channel.DefaultChannel;
  */
 public class DefaultSenderModule extends BridgeModuleBase implements SenderModule {
 
-    private static final Logger                     LOGGER               = LoggerFactory.getLogger(DefaultSenderModule.class);
+    private static final Logger                        LOGGER                  = LoggerFactory.getLogger(DefaultSenderModule.class);
 
-    private final Channel<GlobalSendInterceptor>    globalSendChannel    = new DefaultChannel<>(GlobalSendInterceptor.class);
-    private final Channel<ConnectorSendInterceptor> connectorSendChannel = new DefaultChannel<>(ConnectorSendInterceptor.class);
+    private final Channel<GlobalSendInterceptor>       globalSendChannel       = new DefaultChannel<>(GlobalSendInterceptor.class);
+    private final Channel<LocalHandlerSendInterceptor> localHandlerSendChannel = new DefaultChannel<>(LocalHandlerSendInterceptor.class);
+    private final Channel<ConnectorSendInterceptor>    connectorSendChannel    = new DefaultChannel<>(ConnectorSendInterceptor.class);
 
     /**
      * Creates a new default sender module.
@@ -50,12 +51,18 @@ public class DefaultSenderModule extends BridgeModuleBase implements SenderModul
 
         super(parent);
 
-        // Send events over bridge connectors
         globalSendChannel.addInterceptor(new GlobalSendInterceptor() {
 
             @Override
             public void send(ChannelInvocation<GlobalSendInterceptor> invocation, Event event) {
 
+                // Local handler send channel
+                {
+                    ChannelInvocation<LocalHandlerSendInterceptor> newInvocation = localHandlerSendChannel.invoke();
+                    newInvocation.next().send(newInvocation, event);
+                }
+
+                // Connector send channel
                 for (BridgeConnector connector : getParent().getConnectors()) {
                     ChannelInvocation<ConnectorSendInterceptor> newInvocation = connectorSendChannel.invoke();
                     newInvocation.next().send(newInvocation, connector, event);
@@ -64,13 +71,12 @@ public class DefaultSenderModule extends BridgeModuleBase implements SenderModul
                 invocation.next().send(invocation, event);
             }
 
-        }, 5);
+        }, 0);
 
-        // Send events to local handlers
-        globalSendChannel.addInterceptor(new GlobalSendInterceptor() {
+        localHandlerSendChannel.addInterceptor(new LocalHandlerSendInterceptor() {
 
             @Override
-            public void send(ChannelInvocation<GlobalSendInterceptor> invocation, Event event) {
+            public void send(ChannelInvocation<LocalHandlerSendInterceptor> invocation, Event event) {
 
                 getParent().getHandlerModule().handle(event);
 
@@ -100,6 +106,12 @@ public class DefaultSenderModule extends BridgeModuleBase implements SenderModul
     public Channel<GlobalSendInterceptor> getGlobalSendChannel() {
 
         return globalSendChannel;
+    }
+
+    @Override
+    public Channel<LocalHandlerSendInterceptor> getLocalHandlerSendChannel() {
+
+        return localHandlerSendChannel;
     }
 
     @Override

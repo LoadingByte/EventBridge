@@ -23,6 +23,7 @@ import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.HandlerModule.HandleInterceptor;
 import com.quartercode.eventbridge.bridge.SenderModule.ConnectorSendInterceptor;
 import com.quartercode.eventbridge.bridge.SenderModule.GlobalSendInterceptor;
+import com.quartercode.eventbridge.bridge.SenderModule.LocalHandlerSendInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 
 public class DummyInterceptors {
@@ -56,6 +57,24 @@ public class DummyInterceptors {
 
         @Override
         public void send(ChannelInvocation<GlobalSendInterceptor> invocation, Event event) {
+
+            dummy.send(invocation, event);
+            invocation.next().send(invocation, event);
+        }
+
+    }
+
+    public static class DummyLocalHandlerSendInterceptor implements LocalHandlerSendInterceptor {
+
+        private final LocalHandlerSendInterceptor dummy;
+
+        public DummyLocalHandlerSendInterceptor(LocalHandlerSendInterceptor dummy) {
+
+            this.dummy = dummy;
+        }
+
+        @Override
+        public void send(ChannelInvocation<LocalHandlerSendInterceptor> invocation, Event event) {
 
             dummy.send(invocation, event);
             invocation.next().send(invocation, event);
