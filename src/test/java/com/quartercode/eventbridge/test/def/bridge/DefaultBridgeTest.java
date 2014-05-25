@@ -21,22 +21,27 @@ package com.quartercode.eventbridge.test.def.bridge;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.List;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.Bridge.ModifyConnectorListListener;
+import com.quartercode.eventbridge.bridge.Bridge.ModifyHandlerListListener;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
+import com.quartercode.eventbridge.bridge.Event;
+import com.quartercode.eventbridge.bridge.EventHandler;
+import com.quartercode.eventbridge.bridge.EventPredicate;
 import com.quartercode.eventbridge.bridge.SenderModule;
 import com.quartercode.eventbridge.def.bridge.DefaultBridge;
 
 public class DefaultBridgeTest {
 
-    @SuppressWarnings ("unchecked")
-    private static <T> void assertListEquals(String message, List<T> collection, T... elements) {
+    private static void assertListEquals(String message, List<?> collection, Object... elements) {
 
         assertTrue(message, collection.size() == elements.length);
 
@@ -82,6 +87,96 @@ public class DefaultBridgeTest {
         // @formatter:on
 
         bridge.send(event);
+    }
+
+    @SuppressWarnings ("unchecked")
+    @Test
+    public void testHandlerStorage() {
+
+        EventHandler<TestEvent1> handler1 = context.mock(EventHandler.class, "handler1");
+        EventPredicate<TestEvent1> predicate1 = context.mock(EventPredicate.class, "predicate1");
+        EventHandler<TestEvent2> handler2 = context.mock(EventHandler.class, "handler2");
+        EventPredicate<TestEvent2> predicate2 = context.mock(EventPredicate.class, "predicate2");
+        EventHandler<TestEvent2> handler3 = context.mock(EventHandler.class, "handler3");
+        EventPredicate<TestEvent2> predicate3 = context.mock(EventPredicate.class, "predicate3");
+
+        Pair<EventHandler<TestEvent1>, EventPredicate<TestEvent1>> pair1 = Pair.of(handler1, predicate1);
+        Pair<EventHandler<TestEvent2>, EventPredicate<TestEvent2>> pair2 = Pair.of(handler2, predicate2);
+        Pair<EventHandler<TestEvent2>, EventPredicate<TestEvent2>> pair3 = Pair.of(handler3, predicate3);
+
+        assertHandlerListEmpty(bridge);
+
+        bridge.removeHandler(handler1);
+        assertHandlerListEmpty(bridge);
+
+        bridge.addHandler(handler1, predicate1);
+        assertListEquals("Handlers that are stored inside the bridge are not correct", bridge.getHandlers(), pair1);
+        assertListEquals("Handlers that are stored inside the bridge changed on the second retrieval", bridge.getHandlers(), pair1);
+
+        bridge.addHandler(handler2, predicate2);
+        assertListEquals("Handlers that are stored inside the bridge are not correct", bridge.getHandlers(), pair1, pair2);
+        assertListEquals("Handlers that are stored inside the bridge changed on the second retrieval", bridge.getHandlers(), pair1, pair2);
+
+        bridge.addHandler(handler3, predicate3);
+        assertListEquals("Handlers that are stored inside the bridge are not correct", bridge.getHandlers(), pair1, pair2, pair3);
+        assertListEquals("Handlers that are stored inside the bridge changed on the second retrieval", bridge.getHandlers(), pair1, pair2, pair3);
+
+        bridge.removeHandler(handler2);
+        assertListEquals("Handlers that are stored inside the bridge are not correct", bridge.getHandlers(), pair1, pair3);
+        assertListEquals("Handlers that are stored inside the bridge changed on the second retrieval", bridge.getHandlers(), pair1, pair3);
+    }
+
+    private void assertHandlerListEmpty(Bridge bridge) {
+
+        assertTrue("There are handlers stored inside the bridge although none were added", bridge.getHandlers().isEmpty());
+        assertTrue("Handlers that are stored inside the bridge changed on the second retrieval", bridge.getHandlers().isEmpty());
+    }
+
+    @SuppressWarnings ("unchecked")
+    @Test
+    public void testHandlerStorageRemoveUncheckedCast() {
+
+        EventHandler<TestEvent1> handler1 = new EqualsAllHandler<>();
+        EventPredicate<TestEvent1> predicate1 = context.mock(EventPredicate.class);
+        EqualsAllHandler<TestEvent2> handler2 = new EqualsAllHandler<>();
+
+        // Add handler 1 with type parameter TestEvent1
+        bridge.addHandler(handler1, predicate1);
+
+        // Remove handler 2 with type parameter TestEvent2
+        // Note that handler 2 is equal to handler 1 while having a different type parameter
+        bridge.removeHandler(handler2);
+
+        assertTrue("Handler 1 wasn't removed", bridge.getHandlers().isEmpty());
+    }
+
+    @SuppressWarnings ("unchecked")
+    @Test
+    public void testHandlerStorageListeners() {
+
+        final EventHandler<TestEvent1> handler = context.mock(EventHandler.class, "handler");
+        final EventPredicate<TestEvent1> predicate = context.mock(EventPredicate.class, "predicate");
+        final ModifyHandlerListListener listener = context.mock(ModifyHandlerListListener.class);
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            final Sequence handlerCalls = context.sequence("handlerCalls");
+            oneOf(listener).onAddHandler(handler,predicate, bridge); inSequence(handlerCalls);
+            oneOf(listener).onRemoveHandler(handler,predicate, bridge); inSequence(handlerCalls);
+
+        }});
+        // @formatter:on
+
+        // Calls with listener
+        bridge.addModifyHandlerListListener(listener);
+        bridge.addHandler(handler, predicate);
+        bridge.removeHandler(handler);
+
+        // Calls without listener
+        bridge.removeModifyHandlerListListener(listener);
+        bridge.addHandler(handler, predicate);
+        bridge.removeHandler(handler);
     }
 
     @Test
@@ -147,6 +242,32 @@ public class DefaultBridgeTest {
         bridge.removeModifyConnectorListListener(listener);
         bridge.addConnector(connector);
         bridge.removeConnector(connector);
+    }
+
+    @SuppressWarnings ("serial")
+    private static class TestEvent1 implements Event {
+
+    }
+
+    @SuppressWarnings ("serial")
+    private static class TestEvent2 implements Event {
+
+    }
+
+    private static class EqualsAllHandler<T extends Event> implements EventHandler<T> {
+
+        @Override
+        public boolean equals(Object obj) {
+
+            return true;
+        }
+
+        @Override
+        public void handle(T event) {
+
+            // Not used
+        }
+
     }
 
 }

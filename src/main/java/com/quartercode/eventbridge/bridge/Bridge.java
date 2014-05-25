@@ -19,11 +19,14 @@
 package com.quartercode.eventbridge.bridge;
 
 import java.util.List;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * Bridges allow to connect two parts of an application that must not run on the same vm or machine.
  * The connection between bridges can be changed without much effort.
- * Generally, bridges communicate with {@link Event}s that are sent between the bridges.<br>
+ * Generally, bridges communicate with {@link Event}s that are sent between the bridges.
+ * Events are sent by the first bridge, received by the second bridge and finally processed by some {@link EventHandler}s.
+ * However, events can also be sent to one bridge which then hands them over to its local handlers.<br>
  * <br>
  * {@link BridgeConnector}s are used for connecting a bridge with some other bridges.
  * The {@link #addConnector(BridgeConnector)} method activates a connector and binds it,
@@ -59,6 +62,49 @@ public interface Bridge {
     public void send(Event event);
 
     // ----- Storage -----
+
+    /**
+     * Returns all {@link EventHandler}s which are listening for incoming {@link Event}s, along with their {@link EventPredicate} matchers.
+     * An event handler should only be invoked if its event predicate returns {@code true} for the event.
+     * 
+     * @return The event handlers that are listening on the bridge.
+     */
+    public List<Pair<EventHandler<?>, EventPredicate<?>>> getHandlers();
+
+    /**
+     * Adds the given {@link EventHandler} to bridge.
+     * It'll start listening for incoming {@link Event}s that match the given {@link EventPredicate}.
+     * 
+     * @param handler The new event handler that should start listening on the bridge.
+     * @param predicate An event predicate that decides which events pass into the handler.
+     */
+    public <T extends Event> void addHandler(EventHandler<T> handler, EventPredicate<T> predicate);
+
+    /**
+     * Removes the given {@link EventHandler} from the bridge.
+     * It'll stop listening for incoming {@link Event}s.
+     * 
+     * @param handler The event handler that should stop listening on the bridge.
+     */
+    public <T extends Event> void removeHandler(EventHandler<T> handler);
+
+    /**
+     * Adds the given {@link ModifyHandlerListListener} that is called when an {@link EventHandler} is added or removed.
+     * 
+     * @param listener The listener that should be added.
+     * @see #addHandler(EventHandler)
+     * @see #removeHandler(EventHandler)
+     */
+    public void addModifyHandlerListListener(ModifyHandlerListListener listener);
+
+    /**
+     * Removes the given {@link ModifyHandlerListListener} that is called when an {@link EventHandler} is added or removed.
+     * 
+     * @param listener The listener that should be removed.
+     * @see #addHandler(EventHandler)
+     * @see #removeHandler(EventHandler)
+     */
+    public void removeModifyHandlerListListener(ModifyHandlerListListener listener);
 
     /**
      * Returns an unmodifiable list that contains all active and bound {@link BridgeConnector}s which are connected to other bridges.
@@ -101,6 +147,33 @@ public interface Bridge {
      * @see #removeConnector(BridgeConnector)
      */
     public void removeModifyConnectorListListener(ModifyConnectorListListener listener);
+
+    /**
+     * A modify connector list listener is called when an {@link EventHandler} is added to or removed from a {@link Bridge}.
+     */
+    public static interface ModifyHandlerListListener {
+
+        /**
+         * This method is invoked when the given {@link EventHandler} is being added to the given {@link Bridge}.
+         * It is called after the handler is added.
+         * 
+         * @param handler The event handler that is added to the bridge.
+         * @param predicate The {@link EventPredicate} matcher that belongs to the handler.
+         * @param bridge The bridge the given handler is added to.
+         */
+        public <T extends Event> void onAddHandler(EventHandler<T> handler, EventPredicate<T> predicate, Bridge bridge);
+
+        /**
+         * This method is invoked when the given {@link EventHandler} is being removed from the given {@link Bridge}.
+         * It is called before the handler is removed.
+         * 
+         * @param handler The event handler that is removed from the bridge.
+         * @param predicate The {@link EventPredicate} matcher that belonged to the handler.
+         * @param bridge The bridge the given handler is removed from.
+         */
+        public <T extends Event> void onRemoveHandler(EventHandler<T> handler, EventPredicate<T> predicate, Bridge bridge);
+
+    }
 
     /**
      * A modify connector list listener is called when a {@link BridgeConnector} is added to or removed from a {@link Bridge}.

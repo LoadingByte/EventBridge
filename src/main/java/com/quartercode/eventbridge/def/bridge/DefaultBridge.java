@@ -21,10 +21,14 @@ package com.quartercode.eventbridge.def.bridge;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import org.apache.commons.lang3.tuple.Pair;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
 import com.quartercode.eventbridge.bridge.Event;
+import com.quartercode.eventbridge.bridge.EventHandler;
+import com.quartercode.eventbridge.bridge.EventPredicate;
 import com.quartercode.eventbridge.bridge.SenderModule;
 
 /**
@@ -34,15 +38,18 @@ import com.quartercode.eventbridge.bridge.SenderModule;
  */
 public class DefaultBridge implements Bridge {
 
-    private SenderModule                            senderModule                 = new DefaultSenderModule(this);
+    private SenderModule                                         senderModule                 = new DefaultSenderModule(this);
 
-    private final List<BridgeConnector>             connectors                   = new ArrayList<>();
+    private final List<Pair<EventHandler<?>, EventPredicate<?>>> handlers                     = new CopyOnWriteArrayList<>();
+    private final List<BridgeConnector>                          connectors                   = new ArrayList<>();
 
     // Listeners
-    private final List<ModifyConnectorListListener> modifyConnectorListListeners = new ArrayList<>();
+    private final List<ModifyHandlerListListener>                modifyHandlerListListeners   = new ArrayList<>();
+    private final List<ModifyConnectorListListener>              modifyConnectorListListeners = new ArrayList<>();
 
     // Cache
-    private List<BridgeConnector>                   connectorsUnmodifiableCache;
+    private List<Pair<EventHandler<?>, EventPredicate<?>>>       handlersUnmodifiableCache;
+    private List<BridgeConnector>                                connectorsUnmodifiableCache;
 
     /**
      * Creates a new default bridge.
@@ -78,6 +85,73 @@ public class DefaultBridge implements Bridge {
     }
 
     // ----- Storage -----
+
+    @Override
+    public List<Pair<EventHandler<?>, EventPredicate<?>>> getHandlers() {
+
+        if (handlersUnmodifiableCache == null) {
+            handlersUnmodifiableCache = Collections.unmodifiableList(handlers);
+        }
+
+        return handlersUnmodifiableCache;
+    }
+
+    @Override
+    public <T extends Event> void addHandler(EventHandler<T> handler, EventPredicate<T> predicate) {
+
+        handlers.add(Pair.<EventHandler<?>, EventPredicate<?>> of(handler, predicate));
+        handlersUnmodifiableCache = null;
+
+        for (ModifyHandlerListListener listener : modifyHandlerListListeners) {
+            listener.onAddHandler(handler, predicate, this);
+        }
+    }
+
+    @Override
+    public <T extends Event> void removeHandler(EventHandler<T> handler) {
+
+        Pair<EventHandler<?>, EventPredicate<?>> pair = null;
+        for (Pair<EventHandler<?>, EventPredicate<?>> testPair : handlers) {
+            if (testPair.getLeft().equals(handler)) {
+                pair = testPair;
+                break;
+            }
+        }
+
+        if (pair != null) {
+            if (!modifyHandlerListListeners.isEmpty()) {
+                /*
+                 * Won't cause any problems because T is only used to satisfy the compiler.
+                 * Neither this code nor the listener code can make any type assertions that could cause ClassCastExceptions.
+                 * The listener just uses T to make sure that the handler and the predicate process the same type of event.
+                 */
+                @SuppressWarnings ("unchecked")
+                EventHandler<T> castedHandler = (EventHandler<T>) pair.getLeft();
+                @SuppressWarnings ("unchecked")
+                EventPredicate<T> castedPredicate = (EventPredicate<T>) pair.getRight();
+                for (ModifyHandlerListListener listener : modifyHandlerListListeners) {
+                    listener.onRemoveHandler(castedHandler, castedPredicate, this);
+                }
+            }
+
+            handlers.remove(pair);
+            handlersUnmodifiableCache = null;
+
+            return;
+        }
+    }
+
+    @Override
+    public void addModifyHandlerListListener(ModifyHandlerListListener listener) {
+
+        modifyHandlerListListeners.add(listener);
+    }
+
+    @Override
+    public void removeModifyHandlerListListener(ModifyHandlerListListener listener) {
+
+        modifyHandlerListListeners.remove(listener);
+    }
 
     @Override
     public List<BridgeConnector> getConnectors() {
