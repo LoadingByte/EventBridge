@@ -81,4 +81,27 @@ public class DefaultSenderModuleTest {
         senderModule.send(event);
     }
 
+    @Test
+    public void testSendWithException() throws BridgeConnectorException {
+
+        final EmptyEvent event = new EmptyEvent();
+
+        final BridgeConnector connector = context.mock(BridgeConnector.class);
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            allowing(bridge).getConnectors();
+                will(returnValue(Arrays.asList(connector)));
+
+            oneOf(connector).send(event);
+                will(throwException(new BridgeConnectorException(connector)));
+
+        }});
+        // @formatter:on
+
+        // Assert that the exception is suppressed by the sender module
+        senderModule.send(event);
+    }
+
 }
