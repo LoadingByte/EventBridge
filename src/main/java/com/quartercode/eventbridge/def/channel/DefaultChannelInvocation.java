@@ -91,6 +91,8 @@ class DefaultChannelInvocation<T> implements ChannelInvocation<T> {
                 return (double) 0;
             } else if (type.equals(Boolean.TYPE)) {
                 return false;
+            } else if (type.equals(Character.TYPE)) {
+                return '\u0000';
             } else {
                 return null;
             }
