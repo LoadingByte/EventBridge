@@ -54,6 +54,14 @@ public interface Bridge {
     public HandlerModule getHandlerModule();
 
     /**
+     * Passes the given {@link Event} to the bridge's handler module ({@link #getHandlerModule()}).
+     * This method is basically a shortcut for the {@link HandlerModule#handle(Event)} method.
+     * 
+     * @param event The event that should be passed to the handler module.
+     */
+    public void handle(Event event);
+
+    /**
      * Returns the {@link SenderModule} which is responsible for sending {@link Event}s between bridges.
      * 
      * @return The bridge's sender module.

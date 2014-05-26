@@ -74,6 +74,25 @@ public class DefaultBridgeTest {
     }
 
     @Test
+    public void testHandle() {
+
+        final HandlerModule handlerModule = context.mock(HandlerModule.class);
+        bridge.setHandlerModule(handlerModule);
+
+        final EmptyEvent1 event = new EmptyEvent1();
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            oneOf(handlerModule).handle(event);
+
+        }});
+        // @formatter:on
+
+        bridge.handle(event);
+    }
+
+    @Test
     public void testGetSetSenderModule() {
 
         SenderModule senderModule = context.mock(SenderModule.class);

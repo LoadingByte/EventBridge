@@ -81,6 +81,12 @@ public class DefaultBridge implements Bridge {
     }
 
     @Override
+    public void handle(Event event) {
+
+        handlerModule.handle(event);
+    }
+
+    @Override
     public SenderModule getSenderModule() {
 
         return senderModule;
