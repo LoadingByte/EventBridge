@@ -65,7 +65,7 @@ public class DefaultBridgeTest {
     }
 
     @Test
-    public void testGetHandlerModule() {
+    public void testGetSetHandlerModule() {
 
         HandlerModule handlerModule = context.mock(HandlerModule.class);
         bridge.setHandlerModule(handlerModule);
@@ -74,7 +74,7 @@ public class DefaultBridgeTest {
     }
 
     @Test
-    public void testGetSenderModule() {
+    public void testGetSetSenderModule() {
 
         SenderModule senderModule = context.mock(SenderModule.class);
         bridge.setSenderModule(senderModule);

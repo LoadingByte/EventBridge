@@ -61,10 +61,10 @@ public interface Bridge {
     public SenderModule getSenderModule();
 
     /**
-     * Lets the given {@link Event} be sent by the bridge's sender module ({@link #getSenderModule()}).
+     * Passes the given {@link Event} to the bridge's sender module ({@link #getSenderModule()}).
      * This method is basically a shortcut for the {@link SenderModule#send(Event)} method.
      * 
-     * @param event The event that should be sent by the sender module.
+     * @param event The event that should be passed to the sender module.
      */
     public void send(Event event);
 
