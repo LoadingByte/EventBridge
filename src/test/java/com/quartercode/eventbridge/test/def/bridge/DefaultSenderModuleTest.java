@@ -29,7 +29,6 @@ import org.junit.Test;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
-import com.quartercode.eventbridge.bridge.HandlerModule;
 import com.quartercode.eventbridge.bridge.SenderModule;
 import com.quartercode.eventbridge.bridge.SenderModule.ConnectorSendInterceptor;
 import com.quartercode.eventbridge.bridge.SenderModule.GlobalSendInterceptor;
@@ -72,20 +71,17 @@ public class DefaultSenderModuleTest {
         senderModule.getConnectorSendChannel().addInterceptor(new DummyConnectorSendInterceptor(connectorInterceptor), 1);
 
         final BridgeConnector connector = context.mock(BridgeConnector.class);
-        final HandlerModule handlerModule = context.mock(HandlerModule.class);
 
         // @formatter:off
         context.checking(new Expectations() {{
 
             allowing(bridge).getConnectors();
                 will(returnValue(Arrays.asList(connector)));
-            allowing(bridge).getHandlerModule();
-                will(returnValue(handlerModule));
 
             final Sequence sendChain = context.sequence("sendChain");
             oneOf(globalInterceptor).send(with(any(ChannelInvocation.class)), with(event)); inSequence(sendChain);
             oneOf(localHandlerInterceptor).send(with(any(ChannelInvocation.class)), with(event)); inSequence(sendChain);
-            oneOf(handlerModule).handle(event); inSequence(sendChain);
+            oneOf(bridge).handle(event); inSequence(sendChain);
             oneOf(connectorInterceptor).send(with(any(ChannelInvocation.class)), with(connector), with(event)); inSequence(sendChain);
             oneOf(connector).send(event); inSequence(sendChain);
 
@@ -101,19 +97,16 @@ public class DefaultSenderModuleTest {
         final EmptyEvent1 event = new EmptyEvent1();
 
         final BridgeConnector connector = context.mock(BridgeConnector.class);
-        final HandlerModule handlerModule = context.mock(HandlerModule.class);
 
         // @formatter:off
         context.checking(new Expectations() {{
 
             allowing(bridge).getConnectors();
                 will(returnValue(Arrays.asList(connector)));
-            allowing(bridge).getHandlerModule();
-                will(returnValue(handlerModule));
 
             oneOf(connector).send(event);
                 will(throwException(new BridgeConnectorException(connector)));
-            allowing(handlerModule).handle(event);
+            allowing(bridge).handle(event);
 
         }});
         // @formatter:on
