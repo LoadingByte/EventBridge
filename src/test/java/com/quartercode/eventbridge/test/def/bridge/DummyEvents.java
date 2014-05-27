@@ -32,6 +32,15 @@ public class DummyEvents {
 
     }
 
+    public static interface EmptyEvent3Base extends Event {
+
+    }
+
+    @SuppressWarnings ("serial")
+    public static class EmptyEvent3Extends2 extends EmptyEvent2 implements EmptyEvent3Base {
+
+    }
+
     @SuppressWarnings ("serial")
     public static class CallableEvent implements Event {
 
