@@ -67,6 +67,10 @@ public class MultiPredicates {
         return new AndPredicate<>(predicates);
     }
 
+    private MultiPredicates() {
+
+    }
+
     private static class OrPredicate<T extends Event> implements EventPredicate<T> {
 
         private static final long                 serialVersionUID = -4884575813348736033L;
