@@ -32,9 +32,9 @@ import com.quartercode.eventbridge.bridge.EventPredicate;
 import com.quartercode.eventbridge.extra.predicate.MultiPredicates;
 import com.quartercode.eventbridge.extra.predicate.TypePredicate;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
-import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent2;
-import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent3Base;
-import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent3Extends2;
+import com.quartercode.eventbridge.test.DummyEvents.InheritingEvent;
+import com.quartercode.eventbridge.test.DummyEvents.InheritingEventInterface;
+import com.quartercode.eventbridge.test.DummyEvents.InheritingEventSuper;
 
 @RunWith (Parameterized.class)
 public class MultiPredicatesTest<T extends Event> {
@@ -44,10 +44,10 @@ public class MultiPredicatesTest<T extends Event> {
 
         List<Object[]> data = new ArrayList<>();
 
-        EventPredicate<?>[] predicates = new EventPredicate<?>[] { new TypePredicate<>(EmptyEvent2.class), new TypePredicate<>(EmptyEvent3Base.class) };
+        EventPredicate<?>[] predicates = new EventPredicate<?>[] { new TypePredicate<>(InheritingEventSuper.class), new TypePredicate<>(InheritingEventInterface.class) };
         data.add(new Object[] { predicates, new EmptyEvent1(), false, false });
-        data.add(new Object[] { predicates, new EmptyEvent2(), true, false });
-        data.add(new Object[] { predicates, new EmptyEvent3Extends2(), true, true });
+        data.add(new Object[] { predicates, new InheritingEventSuper(), true, false });
+        data.add(new Object[] { predicates, new InheritingEvent(), true, true });
 
         return data;
     }

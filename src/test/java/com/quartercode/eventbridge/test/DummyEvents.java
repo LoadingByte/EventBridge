@@ -32,12 +32,32 @@ public class DummyEvents {
 
     }
 
-    public static interface EmptyEvent3Base extends Event {
+    @SuppressWarnings ("serial")
+    public static class EmptyEvent3 implements Event {
 
     }
 
     @SuppressWarnings ("serial")
-    public static class EmptyEvent3Extends2 extends EmptyEvent2 implements EmptyEvent3Base {
+    public static class EmptyEvent4 implements Event {
+
+    }
+
+    @SuppressWarnings ("serial")
+    public static class EmptyEvent5 implements Event {
+
+    }
+
+    @SuppressWarnings ("serial")
+    public static class InheritingEventSuper implements Event {
+
+    }
+
+    public static interface InheritingEventInterface extends Event {
+
+    }
+
+    @SuppressWarnings ("serial")
+    public static class InheritingEvent extends InheritingEventSuper implements InheritingEventInterface {
 
     }
 

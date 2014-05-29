@@ -29,9 +29,9 @@ import org.junit.runners.Parameterized.Parameters;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.extra.predicate.TypePredicate;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
-import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent2;
-import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent3Base;
-import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent3Extends2;
+import com.quartercode.eventbridge.test.DummyEvents.InheritingEvent;
+import com.quartercode.eventbridge.test.DummyEvents.InheritingEventInterface;
+import com.quartercode.eventbridge.test.DummyEvents.InheritingEventSuper;
 
 @RunWith (Parameterized.class)
 public class TypePredicateTest {
@@ -42,19 +42,19 @@ public class TypePredicateTest {
         List<Object[]> data = new ArrayList<>();
 
         data.add(new Object[] { new EmptyEvent1(), EmptyEvent1.class, true });
-        data.add(new Object[] { new EmptyEvent1(), EmptyEvent2.class, false });
-        data.add(new Object[] { new EmptyEvent1(), EmptyEvent3Base.class, false });
-        data.add(new Object[] { new EmptyEvent1(), EmptyEvent3Extends2.class, false });
+        data.add(new Object[] { new EmptyEvent1(), InheritingEventSuper.class, false });
+        data.add(new Object[] { new EmptyEvent1(), InheritingEventInterface.class, false });
+        data.add(new Object[] { new EmptyEvent1(), InheritingEvent.class, false });
 
-        data.add(new Object[] { new EmptyEvent2(), EmptyEvent1.class, false });
-        data.add(new Object[] { new EmptyEvent2(), EmptyEvent2.class, true });
-        data.add(new Object[] { new EmptyEvent2(), EmptyEvent3Base.class, false });
-        data.add(new Object[] { new EmptyEvent1(), EmptyEvent3Extends2.class, false });
+        data.add(new Object[] { new InheritingEventSuper(), EmptyEvent1.class, false });
+        data.add(new Object[] { new InheritingEventSuper(), InheritingEventSuper.class, true });
+        data.add(new Object[] { new InheritingEventSuper(), InheritingEventInterface.class, false });
+        data.add(new Object[] { new InheritingEventSuper(), InheritingEvent.class, false });
 
-        data.add(new Object[] { new EmptyEvent3Extends2(), EmptyEvent1.class, false });
-        data.add(new Object[] { new EmptyEvent3Extends2(), EmptyEvent2.class, true });
-        data.add(new Object[] { new EmptyEvent3Extends2(), EmptyEvent3Base.class, true });
-        data.add(new Object[] { new EmptyEvent3Extends2(), EmptyEvent3Extends2.class, true });
+        data.add(new Object[] { new InheritingEvent(), EmptyEvent1.class, false });
+        data.add(new Object[] { new InheritingEvent(), InheritingEventSuper.class, true });
+        data.add(new Object[] { new InheritingEvent(), InheritingEventInterface.class, true });
+        data.add(new Object[] { new InheritingEvent(), InheritingEvent.class, true });
 
         return data;
     }
