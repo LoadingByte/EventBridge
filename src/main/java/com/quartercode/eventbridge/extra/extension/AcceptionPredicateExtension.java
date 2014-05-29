@@ -98,12 +98,12 @@ public class AcceptionPredicateExtension {
 
             List<Pair<EventHandler<?>, EventPredicate<?>>> handlers = bridge.getHandlers();
 
-            EventPredicate<?>[] predicates = new EventPredicate[handlers.size()];
-            for (int index = 0; index < predicates.length; index++) {
-                predicates[index] = handlers.get(index).getRight();
+            EventPredicate<?>[] handlerPredicates = new EventPredicate[handlers.size()];
+            for (int index = 0; index < handlerPredicates.length; index++) {
+                handlerPredicates[index] = handlers.get(index).getRight();
             }
 
-            bridge.send(new AcceptionPredicateEvent(predicates, true));
+            bridge.send(new AcceptionPredicateEvent(handlerPredicates, true));
         }
 
         @Override
@@ -191,7 +191,7 @@ public class AcceptionPredicateExtension {
 
     }
 
-    private class APELocalHandlerSendInterceptor implements LocalHandlerSendInterceptor {
+    private static class APELocalHandlerSendInterceptor implements LocalHandlerSendInterceptor {
 
         @Override
         public void send(ChannelInvocation<LocalHandlerSendInterceptor> invocation, Event event) {
