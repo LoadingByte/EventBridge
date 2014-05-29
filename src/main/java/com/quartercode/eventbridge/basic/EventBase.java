@@ -24,8 +24,8 @@ import com.quartercode.eventbridge.bridge.Event;
  * An abstract {@link Event} class which already implements the {@code hashCode()} etc. methods using reflection builders.
  * It may be used as superclass for all events.
  */
-public class EventBase extends DataObjectBase implements Event {
+public abstract class EventBase extends DataObjectBase implements Event {
 
-    private static final long serialVersionUID = 7910484113828284585L;
+    private static final long serialVersionUID = 2649878925210675231L;
 
 }
