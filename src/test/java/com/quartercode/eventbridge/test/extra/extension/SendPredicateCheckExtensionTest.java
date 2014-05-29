@@ -37,7 +37,7 @@ import com.quartercode.eventbridge.bridge.SenderModule.ConnectorSendInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.bridge.DefaultBridge;
 import com.quartercode.eventbridge.extra.connector.LocalBridgeConnector;
-import com.quartercode.eventbridge.extra.extension.AcceptionPredicateExtension;
+import com.quartercode.eventbridge.extra.extension.SendPredicateCheckExtension;
 import com.quartercode.eventbridge.extra.predicate.TypePredicate;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent2;
@@ -47,14 +47,14 @@ import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent5;
 import com.quartercode.eventbridge.test.DummyInterceptors.DummyConnectorSendInterceptor;
 
 @SuppressWarnings ("unchecked")
-public class AcceptionPredicateExtensionTest {
+public class SendPredicateCheckExtensionTest {
 
-    private static final Class<Event> APEVENT_TYPE;
+    private static final Class<Event> INTERNAL_EVENT_TYPE;
 
     static {
 
         try {
-            APEVENT_TYPE = (Class<Event>) Class.forName(AcceptionPredicateExtension.class.getName() + "$AcceptionPredicateEvent");
+            INTERNAL_EVENT_TYPE = (Class<Event>) Class.forName(SendPredicateCheckExtension.class.getName() + "$SetPredicatesEvent");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -77,9 +77,9 @@ public class AcceptionPredicateExtensionTest {
     @Mock
     private ConnectorSendInterceptor    interceptor;
 
-    private AcceptionPredicateExtension bridge1Extension;
-    private AcceptionPredicateExtension bridge2Extension;
-    private AcceptionPredicateExtension bridge3Extension;
+    private SendPredicateCheckExtension bridge1Extension;
+    private SendPredicateCheckExtension bridge2Extension;
+    private SendPredicateCheckExtension bridge3Extension;
 
     @Before
     public void setUp() {
@@ -94,19 +94,19 @@ public class AcceptionPredicateExtensionTest {
         // Add the mocked connector send interceptor to bridge 1
         bridge1.getSenderModule().getConnectorSendChannel().addInterceptor(new DummyConnectorSendInterceptor(interceptor), 1);
 
-        // Allow the internal acception predicate events to flow through the interceptor
+        // Allow the internal events to flow through the interceptor
         // @formatter:off
         context.checking(new Expectations() {{
 
-            allowing(interceptor).send(with(any(ChannelInvocation.class)), with(any(BridgeConnector.class)), with(any(APEVENT_TYPE)));
+            allowing(interceptor).send(with(any(ChannelInvocation.class)), with(any(BridgeConnector.class)), with(any(INTERNAL_EVENT_TYPE)));
 
         }});
         // @formatter:on
 
-        // Install the acception predicate extensions to both bridges
-        bridge1Extension = new AcceptionPredicateExtension(bridge1);
-        bridge2Extension = new AcceptionPredicateExtension(bridge2);
-        bridge3Extension = new AcceptionPredicateExtension(bridge3);
+        // Install the send predicate check extensions to both bridges
+        bridge1Extension = new SendPredicateCheckExtension(bridge1);
+        bridge2Extension = new SendPredicateCheckExtension(bridge2);
+        bridge3Extension = new SendPredicateCheckExtension(bridge3);
     }
 
     private Event[] beforeCustomActions(Pair<BridgeConnector, Class<?>[]>... expectedEvents) {
@@ -125,8 +125,8 @@ public class AcceptionPredicateExtensionTest {
         // @formatter:off
         context.checking(new Expectations() {{
 
-            for (Pair<BridgeConnector, Event> acceptedEvent : actualExpectedEvents) {
-                oneOf(interceptor).send(with(any(ChannelInvocation.class)), with(acceptedEvent.getLeft()), with(acceptedEvent.getRight()));
+            for (Pair<BridgeConnector, Event> expectedEvent : actualExpectedEvents) {
+                oneOf(interceptor).send(with(any(ChannelInvocation.class)), with(expectedEvent.getLeft()), with(expectedEvent.getRight()));
             }
 
         }});

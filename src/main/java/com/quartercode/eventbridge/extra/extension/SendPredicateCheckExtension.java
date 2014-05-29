@@ -38,21 +38,21 @@ import com.quartercode.eventbridge.bridge.SenderModule.LocalHandlerSendIntercept
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 
 /**
- * The acception predicate extension prevents all {@link Event}s, which the receiver {@link Bridge} does hot have any {@link EventHandler} for, from being sent.
+ * The send predicate check extension prevents all {@link Event}s, which the receiver {@link Bridge} does hot have any {@link EventHandler} for, from being sent.
  * It can remove a lot of load from {@link BridgeConnector}s if many events are sent but not received. <br>
  * <br>
- * Since the acception predicate extension implements the mediator pattern, it can be added to a bridge as follows:
+ * Since the send predicate check extension implements the mediator pattern, it can be added to a bridge as follows:
  * 
  * <pre>
  * Bridge bridge = ...
- * new AcceptionPredicateExtension(bridge);
+ * new SendPredicateCheckExtension(bridge);
  * </pre>
  * 
  * Please note that the extension also can be removed from a bridge with the {@link #remove()} method:
  * 
  * <pre>
  * Bridge bridge = ...
- * AcceptionPredicateExtension extension = new AcceptionPredicateExtension(bridge);
+ * SendPredicateCheckExtension extension = new SendPredicateCheckExtension(bridge);
  * ...
  * extension.remove();
  * </pre>
@@ -60,44 +60,44 @@ import com.quartercode.eventbridge.channel.ChannelInvocation;
  * @see Bridge
  * @see BridgeConnector
  */
-public class AcceptionPredicateExtension {
+public class SendPredicateCheckExtension {
 
     private final Bridge                                        bridge;
-    private final APEModifyHandlerListListener                  modifyHandlerListListener   = new APEModifyHandlerListListener();
-    private final APEModifyConnectorListListener                modifyConnectorListListener = new APEModifyConnectorListListener();
-    private final APEGlobalHandleInterceptor                    globalHandleInterceptor     = new APEGlobalHandleInterceptor();
-    private final APEConnectorSendInterceptor                   connectorSendInterceptor    = new APEConnectorSendInterceptor();
-    private final APELocalHandlerSendInterceptor                localHandlerSendInterceptor = new APELocalHandlerSendInterceptor();
+    private final SPCEModifyHandlerListListener                 modifyHandlerListListener   = new SPCEModifyHandlerListListener();
+    private final SPCEModifyConnectorListListener               modifyConnectorListListener = new SPCEModifyConnectorListListener();
+    private final SPCEGlobalHandleInterceptor                   globalHandleInterceptor     = new SPCEGlobalHandleInterceptor();
+    private final SPCEConnectorSendInterceptor                  connectorSendInterceptor    = new SPCEConnectorSendInterceptor();
+    private final SPCELocalHandlerSendInterceptor               localHandlerSendInterceptor = new SPCELocalHandlerSendInterceptor();
 
     private final Map<BridgeConnector, List<EventPredicate<?>>> predicates                  = new HashMap<>();
 
     /**
-     * Creates a new acception predicate extension and adds it to the given {@link Bridge}.
-     * See the {@link AcceptionPredicateExtension} javadoc for more details on how to use the extension.
+     * Creates a new send predicate check extension and adds it to the given {@link Bridge}.
+     * See the {@link SendPredicateCheckExtension} javadoc for more details on how to use the extension.
      * 
      * @param bridge The bridge to add the extension to.
      */
-    public AcceptionPredicateExtension(Bridge bridge) {
+    public SendPredicateCheckExtension(Bridge bridge) {
 
         this.bridge = bridge;
 
-        // Listeners for sending AcceptionPredicateEvents
+        // Listeners for sending SetPredicatesEvents
         bridge.addModifyHandlerListListener(modifyHandlerListListener);
         bridge.addModifyConnectorListListener(modifyConnectorListListener);
 
-        // Global handle interceptor for receiving AcceptionPredicateEvents
+        // Global handle interceptor for receiving SetPredicatesEvents
         bridge.getHandlerModule().getGlobalHandleChannel().addInterceptor(globalHandleInterceptor, 50);
 
         // Connector send interceptor for stopping events which are not requested at the other side
         bridge.getSenderModule().getConnectorSendChannel().addInterceptor(connectorSendInterceptor, 50);
 
-        // Local handler send interceptor for stopping APEvents from being handled locally
+        // Local handler send interceptor for stopping SetPredicatesEvents from being handled locally
         bridge.getSenderModule().getLocalHandlerSendChannel().addInterceptor(localHandlerSendInterceptor, 50);
     }
 
     /**
-     * Removes the acception predicate extension from the {@link Bridge} it was added to.
-     * See the {@link AcceptionPredicateExtension} javadoc for more details on how to use the extension.
+     * Removes the send predicate check extension from the {@link Bridge} it was added to.
+     * See the {@link SendPredicateCheckExtension} javadoc for more details on how to use the extension.
      */
     public void remove() {
 
@@ -108,23 +108,23 @@ public class AcceptionPredicateExtension {
         bridge.getSenderModule().getLocalHandlerSendChannel().removeInterceptor(localHandlerSendInterceptor);
     }
 
-    private static class APEModifyHandlerListListener implements ModifyHandlerListListener {
+    private static class SPCEModifyHandlerListListener implements ModifyHandlerListListener {
 
         @Override
         public void onAddHandler(EventHandler<?> handler, EventPredicate<?> predicate, Bridge bridge) {
 
-            bridge.send(new AcceptionPredicateEvent(new EventPredicate<?>[] { predicate }, true));
+            bridge.send(new SetPredicatesEvent(new EventPredicate<?>[] { predicate }, true));
         }
 
         @Override
         public void onRemoveHandler(EventHandler<?> handler, EventPredicate<?> predicate, Bridge bridge) {
 
-            bridge.send(new AcceptionPredicateEvent(new EventPredicate<?>[] { predicate }, false));
+            bridge.send(new SetPredicatesEvent(new EventPredicate<?>[] { predicate }, false));
         }
 
     }
 
-    private class APEModifyConnectorListListener implements ModifyConnectorListListener {
+    private class SPCEModifyConnectorListListener implements ModifyConnectorListListener {
 
         @Override
         public void onAddConnector(BridgeConnector connector, Bridge bridge) {
@@ -136,7 +136,7 @@ public class AcceptionPredicateExtension {
                 handlerPredicates[index] = handlers.get(index).getRight();
             }
 
-            bridge.send(new AcceptionPredicateEvent(handlerPredicates, true));
+            bridge.send(new SetPredicatesEvent(handlerPredicates, true));
         }
 
         @Override
@@ -147,21 +147,21 @@ public class AcceptionPredicateExtension {
 
     }
 
-    private class APEGlobalHandleInterceptor implements GlobalHandleInterceptor {
+    private class SPCEGlobalHandleInterceptor implements GlobalHandleInterceptor {
 
         @Override
         public void handle(ChannelInvocation<GlobalHandleInterceptor> invocation, BridgeConnector source, Event event) {
 
-            if (! (event instanceof AcceptionPredicateEvent)) {
+            if (! (event instanceof SetPredicatesEvent)) {
                 invocation.next().handle(invocation, source, event);
                 return;
             }
 
-            // Source cannot be null since AcceptionPredicateEvents are not handled locally.
-            handle(source, (AcceptionPredicateEvent) event);
+            // Source cannot be null since SetPredicatesEvents are not handled locally.
+            handle(source, (SetPredicatesEvent) event);
         }
 
-        private void handle(BridgeConnector connector, AcceptionPredicateEvent event) {
+        private void handle(BridgeConnector connector, SetPredicatesEvent event) {
 
             if (event.isAdd()) {
                 addPredicates(connector, event.getPredicates());
@@ -201,12 +201,12 @@ public class AcceptionPredicateExtension {
 
     }
 
-    private class APEConnectorSendInterceptor implements ConnectorSendInterceptor {
+    private class SPCEConnectorSendInterceptor implements ConnectorSendInterceptor {
 
         @Override
         public void send(ChannelInvocation<ConnectorSendInterceptor> invocation, BridgeConnector connector, Event event) {
 
-            if (event instanceof AcceptionPredicateEvent || isInteresting(connector, event)) {
+            if (event instanceof SetPredicatesEvent || isInteresting(connector, event)) {
                 invocation.next().send(invocation, connector, event);
             }
         }
@@ -224,26 +224,26 @@ public class AcceptionPredicateExtension {
 
     }
 
-    private static class APELocalHandlerSendInterceptor implements LocalHandlerSendInterceptor {
+    private static class SPCELocalHandlerSendInterceptor implements LocalHandlerSendInterceptor {
 
         @Override
         public void send(ChannelInvocation<LocalHandlerSendInterceptor> invocation, Event event) {
 
-            if (! (event instanceof AcceptionPredicateEvent)) {
+            if (! (event instanceof SetPredicatesEvent)) {
                 invocation.next().send(invocation, event);
             }
         }
 
     }
 
-    private static class AcceptionPredicateEvent extends EventBase {
+    private static class SetPredicatesEvent extends EventBase {
 
-        private static final long         serialVersionUID = -8927162777505255022L;
+        private static final long         serialVersionUID = 5988984260797972075L;
 
         private final EventPredicate<?>[] predicates;
         private final boolean             add;
 
-        private AcceptionPredicateEvent(EventPredicate<?>[] predicates, boolean add) {
+        private SetPredicatesEvent(EventPredicate<?>[] predicates, boolean add) {
 
             this.predicates = predicates.clone();
             this.add = add;
