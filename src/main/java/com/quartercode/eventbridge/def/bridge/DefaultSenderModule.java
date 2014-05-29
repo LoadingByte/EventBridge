@@ -113,7 +113,7 @@ public class DefaultSenderModule extends BridgeModuleBase implements SenderModul
         @Override
         public void send(ChannelInvocation<LocalHandlerSendInterceptor> invocation, Event event) {
 
-            getParent().handle(event);
+            getParent().handle(null, event);
 
             invocation.next().send(invocation, event);
         }

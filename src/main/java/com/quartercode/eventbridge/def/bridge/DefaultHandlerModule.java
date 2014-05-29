@@ -21,6 +21,7 @@ package com.quartercode.eventbridge.def.bridge;
 import org.apache.commons.lang3.tuple.Pair;
 import com.quartercode.eventbridge.basic.EventUtils;
 import com.quartercode.eventbridge.bridge.Bridge;
+import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.EventPredicate;
@@ -66,30 +67,30 @@ public class DefaultHandlerModule extends BridgeModuleBase implements HandlerMod
     }
 
     @Override
-    public void handle(Event event) {
+    public void handle(BridgeConnector source, Event event) {
 
         ChannelInvocation<GlobalHandleInterceptor> invocation = globalHandleChannel.invoke();
-        invocation.next().handle(invocation, event);
+        invocation.next().handle(invocation, source, event);
     }
 
     private class FinalGlobalHandleInterceptor implements GlobalHandleInterceptor {
 
         @Override
-        public void handle(ChannelInvocation<GlobalHandleInterceptor> invocation, Event event) {
+        public void handle(ChannelInvocation<GlobalHandleInterceptor> invocation, BridgeConnector source, Event event) {
 
             for (Pair<EventHandler<?>, EventPredicate<?>> handler : getParent().getHandlers()) {
                 if (EventUtils.tryTest(handler.getRight(), event)) {
-                    invokeHandlerHandleChannel(handler.getLeft(), event);
+                    invokeHandlerHandleChannel(source, handler.getLeft(), event);
                 }
             }
 
-            invocation.next().handle(invocation, event);
+            invocation.next().handle(invocation, source, event);
         }
 
-        private void invokeHandlerHandleChannel(EventHandler<?> handler, Event event) {
+        private void invokeHandlerHandleChannel(BridgeConnector source, EventHandler<?> handler, Event event) {
 
             ChannelInvocation<HandlerHandleInterceptor> newInvocation = handlerHandleChannel.invoke();
-            newInvocation.next().handle(newInvocation, handler, event);
+            newInvocation.next().handle(newInvocation, source, handler, event);
         }
 
     }
@@ -101,11 +102,11 @@ public class DefaultHandlerModule extends BridgeModuleBase implements HandlerMod
     private static class FinalHandlerHandleInterceptor implements HandlerHandleInterceptor {
 
         @Override
-        public void handle(ChannelInvocation<HandlerHandleInterceptor> invocation, EventHandler<?> handler, Event event) {
+        public void handle(ChannelInvocation<HandlerHandleInterceptor> invocation, BridgeConnector source, EventHandler<?> handler, Event event) {
 
             EventUtils.tryHandle(handler, event);
 
-            invocation.next().handle(invocation, handler, event);
+            invocation.next().handle(invocation, source, handler, event);
 
         }
 

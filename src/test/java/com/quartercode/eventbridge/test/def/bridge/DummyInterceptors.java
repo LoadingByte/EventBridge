@@ -40,10 +40,10 @@ public class DummyInterceptors {
         }
 
         @Override
-        public void handle(ChannelInvocation<GlobalHandleInterceptor> invocation, Event event) {
+        public void handle(ChannelInvocation<GlobalHandleInterceptor> invocation, BridgeConnector source, Event event) {
 
-            dummy.handle(invocation, event);
-            invocation.next().handle(invocation, event);
+            dummy.handle(invocation, source, event);
+            invocation.next().handle(invocation, source, event);
         }
 
     }
@@ -58,10 +58,10 @@ public class DummyInterceptors {
         }
 
         @Override
-        public void handle(ChannelInvocation<HandlerHandleInterceptor> invocation, EventHandler<?> handler, Event event) {
+        public void handle(ChannelInvocation<HandlerHandleInterceptor> invocation, BridgeConnector source, EventHandler<?> handler, Event event) {
 
-            dummy.handle(invocation, handler, event);
-            invocation.next().handle(invocation, handler, event);
+            dummy.handle(invocation, source, handler, event);
+            invocation.next().handle(invocation, source, handler, event);
         }
 
     }

@@ -43,54 +43,42 @@ public class LocalBridgeConnectorTest {
     }
 
     @Rule
-    public JUnitRuleMockery context = new JUnitRuleMockery();
+    public JUnitRuleMockery                             context             = new JUnitRuleMockery();
 
-    private Bridge          bridge1;
-    private Bridge          bridge2;
+    private Bridge                                      bridge1;
+    private Bridge                                      bridge2;
+
+    private LocalBridgeConnector                        bridge1To2Connector;
+    private final AtomicReference<LocalBridgeConnector> bridge2To1Connector = new AtomicReference<>();
 
     @Before
-    public void setUp() {
+    public void setUp() throws BridgeConnectorException {
 
         bridge1 = context.mock(Bridge.class, "bridge1");
         bridge2 = context.mock(Bridge.class, "bridge2");
+
+        bridge1To2Connector = new LocalBridgeConnector(bridge2);
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            oneOf(bridge2).addConnector(with(any(LocalBridgeConnector.class)));
+                will(doDummyAddConnector(bridge2To1Connector, bridge2));
+
+        }});
+        // @formatter:on
+
+        bridge1To2Connector.start(bridge1);
     }
 
     @Test
     public void testStart() throws BridgeConnectorException {
 
-        final LocalBridgeConnector bridge1To2Connector = new LocalBridgeConnector(bridge2);
-        final AtomicReference<LocalBridgeConnector> bridge2To1Connector = new AtomicReference<>();
-
-        // @formatter:off
-        context.checking(new Expectations() {{
-
-            oneOf(bridge2).addConnector(with(any(LocalBridgeConnector.class)));
-                will(doDummyAddConnector(bridge2To1Connector, bridge2));
-
-        }});
-        // @formatter:on
-
-        bridge1To2Connector.start(bridge1);
         assertNotNull("Local bridge connector didn't add reverse connection", bridge2To1Connector.get());
     }
 
     @Test
     public void testStop() throws BridgeConnectorException {
-
-        final LocalBridgeConnector bridge1To2Connector = new LocalBridgeConnector(bridge2);
-        final AtomicReference<LocalBridgeConnector> bridge2To1Connector = new AtomicReference<>();
-
-        // @formatter:off
-        context.checking(new Expectations() {{
-
-            // Start
-            oneOf(bridge2).addConnector(with(any(LocalBridgeConnector.class)));
-                will(doDummyAddConnector(bridge2To1Connector, bridge2));
-
-        }});
-        // @formatter:on
-
-        bridge1To2Connector.start(bridge1);
 
         // @formatter:off
         context.checking(new Expectations() {{
@@ -106,21 +94,6 @@ public class LocalBridgeConnectorTest {
 
     @Test
     public void testStopReverse() throws BridgeConnectorException {
-
-        final LocalBridgeConnector bridge1To2Connector = new LocalBridgeConnector(bridge2);
-        final AtomicReference<LocalBridgeConnector> bridge2To1Connector = new AtomicReference<>();
-
-        // @formatter:off
-        context.checking(new Expectations() {{
-
-            // Start
-            oneOf(bridge2).addConnector(with(any(LocalBridgeConnector.class)));
-                will(doDummyAddConnector(bridge2To1Connector, bridge2));
-
-        }});
-        // @formatter:on
-
-        bridge1To2Connector.start(bridge1);
 
         // @formatter:off
         context.checking(new Expectations() {{
@@ -140,31 +113,23 @@ public class LocalBridgeConnectorTest {
         final EmptyEvent1[] bridge1To2Events = { new EmptyEvent1(), new EmptyEvent1(), new EmptyEvent1() };
         final EmptyEvent2[] bridge2To1Events = { new EmptyEvent2(), new EmptyEvent2(), new EmptyEvent2() };
 
-        final LocalBridgeConnector bridge1To2Connector = new LocalBridgeConnector(bridge2);
-        final AtomicReference<LocalBridgeConnector> bridge2To1Connector = new AtomicReference<>();
-
         // @formatter:off
         context.checking(new Expectations() {{
-
-            oneOf(bridge2).addConnector(with(any(LocalBridgeConnector.class)));
-                will(doDummyAddConnector(bridge2To1Connector, bridge2));
 
             final Sequence handleCalls = context.sequence("handleCalls");
 
             // Bridge 1 -> Bridge 2 events
-            oneOf(bridge2).handle(bridge1To2Events[0]); inSequence(handleCalls);
-            oneOf(bridge2).handle(bridge1To2Events[1]); inSequence(handleCalls);
-            oneOf(bridge2).handle(bridge1To2Events[2]); inSequence(handleCalls);
+            oneOf(bridge2).handle(bridge2To1Connector.get(), bridge1To2Events[0]); inSequence(handleCalls);
+            oneOf(bridge2).handle(bridge2To1Connector.get(), bridge1To2Events[1]); inSequence(handleCalls);
+            oneOf(bridge2).handle(bridge2To1Connector.get(), bridge1To2Events[2]); inSequence(handleCalls);
 
             // Bridge 2 -> Bridge 1 events
-            oneOf(bridge1).handle(bridge2To1Events[0]); inSequence(handleCalls);
-            oneOf(bridge1).handle(bridge2To1Events[1]); inSequence(handleCalls);
-            oneOf(bridge1).handle(bridge2To1Events[2]); inSequence(handleCalls);
+            oneOf(bridge1).handle(bridge1To2Connector, bridge2To1Events[0]); inSequence(handleCalls);
+            oneOf(bridge1).handle(bridge1To2Connector, bridge2To1Events[1]); inSequence(handleCalls);
+            oneOf(bridge1).handle(bridge1To2Connector, bridge2To1Events[2]); inSequence(handleCalls);
 
         }});
         // @formatter:on
-
-        bridge1To2Connector.start(bridge1);
 
         // Bridge 1 -> Bridge 2 events
         bridge1To2Connector.send(bridge1To2Events[0]);

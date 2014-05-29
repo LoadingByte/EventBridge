@@ -80,16 +80,17 @@ public class DefaultBridgeTest {
         bridge.setHandlerModule(handlerModule);
 
         final EmptyEvent1 event = new EmptyEvent1();
+        final BridgeConnector source = context.mock(BridgeConnector.class);
 
         // @formatter:off
         context.checking(new Expectations() {{
 
-            oneOf(handlerModule).handle(event);
+            oneOf(handlerModule).handle(source, event);
 
         }});
         // @formatter:on
 
-        bridge.handle(event);
+        bridge.handle(source, event);
     }
 
     @Test

@@ -32,7 +32,7 @@ public interface HandlerModule {
 
     /**
      * Returns the {@link Channel} which delivers {@link Event}s to the handler handle channel of the module.
-     * It is invoked by the {@link #handle(Event)} method.
+     * It is invoked by the {@link #handle(BridgeConnector, Event)} method.
      * The handler handle channel can be accessed with {@link #getHandlerHandleChannel()}.
      * 
      * @return The channel which delivers events to the handler handle channel.
@@ -51,9 +51,11 @@ public interface HandlerModule {
      * Sends the given {@link Event} through the handle channel ({@link #getHandlerHandleChannel()}).
      * That channel will deliver the event to all of the bridge's {@link EventHandler}s.
      * 
+     * @param source The {@link BridgeConnector} which received the event.
+     *        May be {@code null} if the handled event was sent from the same bridge which is handling it.
      * @param event The event that should be sent through the handle.
      */
-    public void handle(Event event);
+    public void handle(BridgeConnector source, Event event);
 
     /**
      * The interceptor which is used in the global handle channel of a {@link HandlerModule}.
@@ -66,9 +68,11 @@ public interface HandlerModule {
          * Intercepts the delivery process of the given {@link Event} to the handler handle channel.
          * 
          * @param invocation The {@link ChannelInvocation} object for the current invocation chain.
+         * @param source The {@link BridgeConnector} which received the event.
+         *        May be {@code null} if the handled event was sent from the same bridge which is handling it.
          * @param event The event which is delivered to the handler handle channel.
          */
-        public void handle(ChannelInvocation<GlobalHandleInterceptor> invocation, Event event);
+        public void handle(ChannelInvocation<GlobalHandleInterceptor> invocation, BridgeConnector source, Event event);
 
     }
 
@@ -83,10 +87,12 @@ public interface HandlerModule {
          * Intercepts the delivery process of the given {@link Event} to the given local {@link EventHandler} of a bridge.
          * 
          * @param invocation The {@link ChannelInvocation} object for the current invocation chain.
+         * @param source The {@link BridgeConnector} which received the event.
+         *        May be {@code null} if the handled event was sent from the same bridge which is handling it.
          * @param handler The local event handler the given event is delivered to.
          * @param event The event which is delivered to the given local handler.
          */
-        public void handle(ChannelInvocation<HandlerHandleInterceptor> invocation, EventHandler<?> handler, Event event);
+        public void handle(ChannelInvocation<HandlerHandleInterceptor> invocation, BridgeConnector source, EventHandler<?> handler, Event event);
 
     }
 

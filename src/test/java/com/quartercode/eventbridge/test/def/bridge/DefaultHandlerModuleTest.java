@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import com.quartercode.eventbridge.bridge.Bridge;
+import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.EventPredicate;
@@ -61,6 +62,8 @@ public class DefaultHandlerModuleTest {
     @Test
     public void testHandle() {
 
+        final BridgeConnector source = context.mock(BridgeConnector.class);
+
         final EmptyEvent1 regularEvent = new EmptyEvent1();
         final EmptyEvent2 otherEvent = new EmptyEvent2();
 
@@ -86,19 +89,19 @@ public class DefaultHandlerModuleTest {
 
             final Sequence handleChain = context.sequence("handleChain");
             // Correct event
-            oneOf(globalInterceptor).handle(with(any(ChannelInvocation.class)), with(regularEvent)); inSequence(handleChain);
-            oneOf(handlerInterceptor).handle(with(any(ChannelInvocation.class)), with(handler), with(regularEvent));
+            oneOf(globalInterceptor).handle(with(any(ChannelInvocation.class)), with(source), with(regularEvent)); inSequence(handleChain);
+            oneOf(handlerInterceptor).handle(with(any(ChannelInvocation.class)), with(source), with(handler), with(regularEvent));
             oneOf(handler).handle(regularEvent); inSequence(handleChain);
             // Other event
-            oneOf(globalInterceptor).handle(with(any(ChannelInvocation.class)), with(otherEvent)); inSequence(handleChain);
+            oneOf(globalInterceptor).handle(with(any(ChannelInvocation.class)), with(source), with(otherEvent)); inSequence(handleChain);
 
         }});
         // @formatter:on
 
-        handlerModule.handle(regularEvent);
+        handlerModule.handle(source, regularEvent);
 
         // Test with wrongly typed event
-        handlerModule.handle(otherEvent);
+        handlerModule.handle(source, otherEvent);
     }
 
     @SuppressWarnings ("unchecked")
@@ -130,7 +133,7 @@ public class DefaultHandlerModuleTest {
         // @formatter:on
 
         // Expect the HandlerModule to suppress the resulting ClassCastException
-        handlerModule.handle(new EmptyEvent1());
+        handlerModule.handle(null, new EmptyEvent1());
     }
 
     @SuppressWarnings ("unchecked")
@@ -163,7 +166,7 @@ public class DefaultHandlerModuleTest {
         // @formatter:on
 
         // Expect the HandlerModule to suppress the resulting ClassCastException
-        handlerModule.handle(new EmptyEvent1());
+        handlerModule.handle(null, new EmptyEvent1());
     }
 
 }

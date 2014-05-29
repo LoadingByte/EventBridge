@@ -81,9 +81,9 @@ public class DefaultBridge implements Bridge {
     }
 
     @Override
-    public void handle(Event event) {
+    public void handle(BridgeConnector source, Event event) {
 
-        handlerModule.handle(event);
+        handlerModule.handle(source, event);
     }
 
     @Override

@@ -81,7 +81,7 @@ public class DefaultSenderModuleTest {
             final Sequence sendChain = context.sequence("sendChain");
             oneOf(globalInterceptor).send(with(any(ChannelInvocation.class)), with(event)); inSequence(sendChain);
             oneOf(localHandlerInterceptor).send(with(any(ChannelInvocation.class)), with(event)); inSequence(sendChain);
-            oneOf(bridge).handle(event); inSequence(sendChain);
+            oneOf(bridge).handle(null, event); inSequence(sendChain);
             oneOf(connectorInterceptor).send(with(any(ChannelInvocation.class)), with(connector), with(event)); inSequence(sendChain);
             oneOf(connector).send(event); inSequence(sendChain);
 
@@ -106,7 +106,7 @@ public class DefaultSenderModuleTest {
 
             oneOf(connector).send(event);
                 will(throwException(new BridgeConnectorException(connector)));
-            allowing(bridge).handle(event);
+            allowing(bridge).handle(null, event);
 
         }});
         // @formatter:on
