@@ -37,6 +37,29 @@ import com.quartercode.eventbridge.bridge.SenderModule.ConnectorSendInterceptor;
 import com.quartercode.eventbridge.bridge.SenderModule.LocalHandlerSendInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 
+/**
+ * The acception predicate extension prevents all {@link Event}s, which the receiver {@link Bridge} does hot have any {@link EventHandler} for, from being sent.
+ * It can remove a lot of load from {@link BridgeConnector}s if many events are sent but not received. <br>
+ * <br>
+ * Since the acception predicate extension implements the mediator pattern, it can be added to a bridge as follows:
+ * 
+ * <pre>
+ * Bridge bridge = ...
+ * new AcceptionPredicateExtension(bridge);
+ * </pre>
+ * 
+ * Please note that the extension also can be removed from a bridge with the {@link #remove()} method:
+ * 
+ * <pre>
+ * Bridge bridge = ...
+ * AcceptionPredicateExtension extension = new AcceptionPredicateExtension(bridge);
+ * ...
+ * extension.remove();
+ * </pre>
+ * 
+ * @see Bridge
+ * @see BridgeConnector
+ */
 public class AcceptionPredicateExtension {
 
     private final Bridge                                        bridge;
@@ -48,6 +71,12 @@ public class AcceptionPredicateExtension {
 
     private final Map<BridgeConnector, List<EventPredicate<?>>> predicates                  = new HashMap<>();
 
+    /**
+     * Creates a new acception predicate extension and adds it to the given {@link Bridge}.
+     * See the {@link AcceptionPredicateExtension} javadoc for more details on how to use the extension.
+     * 
+     * @param bridge The bridge to add the extension to.
+     */
     public AcceptionPredicateExtension(Bridge bridge) {
 
         this.bridge = bridge;
@@ -66,6 +95,10 @@ public class AcceptionPredicateExtension {
         bridge.getSenderModule().getLocalHandlerSendChannel().addInterceptor(localHandlerSendInterceptor, 50);
     }
 
+    /**
+     * Removes the acception predicate extension from the {@link Bridge} it was added to.
+     * See the {@link AcceptionPredicateExtension} javadoc for more details on how to use the extension.
+     */
     public void remove() {
 
         bridge.removeModifyHandlerListListener(modifyHandlerListListener);
