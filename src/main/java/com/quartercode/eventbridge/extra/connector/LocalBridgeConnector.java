@@ -32,7 +32,6 @@ public class LocalBridgeConnector extends AbstractBridgeConnector {
 
     private Bridge               remoteBridge;
 
-    private Bridge               localBridge;
     private LocalBridgeConnector remoteConnector;
 
     /**
@@ -54,8 +53,6 @@ public class LocalBridgeConnector extends AbstractBridgeConnector {
     public void start(Bridge localBridge) throws BridgeConnectorException {
 
         super.start(localBridge);
-
-        this.localBridge = localBridge;
 
         // Connect the remote bridge to the local bridge (add reverse connection)
         if (remoteBridge != null) {
@@ -84,12 +81,12 @@ public class LocalBridgeConnector extends AbstractBridgeConnector {
 
     private void handle(Event event) {
 
-        localBridge.handle(this, event);
+        getLocalBridge().handle(this, event);
     }
 
     private void disconnect() throws BridgeConnectorException {
 
-        localBridge.removeConnector(this);
+        getLocalBridge().removeConnector(this);
     }
 
 }
