@@ -18,17 +18,31 @@
 
 package com.quartercode.eventbridge.basic;
 
-import com.quartercode.eventbridge.bridge.Event;
-import com.quartercode.eventbridge.bridge.EventPredicate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 /**
- * An abstract {@link EventPredicate} class which already implements the {@code hashCode()} etc. methods using reflection builders.
- * It may be used as superclass for all event predicates.
- * 
- * @param <T> The type of event that can be tested by the predicate.
+ * A class which implements the {@code hashCode()} etc. methods with reflection builders.
  */
-public abstract class EventPredicateBase<T extends Event> extends DataObjectBase implements EventPredicate<T> {
+class DataObjectBase {
 
-    private static final long serialVersionUID = -6826299068985666013L;
+    @Override
+    public int hashCode() {
+
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public String toString() {
+
+        return ToStringBuilder.reflectionToString(this);
+    }
 
 }

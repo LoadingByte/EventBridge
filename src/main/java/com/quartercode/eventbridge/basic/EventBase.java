@@ -18,35 +18,14 @@
 
 package com.quartercode.eventbridge.basic;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import com.quartercode.eventbridge.bridge.Event;
 
 /**
  * An abstract {@link Event} class which already implements the {@code hashCode()} etc. methods using reflection builders.
  * It may be used as superclass for all events.
  */
-public class EventBase implements Event {
+public class EventBase extends DataObjectBase implements Event {
 
-    private static final long serialVersionUID = -7767055228632075640L;
-
-    @Override
-    public int hashCode() {
-
-        return HashCodeBuilder.reflectionHashCode(this);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-
-        return EqualsBuilder.reflectionEquals(this, obj);
-    }
-
-    @Override
-    public String toString() {
-
-        return ToStringBuilder.reflectionToString(this);
-    }
+    private static final long serialVersionUID = 7910484113828284585L;
 
 }
