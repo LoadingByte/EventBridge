@@ -86,7 +86,14 @@ public class LocalBridgeConnector extends AbstractBridgeConnector {
 
     private void disconnect() throws BridgeConnectorException {
 
-        getLocalBridge().removeConnector(this);
+        if (!isStopped()) {
+            getLocalBridge().removeConnector(this);
+        }
+    }
+
+    private boolean isStopped() {
+
+        return getLocalBridge() == null;
     }
 
 }
