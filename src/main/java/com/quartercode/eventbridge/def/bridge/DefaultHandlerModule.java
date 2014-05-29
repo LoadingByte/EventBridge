@@ -19,6 +19,7 @@
 package com.quartercode.eventbridge.def.bridge;
 
 import org.apache.commons.lang3.tuple.Pair;
+import com.quartercode.eventbridge.basic.EventUtils;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;

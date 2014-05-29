@@ -36,9 +36,9 @@ import com.quartercode.eventbridge.bridge.HandlerModule.GlobalHandleInterceptor;
 import com.quartercode.eventbridge.bridge.HandlerModule.HandlerHandleInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.bridge.DefaultHandlerModule;
-import com.quartercode.eventbridge.test.def.bridge.DummyEvents.CallableEvent;
-import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent1;
-import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent2;
+import com.quartercode.eventbridge.test.DummyEvents.CallableEvent;
+import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
+import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent2;
 import com.quartercode.eventbridge.test.def.bridge.DummyInterceptors.DummyGlobalHandleInterceptor;
 import com.quartercode.eventbridge.test.def.bridge.DummyInterceptors.DummyHandlerHandleInterceptor;
 

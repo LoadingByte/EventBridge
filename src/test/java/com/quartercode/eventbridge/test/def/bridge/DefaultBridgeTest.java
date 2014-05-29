@@ -39,8 +39,8 @@ import com.quartercode.eventbridge.bridge.EventPredicate;
 import com.quartercode.eventbridge.bridge.HandlerModule;
 import com.quartercode.eventbridge.bridge.SenderModule;
 import com.quartercode.eventbridge.def.bridge.DefaultBridge;
-import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent1;
-import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent2;
+import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
+import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent2;
 
 public class DefaultBridgeTest {
 

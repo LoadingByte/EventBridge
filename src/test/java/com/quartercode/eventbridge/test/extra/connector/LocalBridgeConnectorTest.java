@@ -16,7 +16,7 @@
  * License along with EventBridge. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.quartercode.eventbridge.test.def.bridge.connector;
+package com.quartercode.eventbridge.test.extra.connector;
 
 import static org.junit.Assert.assertNotNull;
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,9 +31,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
-import com.quartercode.eventbridge.def.bridge.connector.LocalBridgeConnector;
-import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent1;
-import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent2;
+import com.quartercode.eventbridge.extra.connector.LocalBridgeConnector;
+import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
+import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent2;
 
 public class LocalBridgeConnectorTest {
 

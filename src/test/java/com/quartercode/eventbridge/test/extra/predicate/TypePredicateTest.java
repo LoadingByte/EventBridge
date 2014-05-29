@@ -16,7 +16,7 @@
  * License along with EventBridge. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.quartercode.eventbridge.test.def.bridge.predicate;
+package com.quartercode.eventbridge.test.extra.predicate;
 
 import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
@@ -27,11 +27,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import com.quartercode.eventbridge.bridge.Event;
-import com.quartercode.eventbridge.def.bridge.predicate.TypePredicate;
-import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent1;
-import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent2;
-import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent3Base;
-import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent3Extends2;
+import com.quartercode.eventbridge.extra.predicate.TypePredicate;
+import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
+import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent2;
+import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent3Base;
+import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent3Extends2;
 
 @RunWith (Parameterized.class)
 public class TypePredicateTest {

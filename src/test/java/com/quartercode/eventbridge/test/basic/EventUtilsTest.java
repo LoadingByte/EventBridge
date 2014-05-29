@@ -16,23 +16,17 @@
  * License along with EventBridge. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.quartercode.eventbridge.test.def.bridge;
+package com.quartercode.eventbridge.test.basic;
 
 import static org.junit.Assert.assertTrue;
-import org.junit.Before;
 import org.junit.Test;
+import com.quartercode.eventbridge.basic.EventUtils;
 import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.EventPredicate;
-import com.quartercode.eventbridge.def.bridge.EventUtils;
-import com.quartercode.eventbridge.test.def.bridge.DummyEvents.CallableEvent;
-import com.quartercode.eventbridge.test.def.bridge.DummyEvents.EmptyEvent1;
+import com.quartercode.eventbridge.test.DummyEvents.CallableEvent;
+import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
 
 public class EventUtilsTest {
-
-    @Before
-    public void setUp() {
-
-    }
 
     @Test
     public void testTryTest() {

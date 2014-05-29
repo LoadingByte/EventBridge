@@ -16,7 +16,7 @@
  * License along with EventBridge. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.quartercode.eventbridge.test.def.bridge.connector;
+package com.quartercode.eventbridge.test.extra.connector;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -27,7 +27,7 @@ import org.junit.Test;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
 import com.quartercode.eventbridge.bridge.Event;
-import com.quartercode.eventbridge.def.bridge.connector.AbstractBridgeConnector;
+import com.quartercode.eventbridge.extra.connector.AbstractBridgeConnector;
 
 public class AbstractBridgeConnectorTest {
 
