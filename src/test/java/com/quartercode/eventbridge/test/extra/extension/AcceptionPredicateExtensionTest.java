@@ -54,7 +54,7 @@ public class AcceptionPredicateExtensionTest {
     static {
 
         try {
-            APEVENT_TYPE = (Class<Event>) Class.forName(AcceptionPredicateExtension.class.getPackage().getName() + ".AcceptionPredicateEvent");
+            APEVENT_TYPE = (Class<Event>) Class.forName(AcceptionPredicateExtension.class.getName() + "$AcceptionPredicateEvent");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
+import com.quartercode.eventbridge.basic.EventBase;
 import com.quartercode.eventbridge.basic.EventUtils;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.Bridge.ModifyConnectorListListener;
@@ -198,6 +199,31 @@ public class AcceptionPredicateExtension {
             if (! (event instanceof AcceptionPredicateEvent)) {
                 invocation.next().send(invocation, event);
             }
+        }
+
+    }
+
+    private static class AcceptionPredicateEvent extends EventBase {
+
+        private static final long         serialVersionUID = -8927162777505255022L;
+
+        private final EventPredicate<?>[] predicates;
+        private final boolean             add;
+
+        private AcceptionPredicateEvent(EventPredicate<?>[] predicates, boolean add) {
+
+            this.predicates = predicates.clone();
+            this.add = add;
+        }
+
+        private EventPredicate<?>[] getPredicates() {
+
+            return predicates.clone();
+        }
+
+        private boolean isAdd() {
+
+            return add;
         }
 
     }
