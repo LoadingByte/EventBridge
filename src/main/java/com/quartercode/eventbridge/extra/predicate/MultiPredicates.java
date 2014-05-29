@@ -18,9 +18,7 @@
 
 package com.quartercode.eventbridge.extra.predicate;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import com.quartercode.eventbridge.basic.EventPredicateBase;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventPredicate;
 
@@ -71,9 +69,9 @@ public class MultiPredicates {
 
     }
 
-    private static class OrPredicate<T extends Event> implements EventPredicate<T> {
+    private static class OrPredicate<T extends Event> extends EventPredicateBase<T> {
 
-        private static final long                 serialVersionUID = -4884575813348736033L;
+        private static final long                 serialVersionUID = 1410835432952767299L;
 
         private final EventPredicate<? super T>[] predicates;
 
@@ -94,29 +92,11 @@ public class MultiPredicates {
             return false;
         }
 
-        @Override
-        public int hashCode() {
-
-            return HashCodeBuilder.reflectionHashCode(this);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-
-            return EqualsBuilder.reflectionEquals(this, obj);
-        }
-
-        @Override
-        public String toString() {
-
-            return ToStringBuilder.reflectionToString(this);
-        }
-
     }
 
-    private static class AndPredicate<T extends Event> implements EventPredicate<T> {
+    private static class AndPredicate<T extends Event> extends EventPredicateBase<T> {
 
-        private static final long                 serialVersionUID = -8399320733553421090L;
+        private static final long                 serialVersionUID = 1131743560690967264L;
 
         private final EventPredicate<? super T>[] predicates;
 
@@ -135,24 +115,6 @@ public class MultiPredicates {
             }
 
             return true;
-        }
-
-        @Override
-        public int hashCode() {
-
-            return HashCodeBuilder.reflectionHashCode(this);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-
-            return EqualsBuilder.reflectionEquals(this, obj);
-        }
-
-        @Override
-        public String toString() {
-
-            return ToStringBuilder.reflectionToString(this);
         }
 
     }

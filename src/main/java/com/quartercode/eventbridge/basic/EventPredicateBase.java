@@ -16,38 +16,40 @@
  * License along with EventBridge. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.quartercode.eventbridge.extra.predicate;
+package com.quartercode.eventbridge.basic;
 
-import com.quartercode.eventbridge.basic.EventPredicateBase;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventPredicate;
 
 /**
- * The type predicate checks whether an event is and instance of a known type.
+ * An abstract {@link EventPredicate} class which already implements the {@code hashCode()} etc. methods using reflection builders.
+ * It may be used as superclass for all event predicates.
  * 
  * @param <T> The type of event that can be tested by the predicate.
- * @see EventPredicate
  */
-public class TypePredicate<T extends Event> extends EventPredicateBase<T> {
+public abstract class EventPredicateBase<T extends Event> implements EventPredicate<T> {
 
-    private static final long        serialVersionUID = -9167731433174822281L;
+    private static final long serialVersionUID = -6826299068985666013L;
 
-    private final Class<? extends T> type;
+    @Override
+    public int hashCode() {
 
-    /**
-     * Creates a new type predicate which uses the given type for testing incoming events.
-     * 
-     * @param type The type (class object) to use for the test.
-     */
-    public TypePredicate(Class<? extends T> type) {
-
-        this.type = type;
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
-    public boolean test(T event) {
+    public boolean equals(Object obj) {
 
-        return type.isInstance(event);
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    @Override
+    public String toString() {
+
+        return ToStringBuilder.reflectionToString(this);
     }
 
 }
