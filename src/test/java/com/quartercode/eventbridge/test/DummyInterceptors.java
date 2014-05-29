@@ -16,7 +16,7 @@
  * License along with EventBridge. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.quartercode.eventbridge.test.def.bridge;
+package com.quartercode.eventbridge.test;
 
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.Event;
@@ -48,7 +48,7 @@ public class DummyInterceptors {
 
     }
 
-    static class DummyHandlerHandleInterceptor implements HandlerHandleInterceptor {
+    public static class DummyHandlerHandleInterceptor implements HandlerHandleInterceptor {
 
         private final HandlerHandleInterceptor dummy;
 

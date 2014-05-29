@@ -36,9 +36,9 @@ import com.quartercode.eventbridge.bridge.SenderModule.LocalHandlerSendIntercept
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.bridge.DefaultSenderModule;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
-import com.quartercode.eventbridge.test.def.bridge.DummyInterceptors.DummyConnectorSendInterceptor;
-import com.quartercode.eventbridge.test.def.bridge.DummyInterceptors.DummyGlobalSendInterceptor;
-import com.quartercode.eventbridge.test.def.bridge.DummyInterceptors.DummyLocalHandlerSendInterceptor;
+import com.quartercode.eventbridge.test.DummyInterceptors.DummyConnectorSendInterceptor;
+import com.quartercode.eventbridge.test.DummyInterceptors.DummyGlobalSendInterceptor;
+import com.quartercode.eventbridge.test.DummyInterceptors.DummyLocalHandlerSendInterceptor;
 
 public class DefaultSenderModuleTest {
 

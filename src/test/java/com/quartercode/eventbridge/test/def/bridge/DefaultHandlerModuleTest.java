@@ -40,8 +40,8 @@ import com.quartercode.eventbridge.def.bridge.DefaultHandlerModule;
 import com.quartercode.eventbridge.test.DummyEvents.CallableEvent;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent2;
-import com.quartercode.eventbridge.test.def.bridge.DummyInterceptors.DummyGlobalHandleInterceptor;
-import com.quartercode.eventbridge.test.def.bridge.DummyInterceptors.DummyHandlerHandleInterceptor;
+import com.quartercode.eventbridge.test.DummyInterceptors.DummyGlobalHandleInterceptor;
+import com.quartercode.eventbridge.test.DummyInterceptors.DummyHandlerHandleInterceptor;
 
 public class DefaultHandlerModuleTest {
 
