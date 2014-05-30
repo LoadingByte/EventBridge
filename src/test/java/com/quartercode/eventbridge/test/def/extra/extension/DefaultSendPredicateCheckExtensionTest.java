@@ -105,7 +105,7 @@ public class DefaultSendPredicateCheckExtensionTest {
         }});
         // @formatter:on
 
-        // Install the send predicate check extensions to both bridges
+        // Install the send predicate check extensions on both bridges
         bridge1Extension = new DefaultSendPredicateCheckExtension();
         bridge2Extension = new DefaultSendPredicateCheckExtension();
         bridge3Extension = new DefaultSendPredicateCheckExtension();

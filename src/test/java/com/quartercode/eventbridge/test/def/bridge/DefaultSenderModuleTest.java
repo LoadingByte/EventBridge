@@ -29,7 +29,6 @@ import org.junit.Test;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
-import com.quartercode.eventbridge.bridge.SenderModule;
 import com.quartercode.eventbridge.bridge.SenderModule.ConnectorSendInterceptor;
 import com.quartercode.eventbridge.bridge.SenderModule.GlobalSendInterceptor;
 import com.quartercode.eventbridge.bridge.SenderModule.LocalHandlerSendInterceptor;
@@ -43,11 +42,11 @@ import com.quartercode.eventbridge.test.DummyInterceptors.DummyLocalHandlerSendI
 public class DefaultSenderModuleTest {
 
     @Rule
-    public JUnitRuleMockery context = new JUnitRuleMockery();
+    public JUnitRuleMockery     context = new JUnitRuleMockery();
 
     @Mock
-    private Bridge          bridge;
-    private SenderModule    senderModule;
+    private Bridge              bridge;
+    private DefaultSenderModule senderModule;
 
     @Before
     public void setUp() {

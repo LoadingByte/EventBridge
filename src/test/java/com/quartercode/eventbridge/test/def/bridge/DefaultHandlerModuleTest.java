@@ -31,7 +31,6 @@ import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.EventPredicate;
-import com.quartercode.eventbridge.bridge.HandlerModule;
 import com.quartercode.eventbridge.bridge.HandlerModule.GlobalHandleInterceptor;
 import com.quartercode.eventbridge.bridge.HandlerModule.HandlerHandleInterceptor;
 import com.quartercode.eventbridge.bridge.HandlerModule.ModifyHandlerListListener;
@@ -46,9 +45,9 @@ import com.quartercode.eventbridge.test.DummyInterceptors.DummyHandlerHandleInte
 public class DefaultHandlerModuleTest {
 
     @Rule
-    public JUnitRuleMockery context = new JUnitRuleMockery();
+    public JUnitRuleMockery      context = new JUnitRuleMockery();
 
-    private HandlerModule   handlerModule;
+    private DefaultHandlerModule handlerModule;
 
     @Before
     public void setUp() {

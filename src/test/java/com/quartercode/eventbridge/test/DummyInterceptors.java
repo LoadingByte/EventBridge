@@ -30,42 +30,6 @@ import com.quartercode.eventbridge.channel.ChannelInvocation;
 
 public class DummyInterceptors {
 
-    public static class DummyGlobalHandleInterceptor implements GlobalHandleInterceptor {
-
-        private final GlobalHandleInterceptor dummy;
-
-        public DummyGlobalHandleInterceptor(GlobalHandleInterceptor dummy) {
-
-            this.dummy = dummy;
-        }
-
-        @Override
-        public void handle(ChannelInvocation<GlobalHandleInterceptor> invocation, BridgeConnector source, Event event) {
-
-            dummy.handle(invocation, source, event);
-            invocation.next().handle(invocation, source, event);
-        }
-
-    }
-
-    public static class DummyHandlerHandleInterceptor implements HandlerHandleInterceptor {
-
-        private final HandlerHandleInterceptor dummy;
-
-        public DummyHandlerHandleInterceptor(HandlerHandleInterceptor dummy) {
-
-            this.dummy = dummy;
-        }
-
-        @Override
-        public void handle(ChannelInvocation<HandlerHandleInterceptor> invocation, BridgeConnector source, EventHandler<?> handler, Event event) {
-
-            dummy.handle(invocation, source, handler, event);
-            invocation.next().handle(invocation, source, handler, event);
-        }
-
-    }
-
     public static class DummyGlobalSendInterceptor implements GlobalSendInterceptor {
 
         private final GlobalSendInterceptor dummy;
@@ -116,6 +80,42 @@ public class DummyInterceptors {
 
             dummy.send(invocation, connector, event);
             invocation.next().send(invocation, connector, event);
+        }
+
+    }
+
+    public static class DummyGlobalHandleInterceptor implements GlobalHandleInterceptor {
+
+        private final GlobalHandleInterceptor dummy;
+
+        public DummyGlobalHandleInterceptor(GlobalHandleInterceptor dummy) {
+
+            this.dummy = dummy;
+        }
+
+        @Override
+        public void handle(ChannelInvocation<GlobalHandleInterceptor> invocation, BridgeConnector source, Event event) {
+
+            dummy.handle(invocation, source, event);
+            invocation.next().handle(invocation, source, event);
+        }
+
+    }
+
+    public static class DummyHandlerHandleInterceptor implements HandlerHandleInterceptor {
+
+        private final HandlerHandleInterceptor dummy;
+
+        public DummyHandlerHandleInterceptor(HandlerHandleInterceptor dummy) {
+
+            this.dummy = dummy;
+        }
+
+        @Override
+        public void handle(ChannelInvocation<HandlerHandleInterceptor> invocation, BridgeConnector source, EventHandler<?> handler, Event event) {
+
+            dummy.handle(invocation, source, handler, event);
+            invocation.next().handle(invocation, source, handler, event);
         }
 
     }
