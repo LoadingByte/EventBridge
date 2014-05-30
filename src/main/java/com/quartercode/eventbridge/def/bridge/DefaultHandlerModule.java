@@ -42,12 +42,12 @@ import com.quartercode.eventbridge.def.channel.DefaultChannel;
  */
 public class DefaultHandlerModule extends AbstractBridgeModule implements HandlerModule {
 
+    private final Channel<GlobalHandleInterceptor>        globalHandleChannel        = new DefaultChannel<>(GlobalHandleInterceptor.class);
+    private final Channel<HandlerHandleInterceptor>       handlerHandleChannel       = new DefaultChannel<>(HandlerHandleInterceptor.class);
+
     private final Map<EventHandler<?>, EventPredicate<?>> handlers                   = new ConcurrentHashMap<>();
     private final List<ModifyHandlerListListener>         modifyHandlerListListeners = new ArrayList<>();
     private Map<EventHandler<?>, EventPredicate<?>>       handlersUnmodifiableCache;
-
-    private final Channel<GlobalHandleInterceptor>        globalHandleChannel        = new DefaultChannel<>(GlobalHandleInterceptor.class);
-    private final Channel<HandlerHandleInterceptor>       handlerHandleChannel       = new DefaultChannel<>(HandlerHandleInterceptor.class);
 
     /**
      * Creates a new default sender module.
