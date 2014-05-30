@@ -155,11 +155,11 @@ public class DefaultSendPredicateCheckExtensionTest {
 
     private void removeExtensions() {
 
-        bridge1Extension.remove();
+        bridge1.removeModule(bridge1Extension);
         bridge1Extension = null;
-        bridge2Extension.remove();
+        bridge2.removeModule(bridge2Extension);
         bridge2Extension = null;
-        bridge3Extension.remove();
+        bridge3.removeModule(bridge3Extension);
         bridge3Extension = null;
     }
 
