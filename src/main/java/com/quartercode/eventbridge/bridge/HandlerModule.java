@@ -18,8 +18,7 @@
 
 package com.quartercode.eventbridge.bridge;
 
-import java.util.List;
-import org.apache.commons.lang3.tuple.Pair;
+import java.util.Map;
 import com.quartercode.eventbridge.channel.Channel;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 
@@ -38,7 +37,7 @@ public interface HandlerModule extends BridgeModule {
      * 
      * @return The event handlers that are listening on the handle module.
      */
-    public List<Pair<EventHandler<?>, EventPredicate<?>>> getHandlers();
+    public Map<EventHandler<?>, EventPredicate<?>> getHandlers();
 
     /**
      * Adds the given {@link EventHandler} to handle module.

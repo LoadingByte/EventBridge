@@ -19,9 +19,11 @@
 package com.quartercode.eventbridge.def.extra.extension;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.apache.commons.lang3.tuple.Pair;
 import com.quartercode.eventbridge.basic.AbstractBridgeModule;
 import com.quartercode.eventbridge.basic.EventBase;
@@ -116,14 +118,10 @@ public class DefaultSendPredicateCheckExtension extends AbstractBridgeModule imp
         @Override
         public void onAddConnector(BridgeConnector connector, Bridge bridge) {
 
-            List<Pair<EventHandler<?>, EventPredicate<?>>> handlers = bridge.getModule(HandlerModule.class).getHandlers();
+            Collection<EventPredicate<?>> predicateCollection = bridge.getModule(HandlerModule.class).getHandlers().values();
+            EventPredicate<?>[] predicateArray = predicateCollection.toArray(new EventPredicate<?>[predicateCollection.size()]);
 
-            EventPredicate<?>[] handlerPredicates = new EventPredicate[handlers.size()];
-            for (int index = 0; index < handlerPredicates.length; index++) {
-                handlerPredicates[index] = handlers.get(index).getRight();
-            }
-
-            bridge.send(new SetPredicatesEvent(handlerPredicates, true));
+            bridge.send(new SetPredicatesEvent(predicateArray, true));
         }
 
         @Override

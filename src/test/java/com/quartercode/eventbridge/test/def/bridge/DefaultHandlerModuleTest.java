@@ -18,7 +18,7 @@
 
 package com.quartercode.eventbridge.test.def.bridge;
 
-import static com.quartercode.eventbridge.test.ExtraAssert.assertListEquals;
+import static com.quartercode.eventbridge.test.ExtraAssert.assertMapEquals;
 import static org.junit.Assert.assertTrue;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jmock.Expectations;
@@ -77,44 +77,26 @@ public class DefaultHandlerModuleTest {
         assertHandlerListEmpty();
 
         handlerModule.addHandler(handler1, predicate1);
-        assertListEquals("Handlers that are stored inside the bridge are not correct", handlerModule.getHandlers(), pair1);
-        assertListEquals("Handlers that are stored inside the bridge changed on the second retrieval", handlerModule.getHandlers(), pair1);
+        assertMapEquals("Handlers that are stored inside the bridge are not correct", handlerModule.getHandlers(), pair1);
+        assertMapEquals("Handlers that are stored inside the bridge changed on the second retrieval", handlerModule.getHandlers(), pair1);
 
         handlerModule.addHandler(handler2, predicate2);
-        assertListEquals("Handlers that are stored inside the bridge are not correct", handlerModule.getHandlers(), pair1, pair2);
-        assertListEquals("Handlers that are stored inside the bridge changed on the second retrieval", handlerModule.getHandlers(), pair1, pair2);
+        assertMapEquals("Handlers that are stored inside the bridge are not correct", handlerModule.getHandlers(), pair1, pair2);
+        assertMapEquals("Handlers that are stored inside the bridge changed on the second retrieval", handlerModule.getHandlers(), pair1, pair2);
 
         handlerModule.addHandler(handler3, predicate3);
-        assertListEquals("Handlers that are stored inside the bridge are not correct", handlerModule.getHandlers(), pair1, pair2, pair3);
-        assertListEquals("Handlers that are stored inside the bridge changed on the second retrieval", handlerModule.getHandlers(), pair1, pair2, pair3);
+        assertMapEquals("Handlers that are stored inside the bridge are not correct", handlerModule.getHandlers(), pair1, pair2, pair3);
+        assertMapEquals("Handlers that are stored inside the bridge changed on the second retrieval", handlerModule.getHandlers(), pair1, pair2, pair3);
 
         handlerModule.removeHandler(handler2);
-        assertListEquals("Handlers that are stored inside the bridge are not correct", handlerModule.getHandlers(), pair1, pair3);
-        assertListEquals("Handlers that are stored inside the bridge changed on the second retrieval", handlerModule.getHandlers(), pair1, pair3);
+        assertMapEquals("Handlers that are stored inside the bridge are not correct", handlerModule.getHandlers(), pair1, pair3);
+        assertMapEquals("Handlers that are stored inside the bridge changed on the second retrieval", handlerModule.getHandlers(), pair1, pair3);
     }
 
     private void assertHandlerListEmpty() {
 
         assertTrue("There are handlers stored inside the bridge although none were added", handlerModule.getHandlers().isEmpty());
         assertTrue("Handlers that are stored inside the bridge changed on the second retrieval", handlerModule.getHandlers().isEmpty());
-    }
-
-    @SuppressWarnings ("unchecked")
-    @Test
-    public void testHandlerStorageRemoveUncheckedCast() {
-
-        EventHandler<EmptyEvent1> handler1 = new EqualsAllHandler<>();
-        EventPredicate<EmptyEvent1> predicate1 = context.mock(EventPredicate.class);
-        EqualsAllHandler<EmptyEvent2> handler2 = new EqualsAllHandler<>();
-
-        // Add handler 1 with type parameter TestEvent1
-        handlerModule.addHandler(handler1, predicate1);
-
-        // Remove handler 2 with type parameter TestEvent2
-        // Note that handler 2 is equal to handler 1 while having a different type parameter
-        handlerModule.removeHandler(handler2);
-
-        assertTrue("Handler 1 wasn't removed", handlerModule.getHandlers().isEmpty());
     }
 
     @SuppressWarnings ("unchecked")
@@ -242,22 +224,6 @@ public class DefaultHandlerModuleTest {
 
         // Expect the HandlerModule to suppress the resulting ClassCastException
         handlerModule.handle(null, new EmptyEvent1());
-    }
-
-    private static class EqualsAllHandler<T extends Event> implements EventHandler<T> {
-
-        @Override
-        public boolean equals(Object obj) {
-
-            return true;
-        }
-
-        @Override
-        public void handle(T event) {
-
-            // Not used
-        }
-
     }
 
 }

@@ -21,8 +21,9 @@ package com.quartercode.eventbridge.def.bridge;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import org.apache.commons.lang3.tuple.Pair;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import com.quartercode.eventbridge.basic.AbstractBridgeModule;
 import com.quartercode.eventbridge.basic.EventUtils;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
@@ -41,12 +42,12 @@ import com.quartercode.eventbridge.def.channel.DefaultChannel;
  */
 public class DefaultHandlerModule extends AbstractBridgeModule implements HandlerModule {
 
-    private final List<Pair<EventHandler<?>, EventPredicate<?>>> handlers                   = new CopyOnWriteArrayList<>();
-    private final List<ModifyHandlerListListener>                modifyHandlerListListeners = new ArrayList<>();
-    private List<Pair<EventHandler<?>, EventPredicate<?>>>       handlersUnmodifiableCache;
+    private final Map<EventHandler<?>, EventPredicate<?>> handlers                   = new ConcurrentHashMap<>();
+    private final List<ModifyHandlerListListener>         modifyHandlerListListeners = new ArrayList<>();
+    private Map<EventHandler<?>, EventPredicate<?>>       handlersUnmodifiableCache;
 
-    private final Channel<GlobalHandleInterceptor>               globalHandleChannel        = new DefaultChannel<>(GlobalHandleInterceptor.class);
-    private final Channel<HandlerHandleInterceptor>              handlerHandleChannel       = new DefaultChannel<>(HandlerHandleInterceptor.class);
+    private final Channel<GlobalHandleInterceptor>        globalHandleChannel        = new DefaultChannel<>(GlobalHandleInterceptor.class);
+    private final Channel<HandlerHandleInterceptor>       handlerHandleChannel       = new DefaultChannel<>(HandlerHandleInterceptor.class);
 
     /**
      * Creates a new default sender module.
@@ -58,10 +59,10 @@ public class DefaultHandlerModule extends AbstractBridgeModule implements Handle
     }
 
     @Override
-    public List<Pair<EventHandler<?>, EventPredicate<?>>> getHandlers() {
+    public Map<EventHandler<?>, EventPredicate<?>> getHandlers() {
 
         if (handlersUnmodifiableCache == null) {
-            handlersUnmodifiableCache = Collections.unmodifiableList(handlers);
+            handlersUnmodifiableCache = Collections.unmodifiableMap(handlers);
         }
 
         return handlersUnmodifiableCache;
@@ -70,7 +71,7 @@ public class DefaultHandlerModule extends AbstractBridgeModule implements Handle
     @Override
     public void addHandler(EventHandler<?> handler, EventPredicate<?> predicate) {
 
-        handlers.add(Pair.<EventHandler<?>, EventPredicate<?>> of(handler, predicate));
+        handlers.put(handler, predicate);
         handlersUnmodifiableCache = null;
 
         for (ModifyHandlerListListener listener : modifyHandlerListListeners) {
@@ -81,25 +82,16 @@ public class DefaultHandlerModule extends AbstractBridgeModule implements Handle
     @Override
     public void removeHandler(EventHandler<?> handler) {
 
-        Pair<EventHandler<?>, EventPredicate<?>> pair = null;
-        for (Pair<EventHandler<?>, EventPredicate<?>> testPair : handlers) {
-            if (testPair.getLeft().equals(handler)) {
-                pair = testPair;
-                break;
-            }
-        }
-
-        if (pair != null) {
+        if (handlers.containsKey(handler)) {
             if (!modifyHandlerListListeners.isEmpty()) {
+                EventPredicate<?> predicate = handlers.get(handler);
                 for (ModifyHandlerListListener listener : modifyHandlerListListeners) {
-                    listener.onRemoveHandler(pair.getLeft(), pair.getRight(), this);
+                    listener.onRemoveHandler(handler, predicate, this);
                 }
             }
 
-            handlers.remove(pair);
+            handlers.remove(handler);
             handlersUnmodifiableCache = null;
-
-            return;
         }
     }
 
@@ -139,9 +131,9 @@ public class DefaultHandlerModule extends AbstractBridgeModule implements Handle
         @Override
         public void handle(ChannelInvocation<GlobalHandleInterceptor> invocation, BridgeConnector source, Event event) {
 
-            for (Pair<EventHandler<?>, EventPredicate<?>> handler : handlers) {
-                if (EventUtils.tryTest(handler.getRight(), event)) {
-                    invokeHandlerHandleChannel(source, handler.getLeft(), event);
+            for (Entry<EventHandler<?>, EventPredicate<?>> handler : handlers.entrySet()) {
+                if (EventUtils.tryTest(handler.getValue(), event)) {
+                    invokeHandlerHandleChannel(source, handler.getKey(), event);
                 }
             }
 

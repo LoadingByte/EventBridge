@@ -19,8 +19,11 @@
 package com.quartercode.eventbridge.test;
 
 import static org.junit.Assert.assertTrue;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class ExtraAssert {
 
@@ -30,6 +33,19 @@ public class ExtraAssert {
 
         for (int index = 0; index < list.size(); index++) {
             assertTrue(message, Objects.equals(elements[index], list.get(index)));
+        }
+    }
+
+    public static void assertMapEquals(String message, Map<?, ?> map, Pair<?, ?>... entries) {
+
+        assertTrue(message, map.size() == entries.length);
+
+        Map<?, ?> mapClone = new HashMap<>(map);
+        for (Pair<?, ?> expectedEntry : entries) {
+            Object actualValue = mapClone.get(expectedEntry.getKey());
+            assertTrue(message, Objects.equals(expectedEntry.getValue(), actualValue));
+
+            mapClone.remove(expectedEntry.getKey());
         }
     }
 
