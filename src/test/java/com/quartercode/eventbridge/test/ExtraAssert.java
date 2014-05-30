@@ -18,18 +18,18 @@
 
 package com.quartercode.eventbridge.test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.List;
+import java.util.Objects;
 
 public class ExtraAssert {
 
-    public static void assertListEquals(String message, List<?> collection, Object... elements) {
+    public static void assertListEquals(String message, List<?> list, Object... elements) {
 
-        assertTrue(message, collection.size() == elements.length);
+        assertTrue(message, list.size() == elements.length);
 
-        for (int index = 0; index < collection.size(); index++) {
-            assertEquals(message, elements[index], collection.get(index));
+        for (int index = 0; index < list.size(); index++) {
+            assertTrue(message, Objects.equals(elements[index], list.get(index)));
         }
     }
 
