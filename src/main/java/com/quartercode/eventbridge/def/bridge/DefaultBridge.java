@@ -225,7 +225,13 @@ public class DefaultBridge implements Bridge {
         connectors.add(connector);
         connectorsUnmodifiableCache = null;
 
-        connector.start(this);
+        try {
+            connector.start(this);
+        } catch (BridgeConnectorException e) {
+            connectors.remove(connector);
+            connectorsUnmodifiableCache = null;
+            throw e;
+        }
 
         for (ModifyConnectorListListener listener : modifyConnectorListListeners) {
             listener.onAddConnector(connector, this);
@@ -239,10 +245,12 @@ public class DefaultBridge implements Bridge {
             listener.onRemoveConnector(connector, this);
         }
 
-        connector.stop();
-
-        connectors.remove(connector);
-        connectorsUnmodifiableCache = null;
+        try {
+            connector.stop();
+        } finally {
+            connectors.remove(connector);
+            connectorsUnmodifiableCache = null;
+        }
     }
 
     @Override
