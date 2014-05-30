@@ -369,6 +369,51 @@ public class DefaultBridgeTest {
         assertListEquals("Connectors that are stored inside the bridge changed on the second retrieval", bridge.getConnectors(), connector2);
     }
 
+    @Test (expected = BridgeConnectorException.class)
+    public void testConnectorStorageAddErrors() throws BridgeConnectorException {
+
+        final BridgeConnector connector = context.mock(BridgeConnector.class, "connector");
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            oneOf(connector).start(bridge);
+                will(throwException(new BridgeConnectorException(connector)));
+
+        }});
+        // @formatter:on
+
+        try {
+            bridge.addConnector(connector);
+        } finally {
+            assertTrue("Bridge connector which threw an error during adding was nevertheless added", bridge.getConnectors().isEmpty());
+        }
+    }
+
+    @Test (expected = BridgeConnectorException.class)
+    public void testConnectorStorageRemoveErrors() throws BridgeConnectorException {
+
+        final BridgeConnector connector = context.mock(BridgeConnector.class, "connector");
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            oneOf(connector).start(bridge);
+            oneOf(connector).stop();
+                will(throwException(new BridgeConnectorException(connector)));
+
+        }});
+        // @formatter:on
+
+        bridge.addConnector(connector);
+
+        try {
+            bridge.removeConnector(connector);
+        } finally {
+            assertTrue("Bridge connector which threw an error during removal wasn't actually removed", bridge.getConnectors().isEmpty());
+        }
+    }
+
     @Test
     public void testConnectorStorageListeners() throws BridgeConnectorException {
 
