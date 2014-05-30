@@ -16,7 +16,7 @@
  * License along with EventBridge. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.quartercode.eventbridge.test.extra.connector;
+package com.quartercode.eventbridge.test.basic;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
