@@ -16,36 +16,56 @@
  * License along with EventBridge. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.quartercode.eventbridge.def.bridge;
+package com.quartercode.eventbridge.basic;
 
 import com.quartercode.eventbridge.bridge.Bridge;
+import com.quartercode.eventbridge.bridge.BridgeModule;
 
 /**
  * Bridge module base is the base class for all modules of a {@link Bridge}.
  * Basically, bridge modules are just classes which store bridge functionality outside the main bridge class.
+ * 
+ * @see BridgeModule
  */
-class BridgeModuleBase {
+public abstract class AbstractBridgeModule implements BridgeModule {
 
-    private final Bridge parent;
+    private Bridge  bridge;
+    private boolean consumed;
 
     /**
-     * Creates a new bridge module base object.
-     * 
-     * @param parent The parent {@link Bridge} that uses the module.
+     * Creates a new abstract bridge module.
      */
-    protected BridgeModuleBase(Bridge parent) {
+    public AbstractBridgeModule() {
 
-        this.parent = parent;
     }
 
-    /**
-     * Returns the parent {@link Bridge} that uses the module object.
-     * 
-     * @return The bridge that uses the module.
-     */
-    protected Bridge getParent() {
+    @Override
+    public Bridge getBridge() {
 
-        return parent;
+        return bridge;
+    }
+
+    @Override
+    public void add(Bridge bridge) {
+
+        if (consumed) {
+            throw new IllegalStateException("Bridge module was already consumed (added and removed)");
+        } else if (this.bridge != null) {
+            throw new IllegalStateException("Can't add bridge module: Already used by another bridge");
+        }
+
+        this.bridge = bridge;
+    }
+
+    @Override
+    public void remove() {
+
+        if (bridge == null) {
+            throw new IllegalStateException("Can't remove bridge module: Not used by any bridge");
+        }
+
+        bridge = null;
+        consumed = true;
     }
 
 }
