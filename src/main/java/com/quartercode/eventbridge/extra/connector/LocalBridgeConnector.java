@@ -18,6 +18,7 @@
 
 package com.quartercode.eventbridge.extra.connector;
 
+import com.quartercode.eventbridge.basic.AbstractBridgeConnector;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;

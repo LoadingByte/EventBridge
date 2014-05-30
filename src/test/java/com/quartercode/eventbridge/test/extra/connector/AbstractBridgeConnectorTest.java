@@ -24,10 +24,10 @@ import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import com.quartercode.eventbridge.basic.AbstractBridgeConnector;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
 import com.quartercode.eventbridge.bridge.Event;
-import com.quartercode.eventbridge.extra.connector.AbstractBridgeConnector;
 
 public class AbstractBridgeConnectorTest {
 
