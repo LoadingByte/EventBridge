@@ -18,8 +18,7 @@
 
 package com.quartercode.eventbridge.test.def.bridge;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jmock.Expectations;
@@ -33,6 +32,7 @@ import com.quartercode.eventbridge.bridge.Bridge.ModifyConnectorListListener;
 import com.quartercode.eventbridge.bridge.Bridge.ModifyHandlerListListener;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
+import com.quartercode.eventbridge.bridge.BridgeModule;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.EventPredicate;
@@ -62,6 +62,134 @@ public class DefaultBridgeTest {
     public void setUp() {
 
         bridge = new DefaultBridge();
+    }
+
+    @Test
+    public void testAddModule() {
+
+        final BridgeModule1 module = context.mock(BridgeModule1.class);
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            oneOf(module).add(bridge);
+
+        }});
+        // @formatter:on
+
+        bridge.addModule(module);
+
+        assertEquals("Retrieved bridge module (by interface)", module, bridge.getModule(BridgeModule1.class));
+        assertEquals("Retrieved bridge module (by class)", module, bridge.getModule(module.getClass()));
+    }
+
+    @Test (expected = NullPointerException.class)
+    public void testAddNullModule() {
+
+        bridge.addModule(null);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void testAddModuleTypeTwice() {
+
+        final BridgeModule1 module1 = context.mock(BridgeModule1.class, "module1");
+        BridgeModule1 module2 = context.mock(BridgeModule1.class, "module2");
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            oneOf(module1).add(bridge);
+
+        }});
+        // @formatter:on
+
+        bridge.addModule(module1);
+        bridge.addModule(module2);
+    }
+
+    @Test
+    public void testAddMultipleModules() {
+
+        final BridgeModule module1 = context.mock(BridgeModule1.class);
+        final BridgeModule module2 = context.mock(BridgeModule2.class);
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            final Sequence moduleCalls = context.sequence("moduleCalls");
+
+            oneOf(module1).add(bridge); inSequence(moduleCalls);
+            oneOf(module2).add(bridge); inSequence(moduleCalls);
+
+        }});
+        // @formatter:on
+
+        bridge.addModule(module1);
+        bridge.addModule(module2);
+
+        assertEquals("Retrieved bridge module", module1, bridge.getModule(BridgeModule1.class));
+        assertEquals("Retrieved bridge module", module2, bridge.getModule(BridgeModule2.class));
+    }
+
+    @Test
+    public void testRemoveModule() {
+
+        final BridgeModule module = context.mock(BridgeModule.class);
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            final Sequence moduleCalls = context.sequence("moduleCalls");
+
+            oneOf(module).add(bridge); inSequence(moduleCalls);
+            oneOf(module).remove(); inSequence(moduleCalls);
+
+        }});
+        // @formatter:on
+
+        bridge.addModule(module);
+        bridge.removeModule(module);
+    }
+
+    @Test
+    public void testRemoveUnknownModules() {
+
+        BridgeModule module = context.mock(BridgeModule1.class);
+
+        assertNull("Bridge module exists although it wasn't added", bridge.getModule(BridgeModule1.class));
+        bridge.removeModule(module);
+        assertNull("Bridge module exists although it wasn't added", bridge.getModule(BridgeModule1.class));
+    }
+
+    @Test
+    public void testRemoveMultipleModules() {
+
+        final BridgeModule module1 = context.mock(BridgeModule1.class);
+        final BridgeModule module2 = context.mock(BridgeModule2.class);
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            final Sequence moduleCalls = context.sequence("moduleCalls");
+
+            oneOf(module1).add(bridge); inSequence(moduleCalls);
+            oneOf(module2).add(bridge); inSequence(moduleCalls);
+
+            oneOf(module2).remove(); inSequence(moduleCalls);
+            oneOf(module1).remove(); inSequence(moduleCalls);
+
+        }});
+        // @formatter:on
+
+        bridge.addModule(module1);
+        assertEquals("Retrieved bridge module", module1, bridge.getModule(BridgeModule1.class));
+        bridge.addModule(module2);
+        assertEquals("Retrieved bridge module", module2, bridge.getModule(BridgeModule2.class));
+
+        bridge.removeModule(module2);
+        assertNull("Bridge module exists although it was removed", bridge.getModule(BridgeModule2.class));
+        bridge.removeModule(module1);
+        assertNull("Bridge module exists although it was removed", bridge.getModule(BridgeModule1.class));
     }
 
     @Test
@@ -274,6 +402,14 @@ public class DefaultBridgeTest {
         bridge.removeModifyConnectorListListener(listener);
         bridge.addConnector(connector);
         bridge.removeConnector(connector);
+    }
+
+    private static interface BridgeModule1 extends BridgeModule {
+
+    }
+
+    private static interface BridgeModule2 extends BridgeModule {
+
     }
 
     private static class EqualsAllHandler<T extends Event> implements EventHandler<T> {

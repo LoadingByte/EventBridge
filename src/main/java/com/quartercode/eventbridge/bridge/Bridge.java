@@ -47,6 +47,32 @@ public interface Bridge {
     // ----- Modules -----
 
     /**
+     * Returns the {@link BridgeModule} which is an instance of the given type.
+     * If multiple modules are instances of the given type, the first one is returned.
+     * If no module is an instance of the given type, {@code null} is returned.
+     * 
+     * @param type The type of the returned module (cannot be {@code null}).
+     * @return The first module which is assignable to the given type.
+     */
+    public <T extends BridgeModule> T getModule(Class<T> type);
+
+    /**
+     * Adds the given {@link BridgeModule} to the bridge and calls its {@link BridgeModule#add(Bridge)} method.
+     * If a module which has the same type as the new one has already been added, an {@link IllegalArgumentException} is thrown.
+     * 
+     * @param module The module to add to the bridge (cannot be {@code null}).
+     * @throws IllegalArgumentException A module which has the same type as the new one has already been added.
+     */
+    public void addModule(BridgeModule module);
+
+    /**
+     * Removes the given {@link BridgeModule} from the bridge and calls its {@link BridgeModule#remove()} method.
+     * 
+     * @param module The module to remove from the bridge (cannot be {@code null}).
+     */
+    public void removeModule(BridgeModule module);
+
+    /**
      * Returns the {@link HandlerModule} which is responsible for calling the bridge's {@link EventHandler}s when {@link Event}s are incoming.
      * 
      * @return The bridge's handler module.

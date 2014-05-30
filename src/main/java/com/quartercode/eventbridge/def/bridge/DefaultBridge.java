@@ -22,10 +22,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
+import com.quartercode.eventbridge.bridge.BridgeModule;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.EventPredicate;
@@ -38,6 +40,8 @@ import com.quartercode.eventbridge.bridge.SenderModule;
  * @see Bridge
  */
 public class DefaultBridge implements Bridge {
+
+    private final List<BridgeModule>                             modules                      = new ArrayList<>();
 
     private HandlerModule                                        handlerModule                = new DefaultHandlerModule(this);
     private SenderModule                                         senderModule                 = new DefaultSenderModule(this);
@@ -61,6 +65,41 @@ public class DefaultBridge implements Bridge {
     }
 
     // ----- Modules -----
+
+    @Override
+    public <T extends BridgeModule> T getModule(Class<T> type) {
+
+        Validate.notNull(type, "Module type for module retrieval cannot be null");
+
+        for (BridgeModule module : modules) {
+            if (type.isInstance(module)) {
+                return type.cast(module);
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public void addModule(BridgeModule module) {
+
+        Validate.notNull(module, "The module to add to a bridge cannot be null");
+        Validate.isTrue(getModule(module.getClass()) == null, "Module of type '%s' is already added to the bridge", module.getClass().getName());
+
+        modules.add(module);
+        module.add(this);
+    }
+
+    @Override
+    public void removeModule(BridgeModule module) {
+
+        Validate.notNull(module, "The module to remove from a bridge cannot be null");
+
+        if (modules.contains(module)) {
+            module.remove();
+            modules.remove(module);
+        }
+    }
 
     @Override
     public HandlerModule getHandlerModule() {
