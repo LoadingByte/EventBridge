@@ -16,7 +16,7 @@
  * License along with EventBridge. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.quartercode.eventbridge.test.extra.extension;
+package com.quartercode.eventbridge.test.def.extra.extension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,8 +38,8 @@ import com.quartercode.eventbridge.bridge.SenderModule;
 import com.quartercode.eventbridge.bridge.SenderModule.ConnectorSendInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.bridge.DefaultBridge;
+import com.quartercode.eventbridge.def.extra.extension.DefaultSendPredicateCheckExtension;
 import com.quartercode.eventbridge.extra.connector.LocalBridgeConnector;
-import com.quartercode.eventbridge.extra.extension.SendPredicateCheckExtension;
 import com.quartercode.eventbridge.extra.predicate.TypePredicate;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent2;
@@ -49,14 +49,14 @@ import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent5;
 import com.quartercode.eventbridge.test.DummyInterceptors.DummyConnectorSendInterceptor;
 
 @SuppressWarnings ("unchecked")
-public class SendPredicateCheckExtensionTest {
+public class DefaultSendPredicateCheckExtensionTest {
 
     private static final Class<Event> INTERNAL_EVENT_TYPE;
 
     static {
 
         try {
-            INTERNAL_EVENT_TYPE = (Class<Event>) Class.forName(SendPredicateCheckExtension.class.getName() + "$SetPredicatesEvent");
+            INTERNAL_EVENT_TYPE = (Class<Event>) Class.forName(DefaultSendPredicateCheckExtension.class.getName() + "$SetPredicatesEvent");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -69,19 +69,19 @@ public class SendPredicateCheckExtensionTest {
     }
 
     @Rule
-    public JUnitRuleMockery             context = new JUnitRuleMockery();
+    public JUnitRuleMockery                    context = new JUnitRuleMockery();
 
-    private Bridge                      bridge1;
-    private Bridge                      bridge2;
-    private Bridge                      bridge3;
-    private BridgeConnector             bridge1To2Connector;
-    private BridgeConnector             bridge1To3Connector;
+    private Bridge                             bridge1;
+    private Bridge                             bridge2;
+    private Bridge                             bridge3;
+    private BridgeConnector                    bridge1To2Connector;
+    private BridgeConnector                    bridge1To3Connector;
     @Mock
-    private ConnectorSendInterceptor    interceptor;
+    private ConnectorSendInterceptor           interceptor;
 
-    private SendPredicateCheckExtension bridge1Extension;
-    private SendPredicateCheckExtension bridge2Extension;
-    private SendPredicateCheckExtension bridge3Extension;
+    private DefaultSendPredicateCheckExtension bridge1Extension;
+    private DefaultSendPredicateCheckExtension bridge2Extension;
+    private DefaultSendPredicateCheckExtension bridge3Extension;
 
     @Before
     public void setUp() {
@@ -106,9 +106,12 @@ public class SendPredicateCheckExtensionTest {
         // @formatter:on
 
         // Install the send predicate check extensions to both bridges
-        bridge1Extension = new SendPredicateCheckExtension(bridge1);
-        bridge2Extension = new SendPredicateCheckExtension(bridge2);
-        bridge3Extension = new SendPredicateCheckExtension(bridge3);
+        bridge1Extension = new DefaultSendPredicateCheckExtension();
+        bridge2Extension = new DefaultSendPredicateCheckExtension();
+        bridge3Extension = new DefaultSendPredicateCheckExtension();
+        bridge1.addModule(bridge1Extension);
+        bridge2.addModule(bridge2Extension);
+        bridge3.addModule(bridge3Extension);
     }
 
     private Event[] beforeCustomActions(Pair<BridgeConnector, Class<?>[]>... expectedEvents) {
