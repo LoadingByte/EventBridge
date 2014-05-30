@@ -18,16 +18,15 @@
 
 package com.quartercode.eventbridge.test.def.bridge;
 
-import java.util.Arrays;
+import static com.quartercode.eventbridge.test.ExtraAssert.assertListEquals;
+import static org.junit.Assert.assertTrue;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
-import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
@@ -35,6 +34,7 @@ import com.quartercode.eventbridge.bridge.EventPredicate;
 import com.quartercode.eventbridge.bridge.HandlerModule;
 import com.quartercode.eventbridge.bridge.HandlerModule.GlobalHandleInterceptor;
 import com.quartercode.eventbridge.bridge.HandlerModule.HandlerHandleInterceptor;
+import com.quartercode.eventbridge.bridge.HandlerModule.ModifyHandlerListListener;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.bridge.DefaultHandlerModule;
 import com.quartercode.eventbridge.test.DummyEvents.CallableEvent;
@@ -48,14 +48,102 @@ public class DefaultHandlerModuleTest {
     @Rule
     public JUnitRuleMockery context = new JUnitRuleMockery();
 
-    @Mock
-    private Bridge          bridge;
     private HandlerModule   handlerModule;
 
     @Before
     public void setUp() {
 
-        handlerModule = new DefaultHandlerModule(bridge);
+        handlerModule = new DefaultHandlerModule();
+    }
+
+    @SuppressWarnings ("unchecked")
+    @Test
+    public void testHandlerStorage() {
+
+        EventHandler<EmptyEvent1> handler1 = context.mock(EventHandler.class, "handler1");
+        EventPredicate<EmptyEvent1> predicate1 = context.mock(EventPredicate.class, "predicate1");
+        EventHandler<EmptyEvent2> handler2 = context.mock(EventHandler.class, "handler2");
+        EventPredicate<EmptyEvent2> predicate2 = context.mock(EventPredicate.class, "predicate2");
+        EventHandler<EmptyEvent2> handler3 = context.mock(EventHandler.class, "handler3");
+        EventPredicate<EmptyEvent2> predicate3 = context.mock(EventPredicate.class, "predicate3");
+
+        Pair<EventHandler<EmptyEvent1>, EventPredicate<EmptyEvent1>> pair1 = Pair.of(handler1, predicate1);
+        Pair<EventHandler<EmptyEvent2>, EventPredicate<EmptyEvent2>> pair2 = Pair.of(handler2, predicate2);
+        Pair<EventHandler<EmptyEvent2>, EventPredicate<EmptyEvent2>> pair3 = Pair.of(handler3, predicate3);
+
+        assertHandlerListEmpty();
+
+        handlerModule.removeHandler(handler1);
+        assertHandlerListEmpty();
+
+        handlerModule.addHandler(handler1, predicate1);
+        assertListEquals("Handlers that are stored inside the bridge are not correct", handlerModule.getHandlers(), pair1);
+        assertListEquals("Handlers that are stored inside the bridge changed on the second retrieval", handlerModule.getHandlers(), pair1);
+
+        handlerModule.addHandler(handler2, predicate2);
+        assertListEquals("Handlers that are stored inside the bridge are not correct", handlerModule.getHandlers(), pair1, pair2);
+        assertListEquals("Handlers that are stored inside the bridge changed on the second retrieval", handlerModule.getHandlers(), pair1, pair2);
+
+        handlerModule.addHandler(handler3, predicate3);
+        assertListEquals("Handlers that are stored inside the bridge are not correct", handlerModule.getHandlers(), pair1, pair2, pair3);
+        assertListEquals("Handlers that are stored inside the bridge changed on the second retrieval", handlerModule.getHandlers(), pair1, pair2, pair3);
+
+        handlerModule.removeHandler(handler2);
+        assertListEquals("Handlers that are stored inside the bridge are not correct", handlerModule.getHandlers(), pair1, pair3);
+        assertListEquals("Handlers that are stored inside the bridge changed on the second retrieval", handlerModule.getHandlers(), pair1, pair3);
+    }
+
+    private void assertHandlerListEmpty() {
+
+        assertTrue("There are handlers stored inside the bridge although none were added", handlerModule.getHandlers().isEmpty());
+        assertTrue("Handlers that are stored inside the bridge changed on the second retrieval", handlerModule.getHandlers().isEmpty());
+    }
+
+    @SuppressWarnings ("unchecked")
+    @Test
+    public void testHandlerStorageRemoveUncheckedCast() {
+
+        EventHandler<EmptyEvent1> handler1 = new EqualsAllHandler<>();
+        EventPredicate<EmptyEvent1> predicate1 = context.mock(EventPredicate.class);
+        EqualsAllHandler<EmptyEvent2> handler2 = new EqualsAllHandler<>();
+
+        // Add handler 1 with type parameter TestEvent1
+        handlerModule.addHandler(handler1, predicate1);
+
+        // Remove handler 2 with type parameter TestEvent2
+        // Note that handler 2 is equal to handler 1 while having a different type parameter
+        handlerModule.removeHandler(handler2);
+
+        assertTrue("Handler 1 wasn't removed", handlerModule.getHandlers().isEmpty());
+    }
+
+    @SuppressWarnings ("unchecked")
+    @Test
+    public void testHandlerStorageListeners() {
+
+        final EventHandler<EmptyEvent1> handler = context.mock(EventHandler.class, "handler");
+        final EventPredicate<EmptyEvent1> predicate = context.mock(EventPredicate.class, "predicate");
+        final ModifyHandlerListListener listener = context.mock(ModifyHandlerListListener.class);
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            final Sequence handlerCalls = context.sequence("handlerCalls");
+            oneOf(listener).onAddHandler(handler, predicate, handlerModule); inSequence(handlerCalls);
+            oneOf(listener).onRemoveHandler(handler, predicate, handlerModule); inSequence(handlerCalls);
+
+        }});
+        // @formatter:on
+
+        // Calls with listener
+        handlerModule.addModifyHandlerListListener(listener);
+        handlerModule.addHandler(handler, predicate);
+        handlerModule.removeHandler(handler);
+
+        // Calls without listener
+        handlerModule.removeModifyHandlerListListener(listener);
+        handlerModule.addHandler(handler, predicate);
+        handlerModule.removeHandler(handler);
     }
 
     @SuppressWarnings ("unchecked")
@@ -75,12 +163,10 @@ public class DefaultHandlerModuleTest {
 
         final EventHandler<EmptyEvent1> handler = context.mock(EventHandler.class);
         final EventPredicate<Event> predicate = context.mock(EventPredicate.class);
+        handlerModule.addHandler(handler, predicate);
 
         // @formatter:off
         context.checking(new Expectations() {{
-
-            allowing(bridge).getHandlers();
-                will(returnValue(Arrays.asList(Pair.of(handler, predicate))));
 
             allowing(predicate).test(regularEvent);
                 will(returnValue(true));
@@ -121,16 +207,8 @@ public class DefaultHandlerModuleTest {
 
         };
 
-        final EventHandler<EmptyEvent1> handler = context.mock(EventHandler.class);
-
-        // @formatter:off
-        context.checking(new Expectations() {{
-
-            allowing(bridge).getHandlers();
-                will(returnValue(Arrays.asList(Pair.of(handler, predicate))));
-
-        }});
-        // @formatter:on
+        EventHandler<EmptyEvent1> handler = context.mock(EventHandler.class);
+        handlerModule.addHandler(handler, predicate);
 
         // Expect the HandlerModule to suppress the resulting ClassCastException
         handlerModule.handle(null, new EmptyEvent1());
@@ -140,7 +218,7 @@ public class DefaultHandlerModuleTest {
     @Test
     public void testHandleWrongTypeInHandler() {
 
-        final EventHandler<CallableEvent> handler = new EventHandler<CallableEvent>() {
+        EventHandler<CallableEvent> handler = new EventHandler<CallableEvent>() {
 
             @Override
             public void handle(CallableEvent event) {
@@ -150,14 +228,11 @@ public class DefaultHandlerModuleTest {
             }
 
         };
-
         final EventPredicate<Event> predicate = context.mock(EventPredicate.class);
+        handlerModule.addHandler(handler, predicate);
 
         // @formatter:off
         context.checking(new Expectations() {{
-
-            allowing(bridge).getHandlers();
-                will(returnValue(Arrays.asList(Pair.of(handler, predicate))));
 
             allowing(predicate).test(with(any(Event.class)));
                 will(returnValue(true));
@@ -167,6 +242,22 @@ public class DefaultHandlerModuleTest {
 
         // Expect the HandlerModule to suppress the resulting ClassCastException
         handlerModule.handle(null, new EmptyEvent1());
+    }
+
+    private static class EqualsAllHandler<T extends Event> implements EventHandler<T> {
+
+        @Override
+        public boolean equals(Object obj) {
+
+            return true;
+        }
+
+        @Override
+        public void handle(T event) {
+
+            // Not used
+        }
+
     }
 
 }

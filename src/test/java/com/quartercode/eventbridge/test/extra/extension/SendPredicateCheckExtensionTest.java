@@ -33,6 +33,8 @@ import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
+import com.quartercode.eventbridge.bridge.HandlerModule;
+import com.quartercode.eventbridge.bridge.SenderModule;
 import com.quartercode.eventbridge.bridge.SenderModule.ConnectorSendInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.bridge.DefaultBridge;
@@ -92,7 +94,7 @@ public class SendPredicateCheckExtensionTest {
         bridge1To3Connector = new LocalBridgeConnector(bridge3);
 
         // Add the mocked connector send interceptor to bridge 1
-        bridge1.getSenderModule().getConnectorSendChannel().addInterceptor(new DummyConnectorSendInterceptor(interceptor), 1);
+        bridge1.getModule(SenderModule.class).getConnectorSendChannel().addInterceptor(new DummyConnectorSendInterceptor(interceptor), 1);
 
         // Allow the internal events to flow through the interceptor
         // @formatter:off
@@ -198,7 +200,7 @@ public class SendPredicateCheckExtensionTest {
         // @formatter:on
 
         connect();
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
     }
 
     // ----- One Bridge Filtering Tests -----
@@ -208,7 +210,7 @@ public class SendPredicateCheckExtensionTest {
 
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class));
 
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
         connect();
 
         afterCustomActions(data);
@@ -220,7 +222,7 @@ public class SendPredicateCheckExtensionTest {
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class));
 
         connect();
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
 
         afterCustomActions(data);
     }
@@ -230,8 +232,8 @@ public class SendPredicateCheckExtensionTest {
 
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class, EmptyEvent2.class));
 
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
         connect();
 
         afterCustomActions(data);
@@ -243,8 +245,8 @@ public class SendPredicateCheckExtensionTest {
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class, EmptyEvent2.class));
 
         connect();
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
 
         afterCustomActions(data);
     }
@@ -254,10 +256,10 @@ public class SendPredicateCheckExtensionTest {
 
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class));
 
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
         EmptyEventHandler removeHandler = new EmptyEventHandler();
-        bridge2.addHandler(removeHandler, new TypePredicate<>(EmptyEvent2.class));
-        bridge2.removeHandler(removeHandler);
+        bridge2.getModule(HandlerModule.class).addHandler(removeHandler, new TypePredicate<>(EmptyEvent2.class));
+        bridge2.getModule(HandlerModule.class).removeHandler(removeHandler);
 
         connect();
 
@@ -271,10 +273,10 @@ public class SendPredicateCheckExtensionTest {
 
         connect();
 
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
         EmptyEventHandler removeHandler = new EmptyEventHandler();
-        bridge2.addHandler(removeHandler, new TypePredicate<>(EmptyEvent2.class));
-        bridge2.removeHandler(removeHandler);
+        bridge2.getModule(HandlerModule.class).addHandler(removeHandler, new TypePredicate<>(EmptyEvent2.class));
+        bridge2.getModule(HandlerModule.class).removeHandler(removeHandler);
 
         afterCustomActions(data);
     }
@@ -286,8 +288,8 @@ public class SendPredicateCheckExtensionTest {
 
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class), pair(bridge1To3Connector, EmptyEvent1.class));
 
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
         connect();
 
         afterCustomActions(data);
@@ -299,8 +301,8 @@ public class SendPredicateCheckExtensionTest {
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class), pair(bridge1To3Connector, EmptyEvent1.class));
 
         connect();
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
 
         afterCustomActions(data);
     }
@@ -310,8 +312,8 @@ public class SendPredicateCheckExtensionTest {
 
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class), pair(bridge1To3Connector, EmptyEvent2.class));
 
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
         connect();
 
         afterCustomActions(data);
@@ -323,8 +325,8 @@ public class SendPredicateCheckExtensionTest {
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class), pair(bridge1To3Connector, EmptyEvent2.class));
 
         connect();
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
 
         afterCustomActions(data);
     }
@@ -334,10 +336,10 @@ public class SendPredicateCheckExtensionTest {
 
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class, EmptyEvent2.class), pair(bridge1To3Connector, EmptyEvent1.class, EmptyEvent2.class));
 
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
         connect();
 
         afterCustomActions(data);
@@ -349,10 +351,10 @@ public class SendPredicateCheckExtensionTest {
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class, EmptyEvent2.class), pair(bridge1To3Connector, EmptyEvent1.class, EmptyEvent2.class));
 
         connect();
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
 
         afterCustomActions(data);
     }
@@ -362,10 +364,10 @@ public class SendPredicateCheckExtensionTest {
 
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class, EmptyEvent2.class), pair(bridge1To3Connector, EmptyEvent3.class, EmptyEvent4.class));
 
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent3.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent4.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent3.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent4.class));
         connect();
 
         afterCustomActions(data);
@@ -377,10 +379,10 @@ public class SendPredicateCheckExtensionTest {
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class, EmptyEvent2.class), pair(bridge1To3Connector, EmptyEvent3.class, EmptyEvent4.class));
 
         connect();
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent3.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent4.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent3.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent4.class));
 
         afterCustomActions(data);
     }
@@ -390,10 +392,10 @@ public class SendPredicateCheckExtensionTest {
 
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class, EmptyEvent2.class), pair(bridge1To3Connector, EmptyEvent1.class, EmptyEvent3.class));
 
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent3.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent3.class));
         connect();
 
         afterCustomActions(data);
@@ -405,10 +407,10 @@ public class SendPredicateCheckExtensionTest {
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class, EmptyEvent2.class), pair(bridge1To3Connector, EmptyEvent1.class, EmptyEvent3.class));
 
         connect();
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent3.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent3.class));
 
         afterCustomActions(data);
     }
@@ -418,15 +420,15 @@ public class SendPredicateCheckExtensionTest {
 
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class), pair(bridge1To3Connector, EmptyEvent2.class));
 
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
         EmptyEventHandler removeHandler1 = new EmptyEventHandler();
-        bridge2.addHandler(removeHandler1, new TypePredicate<>(EmptyEvent2.class));
-        bridge2.removeHandler(removeHandler1);
+        bridge2.getModule(HandlerModule.class).addHandler(removeHandler1, new TypePredicate<>(EmptyEvent2.class));
+        bridge2.getModule(HandlerModule.class).removeHandler(removeHandler1);
 
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
         EmptyEventHandler removeHandler2 = new EmptyEventHandler();
-        bridge3.addHandler(removeHandler2, new TypePredicate<>(EmptyEvent1.class));
-        bridge3.removeHandler(removeHandler2);
+        bridge3.getModule(HandlerModule.class).addHandler(removeHandler2, new TypePredicate<>(EmptyEvent1.class));
+        bridge3.getModule(HandlerModule.class).removeHandler(removeHandler2);
 
         connect();
 
@@ -440,15 +442,15 @@ public class SendPredicateCheckExtensionTest {
 
         connect();
 
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
         EmptyEventHandler removeHandler1 = new EmptyEventHandler();
-        bridge2.addHandler(removeHandler1, new TypePredicate<>(EmptyEvent2.class));
-        bridge2.removeHandler(removeHandler1);
+        bridge2.getModule(HandlerModule.class).addHandler(removeHandler1, new TypePredicate<>(EmptyEvent2.class));
+        bridge2.getModule(HandlerModule.class).removeHandler(removeHandler1);
 
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent2.class));
         EmptyEventHandler removeHandler2 = new EmptyEventHandler();
-        bridge3.addHandler(removeHandler2, new TypePredicate<>(EmptyEvent1.class));
-        bridge3.removeHandler(removeHandler2);
+        bridge3.getModule(HandlerModule.class).addHandler(removeHandler2, new TypePredicate<>(EmptyEvent1.class));
+        bridge3.getModule(HandlerModule.class).removeHandler(removeHandler2);
 
         afterCustomActions(data);
     }
@@ -458,8 +460,8 @@ public class SendPredicateCheckExtensionTest {
 
         Event[] data = beforeCustomActions(pair(bridge1To2Connector, EmptyEvent1.class));
 
-        bridge2.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
-        bridge3.addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge2.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
+        bridge3.getModule(HandlerModule.class).addHandler(new EmptyEventHandler(), new TypePredicate<>(EmptyEvent1.class));
         connect();
 
         bridge1.removeConnector(bridge1To3Connector);

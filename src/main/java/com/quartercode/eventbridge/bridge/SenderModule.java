@@ -27,7 +27,7 @@ import com.quartercode.eventbridge.channel.ChannelInvocation;
  * @see Bridge
  * @see Event
  */
-public interface SenderModule {
+public interface SenderModule extends BridgeModule {
 
     /**
      * Returns the {@link Channel} which delivers {@link Event}s to the local handler send channel and connector send channel of the module.

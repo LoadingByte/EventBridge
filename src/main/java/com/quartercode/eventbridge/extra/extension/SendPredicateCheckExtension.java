@@ -27,12 +27,14 @@ import com.quartercode.eventbridge.basic.EventBase;
 import com.quartercode.eventbridge.basic.EventUtils;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.Bridge.ModifyConnectorListListener;
-import com.quartercode.eventbridge.bridge.Bridge.ModifyHandlerListListener;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.EventPredicate;
+import com.quartercode.eventbridge.bridge.HandlerModule;
 import com.quartercode.eventbridge.bridge.HandlerModule.GlobalHandleInterceptor;
+import com.quartercode.eventbridge.bridge.HandlerModule.ModifyHandlerListListener;
+import com.quartercode.eventbridge.bridge.SenderModule;
 import com.quartercode.eventbridge.bridge.SenderModule.ConnectorSendInterceptor;
 import com.quartercode.eventbridge.bridge.SenderModule.LocalHandlerSendInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
@@ -82,17 +84,17 @@ public class SendPredicateCheckExtension {
         this.bridge = bridge;
 
         // Listeners for sending SetPredicatesEvents
-        bridge.addModifyHandlerListListener(modifyHandlerListListener);
+        bridge.getModule(HandlerModule.class).addModifyHandlerListListener(modifyHandlerListListener);
         bridge.addModifyConnectorListListener(modifyConnectorListListener);
 
         // Global handle interceptor for receiving SetPredicatesEvents
-        bridge.getHandlerModule().getGlobalHandleChannel().addInterceptor(globalHandleInterceptor, 50);
+        bridge.getModule(HandlerModule.class).getGlobalHandleChannel().addInterceptor(globalHandleInterceptor, 50);
 
         // Connector send interceptor for stopping events which are not requested at the other side
-        bridge.getSenderModule().getConnectorSendChannel().addInterceptor(connectorSendInterceptor, 50);
+        bridge.getModule(SenderModule.class).getConnectorSendChannel().addInterceptor(connectorSendInterceptor, 50);
 
         // Local handler send interceptor for stopping SetPredicatesEvents from being handled locally
-        bridge.getSenderModule().getLocalHandlerSendChannel().addInterceptor(localHandlerSendInterceptor, 50);
+        bridge.getModule(SenderModule.class).getLocalHandlerSendChannel().addInterceptor(localHandlerSendInterceptor, 50);
     }
 
     /**
@@ -101,25 +103,25 @@ public class SendPredicateCheckExtension {
      */
     public void remove() {
 
-        bridge.removeModifyHandlerListListener(modifyHandlerListListener);
+        bridge.getModule(HandlerModule.class).removeModifyHandlerListListener(modifyHandlerListListener);
         bridge.removeModifyConnectorListListener(modifyConnectorListListener);
-        bridge.getHandlerModule().getGlobalHandleChannel().removeInterceptor(globalHandleInterceptor);
-        bridge.getSenderModule().getConnectorSendChannel().removeInterceptor(connectorSendInterceptor);
-        bridge.getSenderModule().getLocalHandlerSendChannel().removeInterceptor(localHandlerSendInterceptor);
+        bridge.getModule(HandlerModule.class).getGlobalHandleChannel().removeInterceptor(globalHandleInterceptor);
+        bridge.getModule(SenderModule.class).getConnectorSendChannel().removeInterceptor(connectorSendInterceptor);
+        bridge.getModule(SenderModule.class).getLocalHandlerSendChannel().removeInterceptor(localHandlerSendInterceptor);
     }
 
     private static class SPCEModifyHandlerListListener implements ModifyHandlerListListener {
 
         @Override
-        public void onAddHandler(EventHandler<?> handler, EventPredicate<?> predicate, Bridge bridge) {
+        public void onAddHandler(EventHandler<?> handler, EventPredicate<?> predicate, HandlerModule handlerModule) {
 
-            bridge.send(new SetPredicatesEvent(new EventPredicate<?>[] { predicate }, true));
+            handlerModule.getBridge().send(new SetPredicatesEvent(new EventPredicate<?>[] { predicate }, true));
         }
 
         @Override
-        public void onRemoveHandler(EventHandler<?> handler, EventPredicate<?> predicate, Bridge bridge) {
+        public void onRemoveHandler(EventHandler<?> handler, EventPredicate<?> predicate, HandlerModule handlerModule) {
 
-            bridge.send(new SetPredicatesEvent(new EventPredicate<?>[] { predicate }, false));
+            handlerModule.getBridge().send(new SetPredicatesEvent(new EventPredicate<?>[] { predicate }, false));
         }
 
     }
@@ -129,7 +131,7 @@ public class SendPredicateCheckExtension {
         @Override
         public void onAddConnector(BridgeConnector connector, Bridge bridge) {
 
-            List<Pair<EventHandler<?>, EventPredicate<?>>> handlers = bridge.getHandlers();
+            List<Pair<EventHandler<?>, EventPredicate<?>>> handlers = bridge.getModule(HandlerModule.class).getHandlers();
 
             EventPredicate<?>[] handlerPredicates = new EventPredicate[handlers.size()];
             for (int index = 0; index < handlerPredicates.length; index++) {

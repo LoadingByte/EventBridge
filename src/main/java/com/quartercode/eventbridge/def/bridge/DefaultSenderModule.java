@@ -20,7 +20,7 @@ package com.quartercode.eventbridge.def.bridge;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.quartercode.eventbridge.bridge.Bridge;
+import com.quartercode.eventbridge.basic.AbstractBridgeModule;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
 import com.quartercode.eventbridge.bridge.Event;
@@ -34,7 +34,7 @@ import com.quartercode.eventbridge.def.channel.DefaultChannel;
  * 
  * @see SenderModule
  */
-public class DefaultSenderModule extends BridgeModuleBase implements SenderModule {
+public class DefaultSenderModule extends AbstractBridgeModule implements SenderModule {
 
     private static final Logger                        LOGGER                  = LoggerFactory.getLogger(DefaultSenderModule.class);
 
@@ -44,12 +44,8 @@ public class DefaultSenderModule extends BridgeModuleBase implements SenderModul
 
     /**
      * Creates a new default sender module.
-     * 
-     * @param parent The parent {@link Bridge} that uses the sender module.
      */
-    public DefaultSenderModule(Bridge parent) {
-
-        super(parent);
+    public DefaultSenderModule() {
 
         globalSendChannel.addInterceptor(new FinalGlobalSendInterceptor(), 0);
         localHandlerSendChannel.addInterceptor(new FinalLocalHandlerSendInterceptor(), 0);
@@ -100,7 +96,7 @@ public class DefaultSenderModule extends BridgeModuleBase implements SenderModul
 
         private void invokeConnectorSendChannel(Event event) {
 
-            for (BridgeConnector connector : getParent().getConnectors()) {
+            for (BridgeConnector connector : getBridge().getConnectors()) {
                 ChannelInvocation<ConnectorSendInterceptor> newInvocation = connectorSendChannel.invoke();
                 newInvocation.next().send(newInvocation, connector, event);
             }
@@ -113,7 +109,7 @@ public class DefaultSenderModule extends BridgeModuleBase implements SenderModul
         @Override
         public void send(ChannelInvocation<LocalHandlerSendInterceptor> invocation, Event event) {
 
-            getParent().handle(null, event);
+            getBridge().handle(null, event);
 
             invocation.next().send(invocation, event);
         }

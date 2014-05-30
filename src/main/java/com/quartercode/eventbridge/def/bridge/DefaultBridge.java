@@ -21,16 +21,12 @@ package com.quartercode.eventbridge.def.bridge;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.tuple.Pair;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
 import com.quartercode.eventbridge.bridge.BridgeModule;
 import com.quartercode.eventbridge.bridge.Event;
-import com.quartercode.eventbridge.bridge.EventHandler;
-import com.quartercode.eventbridge.bridge.EventPredicate;
 import com.quartercode.eventbridge.bridge.HandlerModule;
 import com.quartercode.eventbridge.bridge.SenderModule;
 
@@ -41,27 +37,19 @@ import com.quartercode.eventbridge.bridge.SenderModule;
  */
 public class DefaultBridge implements Bridge {
 
-    private final List<BridgeModule>                             modules                      = new ArrayList<>();
+    private final List<BridgeModule>                modules                      = new ArrayList<>();
 
-    private HandlerModule                                        handlerModule                = new DefaultHandlerModule(this);
-    private SenderModule                                         senderModule                 = new DefaultSenderModule(this);
-
-    private final List<Pair<EventHandler<?>, EventPredicate<?>>> handlers                     = new CopyOnWriteArrayList<>();
-    private final List<BridgeConnector>                          connectors                   = new ArrayList<>();
-
-    // Listeners
-    private final List<ModifyHandlerListListener>                modifyHandlerListListeners   = new ArrayList<>();
-    private final List<ModifyConnectorListListener>              modifyConnectorListListeners = new ArrayList<>();
-
-    // Cache
-    private List<Pair<EventHandler<?>, EventPredicate<?>>>       handlersUnmodifiableCache;
-    private List<BridgeConnector>                                connectorsUnmodifiableCache;
+    private final List<BridgeConnector>             connectors                   = new ArrayList<>();
+    private final List<ModifyConnectorListListener> modifyConnectorListListeners = new ArrayList<>();
+    private List<BridgeConnector>                   connectorsUnmodifiableCache;
 
     /**
      * Creates a new default bridge.
      */
     public DefaultBridge() {
 
+        addModule(new DefaultSenderModule());
+        addModule(new DefaultHandlerModule());
     }
 
     // ----- Modules -----
@@ -101,113 +89,21 @@ public class DefaultBridge implements Bridge {
         }
     }
 
+    // ----- Shortcuts -----
+
     @Override
-    public HandlerModule getHandlerModule() {
+    public void send(Event event) {
 
-        return handlerModule;
-    }
-
-    /**
-     * Lets the bridge use another {@link HandlerModule} which is responsible for calling the bridge's {@link EventHandler}s when {@link Event}s are incoming.<br>
-     * <br>
-     * <i>This method is highly implementation-dependent and should not be used in production!</i>
-     * 
-     * @param handlerModule The new handler module for the bridge.
-     */
-    public void setHandlerModule(HandlerModule handlerModule) {
-
-        this.handlerModule = handlerModule;
+        getModule(SenderModule.class).send(event);
     }
 
     @Override
     public void handle(BridgeConnector source, Event event) {
 
-        handlerModule.handle(source, event);
+        getModule(HandlerModule.class).handle(source, event);
     }
 
-    @Override
-    public SenderModule getSenderModule() {
-
-        return senderModule;
-    }
-
-    /**
-     * Lets the bridge use another {@link SenderModule} which is responsible for sending {@link Event}s between bridges.<br>
-     * <br>
-     * <i>This method is highly implementation-dependent and should not be used in production!</i>
-     * 
-     * @param senderModule The new sender module for the bridge.
-     */
-    public void setSenderModule(SenderModule senderModule) {
-
-        this.senderModule = senderModule;
-    }
-
-    @Override
-    public void send(Event event) {
-
-        senderModule.send(event);
-    }
-
-    // ----- Storage -----
-
-    @Override
-    public List<Pair<EventHandler<?>, EventPredicate<?>>> getHandlers() {
-
-        if (handlersUnmodifiableCache == null) {
-            handlersUnmodifiableCache = Collections.unmodifiableList(handlers);
-        }
-
-        return handlersUnmodifiableCache;
-    }
-
-    @Override
-    public void addHandler(EventHandler<?> handler, EventPredicate<?> predicate) {
-
-        handlers.add(Pair.<EventHandler<?>, EventPredicate<?>> of(handler, predicate));
-        handlersUnmodifiableCache = null;
-
-        for (ModifyHandlerListListener listener : modifyHandlerListListeners) {
-            listener.onAddHandler(handler, predicate, this);
-        }
-    }
-
-    @Override
-    public void removeHandler(EventHandler<?> handler) {
-
-        Pair<EventHandler<?>, EventPredicate<?>> pair = null;
-        for (Pair<EventHandler<?>, EventPredicate<?>> testPair : handlers) {
-            if (testPair.getLeft().equals(handler)) {
-                pair = testPair;
-                break;
-            }
-        }
-
-        if (pair != null) {
-            if (!modifyHandlerListListeners.isEmpty()) {
-                for (ModifyHandlerListListener listener : modifyHandlerListListeners) {
-                    listener.onRemoveHandler(pair.getLeft(), pair.getRight(), this);
-                }
-            }
-
-            handlers.remove(pair);
-            handlersUnmodifiableCache = null;
-
-            return;
-        }
-    }
-
-    @Override
-    public void addModifyHandlerListListener(ModifyHandlerListListener listener) {
-
-        modifyHandlerListListeners.add(listener);
-    }
-
-    @Override
-    public void removeModifyHandlerListListener(ModifyHandlerListListener listener) {
-
-        modifyHandlerListListeners.remove(listener);
-    }
+    // ----- Connectors -----
 
     @Override
     public List<BridgeConnector> getConnectors() {

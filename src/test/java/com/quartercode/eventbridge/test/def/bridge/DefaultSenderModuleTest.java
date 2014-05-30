@@ -52,7 +52,8 @@ public class DefaultSenderModuleTest {
     @Before
     public void setUp() {
 
-        senderModule = new DefaultSenderModule(bridge);
+        senderModule = new DefaultSenderModule();
+        senderModule.add(bridge);
     }
 
     @SuppressWarnings ("unchecked")
