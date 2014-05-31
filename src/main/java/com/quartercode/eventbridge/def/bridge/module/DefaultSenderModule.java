@@ -16,11 +16,11 @@
  * License along with EventBridge. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.quartercode.eventbridge.def.bridge;
+package com.quartercode.eventbridge.def.bridge.module;
 
 import com.quartercode.eventbridge.basic.AbstractBridgeModule;
 import com.quartercode.eventbridge.bridge.Event;
-import com.quartercode.eventbridge.bridge.SenderModule;
+import com.quartercode.eventbridge.bridge.module.SenderModule;
 import com.quartercode.eventbridge.channel.Channel;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.channel.DefaultChannel;

@@ -16,7 +16,7 @@
  * License along with EventBridge. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.quartercode.eventbridge.test.def.bridge;
+package com.quartercode.eventbridge.test.def.bridge.module;
 
 import org.jmock.Expectations;
 import org.jmock.Sequence;
@@ -27,12 +27,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
-import com.quartercode.eventbridge.bridge.LocalHandlerSenderModule.LocalHandlerSendInterceptor;
-import com.quartercode.eventbridge.bridge.SenderModule;
-import com.quartercode.eventbridge.bridge.SenderModule.SendInterceptor;
+import com.quartercode.eventbridge.bridge.module.LocalHandlerSenderModule.LocalHandlerSendInterceptor;
+import com.quartercode.eventbridge.bridge.module.SenderModule;
+import com.quartercode.eventbridge.bridge.module.SenderModule.SendInterceptor;
 import com.quartercode.eventbridge.channel.Channel;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
-import com.quartercode.eventbridge.def.bridge.DefaultLocalHandlerSenderModule;
+import com.quartercode.eventbridge.def.bridge.module.DefaultLocalHandlerSenderModule;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
 import com.quartercode.eventbridge.test.DummyInterceptors.DummyLocalHandlerSendInterceptor;
 

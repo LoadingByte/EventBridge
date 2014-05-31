@@ -16,7 +16,7 @@
  * License along with EventBridge. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.quartercode.eventbridge.test.def.bridge;
+package com.quartercode.eventbridge.test.def.bridge.module;
 
 import java.util.Arrays;
 import org.jmock.Expectations;
@@ -29,13 +29,13 @@ import org.junit.Test;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
-import com.quartercode.eventbridge.bridge.ConnectorSenderModule.GlobalConnectorSendInterceptor;
-import com.quartercode.eventbridge.bridge.ConnectorSenderModule.SpecificConnectorSendInterceptor;
-import com.quartercode.eventbridge.bridge.SenderModule;
-import com.quartercode.eventbridge.bridge.SenderModule.SendInterceptor;
+import com.quartercode.eventbridge.bridge.module.ConnectorSenderModule.GlobalConnectorSendInterceptor;
+import com.quartercode.eventbridge.bridge.module.ConnectorSenderModule.SpecificConnectorSendInterceptor;
+import com.quartercode.eventbridge.bridge.module.SenderModule;
+import com.quartercode.eventbridge.bridge.module.SenderModule.SendInterceptor;
 import com.quartercode.eventbridge.channel.Channel;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
-import com.quartercode.eventbridge.def.bridge.DefaultConnectorSenderModule;
+import com.quartercode.eventbridge.def.bridge.module.DefaultConnectorSenderModule;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
 import com.quartercode.eventbridge.test.DummyInterceptors.DummyGlobalConnectorSendInterceptor;
 import com.quartercode.eventbridge.test.DummyInterceptors.DummySpecificConnectorSendInterceptor;

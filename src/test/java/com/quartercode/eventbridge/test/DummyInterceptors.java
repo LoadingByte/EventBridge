@@ -19,14 +19,14 @@
 package com.quartercode.eventbridge.test;
 
 import com.quartercode.eventbridge.bridge.BridgeConnector;
-import com.quartercode.eventbridge.bridge.ConnectorSenderModule.GlobalConnectorSendInterceptor;
-import com.quartercode.eventbridge.bridge.ConnectorSenderModule.SpecificConnectorSendInterceptor;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
-import com.quartercode.eventbridge.bridge.HandlerModule.GlobalHandleInterceptor;
-import com.quartercode.eventbridge.bridge.HandlerModule.HandlerHandleInterceptor;
-import com.quartercode.eventbridge.bridge.LocalHandlerSenderModule.LocalHandlerSendInterceptor;
-import com.quartercode.eventbridge.bridge.SenderModule.SendInterceptor;
+import com.quartercode.eventbridge.bridge.module.ConnectorSenderModule.GlobalConnectorSendInterceptor;
+import com.quartercode.eventbridge.bridge.module.ConnectorSenderModule.SpecificConnectorSendInterceptor;
+import com.quartercode.eventbridge.bridge.module.HandlerModule.GlobalHandleInterceptor;
+import com.quartercode.eventbridge.bridge.module.HandlerModule.HandlerHandleInterceptor;
+import com.quartercode.eventbridge.bridge.module.LocalHandlerSenderModule.LocalHandlerSendInterceptor;
+import com.quartercode.eventbridge.bridge.module.SenderModule.SendInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 
 public class DummyInterceptors {

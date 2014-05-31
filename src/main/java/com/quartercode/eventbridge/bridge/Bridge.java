@@ -19,6 +19,8 @@
 package com.quartercode.eventbridge.bridge;
 
 import java.util.List;
+import com.quartercode.eventbridge.bridge.module.HandlerModule;
+import com.quartercode.eventbridge.bridge.module.SenderModule;
 
 /**
  * Bridges allow to connect two parts of an application that must not run on the same vm or machine.

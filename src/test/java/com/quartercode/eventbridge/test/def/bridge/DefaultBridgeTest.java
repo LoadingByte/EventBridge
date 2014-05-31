@@ -30,10 +30,10 @@ import com.quartercode.eventbridge.bridge.Bridge.ModifyConnectorListListener;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
 import com.quartercode.eventbridge.bridge.BridgeModule;
-import com.quartercode.eventbridge.bridge.ConnectorSenderModule;
-import com.quartercode.eventbridge.bridge.HandlerModule;
-import com.quartercode.eventbridge.bridge.LocalHandlerSenderModule;
-import com.quartercode.eventbridge.bridge.SenderModule;
+import com.quartercode.eventbridge.bridge.module.ConnectorSenderModule;
+import com.quartercode.eventbridge.bridge.module.HandlerModule;
+import com.quartercode.eventbridge.bridge.module.LocalHandlerSenderModule;
+import com.quartercode.eventbridge.bridge.module.SenderModule;
 import com.quartercode.eventbridge.def.bridge.DefaultBridge;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
 

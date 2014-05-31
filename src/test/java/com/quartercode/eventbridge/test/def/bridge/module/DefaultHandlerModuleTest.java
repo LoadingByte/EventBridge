@@ -16,7 +16,7 @@
  * License along with EventBridge. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.quartercode.eventbridge.test.def.bridge;
+package com.quartercode.eventbridge.test.def.bridge.module;
 
 import static com.quartercode.eventbridge.test.ExtraAssert.assertMapEquals;
 import static org.junit.Assert.assertTrue;
@@ -31,11 +31,11 @@ import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.EventPredicate;
-import com.quartercode.eventbridge.bridge.HandlerModule.GlobalHandleInterceptor;
-import com.quartercode.eventbridge.bridge.HandlerModule.HandlerHandleInterceptor;
-import com.quartercode.eventbridge.bridge.HandlerModule.ModifyHandlerListListener;
+import com.quartercode.eventbridge.bridge.module.HandlerModule.GlobalHandleInterceptor;
+import com.quartercode.eventbridge.bridge.module.HandlerModule.HandlerHandleInterceptor;
+import com.quartercode.eventbridge.bridge.module.HandlerModule.ModifyHandlerListListener;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
-import com.quartercode.eventbridge.def.bridge.DefaultHandlerModule;
+import com.quartercode.eventbridge.def.bridge.module.DefaultHandlerModule;
 import com.quartercode.eventbridge.test.DummyEvents.CallableEvent;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent2;

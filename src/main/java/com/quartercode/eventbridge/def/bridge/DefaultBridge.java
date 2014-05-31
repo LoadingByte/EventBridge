@@ -27,8 +27,12 @@ import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
 import com.quartercode.eventbridge.bridge.BridgeModule;
 import com.quartercode.eventbridge.bridge.Event;
-import com.quartercode.eventbridge.bridge.HandlerModule;
-import com.quartercode.eventbridge.bridge.SenderModule;
+import com.quartercode.eventbridge.bridge.module.HandlerModule;
+import com.quartercode.eventbridge.bridge.module.SenderModule;
+import com.quartercode.eventbridge.def.bridge.module.DefaultConnectorSenderModule;
+import com.quartercode.eventbridge.def.bridge.module.DefaultHandlerModule;
+import com.quartercode.eventbridge.def.bridge.module.DefaultLocalHandlerSenderModule;
+import com.quartercode.eventbridge.def.bridge.module.DefaultSenderModule;
 
 /**
  * The default implementation of the {@link Bridge} interface.

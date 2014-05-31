@@ -16,9 +16,15 @@
  * License along with EventBridge. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.quartercode.eventbridge.bridge;
+package com.quartercode.eventbridge.bridge.module;
 
 import java.util.Map;
+import com.quartercode.eventbridge.bridge.Bridge;
+import com.quartercode.eventbridge.bridge.BridgeConnector;
+import com.quartercode.eventbridge.bridge.BridgeModule;
+import com.quartercode.eventbridge.bridge.Event;
+import com.quartercode.eventbridge.bridge.EventHandler;
+import com.quartercode.eventbridge.bridge.EventPredicate;
 import com.quartercode.eventbridge.channel.Channel;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 

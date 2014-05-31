@@ -16,7 +16,7 @@
  * License along with EventBridge. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.quartercode.eventbridge.def.bridge;
+package com.quartercode.eventbridge.def.bridge.module;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,10 +24,10 @@ import com.quartercode.eventbridge.basic.AbstractBridgeModule;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
-import com.quartercode.eventbridge.bridge.ConnectorSenderModule;
 import com.quartercode.eventbridge.bridge.Event;
-import com.quartercode.eventbridge.bridge.SenderModule;
-import com.quartercode.eventbridge.bridge.SenderModule.SendInterceptor;
+import com.quartercode.eventbridge.bridge.module.ConnectorSenderModule;
+import com.quartercode.eventbridge.bridge.module.SenderModule;
+import com.quartercode.eventbridge.bridge.module.SenderModule.SendInterceptor;
 import com.quartercode.eventbridge.channel.Channel;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.channel.DefaultChannel;
