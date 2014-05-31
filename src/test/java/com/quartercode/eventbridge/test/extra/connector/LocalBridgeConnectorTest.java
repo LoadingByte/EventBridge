@@ -18,6 +18,7 @@
 
 package com.quartercode.eventbridge.test.extra.connector;
 
+import static com.quartercode.eventbridge.test.ExtraActions.recordArgument;
 import static org.junit.Assert.assertNotNull;
 import java.util.concurrent.atomic.AtomicReference;
 import org.jmock.Expectations;
@@ -30,6 +31,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import com.quartercode.eventbridge.bridge.Bridge;
+import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
 import com.quartercode.eventbridge.extra.connector.LocalBridgeConnector;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
@@ -37,9 +39,9 @@ import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent2;
 
 public class LocalBridgeConnectorTest {
 
-    private static Action doDummyAddConnector(AtomicReference<LocalBridgeConnector> connectorStorage, Bridge localBridge) {
+    private static Action startConnectorOnBridge(Bridge localBridge) {
 
-        return new DummyAddConnectorAction(connectorStorage, localBridge);
+        return new StartConnectorAction(localBridge);
     }
 
     @Rule
@@ -63,7 +65,10 @@ public class LocalBridgeConnectorTest {
         context.checking(new Expectations() {{
 
             oneOf(bridge2).addConnector(with(any(LocalBridgeConnector.class)));
-                will(doDummyAddConnector(bridge2To1Connector, bridge2));
+                will(doAll(
+                    recordArgument(0).to(bridge2To1Connector),
+                    startConnectorOnBridge(bridge2)
+                ));
 
         }});
         // @formatter:on
@@ -142,24 +147,21 @@ public class LocalBridgeConnectorTest {
         bridge2To1Connector.get().send(bridge2To1Events[2]);
     }
 
-    private static class DummyAddConnectorAction extends CustomAction {
+    private static class StartConnectorAction extends CustomAction {
 
-        private final AtomicReference<LocalBridgeConnector> connectorStorage;
-        private final Bridge                                localBridge;
+        private final Bridge localBridge;
 
-        public DummyAddConnectorAction(AtomicReference<LocalBridgeConnector> connectorStorage, Bridge localBridge) {
+        public StartConnectorAction(Bridge localBridge) {
 
-            super("stores LocalBridgeConnector in atomic reference");
+            super("starts a bridge connector");
 
-            this.connectorStorage = connectorStorage;
             this.localBridge = localBridge;
         }
 
         @Override
         public Object invoke(Invocation invocation) throws BridgeConnectorException {
 
-            LocalBridgeConnector connector = (LocalBridgeConnector) invocation.getParameter(0);
-            connectorStorage.set(connector);
+            BridgeConnector connector = (BridgeConnector) invocation.getParameter(0);
             connector.start(localBridge);
             return null;
         }
