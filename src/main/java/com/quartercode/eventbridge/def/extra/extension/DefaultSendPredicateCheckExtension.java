@@ -23,23 +23,22 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import org.apache.commons.lang3.tuple.Pair;
 import com.quartercode.eventbridge.basic.AbstractBridgeModule;
 import com.quartercode.eventbridge.basic.EventBase;
 import com.quartercode.eventbridge.basic.EventUtils;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.Bridge.ModifyConnectorListListener;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
+import com.quartercode.eventbridge.bridge.ConnectorSenderModule;
+import com.quartercode.eventbridge.bridge.ConnectorSenderModule.SpecificConnectorSendInterceptor;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.EventPredicate;
 import com.quartercode.eventbridge.bridge.HandlerModule;
 import com.quartercode.eventbridge.bridge.HandlerModule.GlobalHandleInterceptor;
 import com.quartercode.eventbridge.bridge.HandlerModule.ModifyHandlerListListener;
-import com.quartercode.eventbridge.bridge.SenderModule;
-import com.quartercode.eventbridge.bridge.SenderModule.ConnectorSendInterceptor;
-import com.quartercode.eventbridge.bridge.SenderModule.LocalHandlerSendInterceptor;
+import com.quartercode.eventbridge.bridge.LocalHandlerSenderModule;
+import com.quartercode.eventbridge.bridge.LocalHandlerSenderModule.LocalHandlerSendInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.extra.extension.SendPredicateCheckExtension;
 
@@ -50,13 +49,13 @@ import com.quartercode.eventbridge.extra.extension.SendPredicateCheckExtension;
  */
 public class DefaultSendPredicateCheckExtension extends AbstractBridgeModule implements SendPredicateCheckExtension {
 
-    private final SPCEModifyHandlerListListener                 modifyHandlerListListener   = new SPCEModifyHandlerListListener();
-    private final SPCEModifyConnectorListListener               modifyConnectorListListener = new SPCEModifyConnectorListListener();
-    private final SPCEGlobalHandleInterceptor                   globalHandleInterceptor     = new SPCEGlobalHandleInterceptor();
-    private final SPCEConnectorSendInterceptor                  connectorSendInterceptor    = new SPCEConnectorSendInterceptor();
-    private final SPCELocalHandlerSendInterceptor               localHandlerSendInterceptor = new SPCELocalHandlerSendInterceptor();
+    private final SPCEModifyHandlerListListener                 modifyHandlerListListener        = new SPCEModifyHandlerListListener();
+    private final SPCEModifyConnectorListListener               modifyConnectorListListener      = new SPCEModifyConnectorListListener();
+    private final SPCEGlobalHandleInterceptor                   globalHandleInterceptor          = new SPCEGlobalHandleInterceptor();
+    private final SPCESpecificConnectorSendInterceptor          specificConnectorSendInterceptor = new SPCESpecificConnectorSendInterceptor();
+    private final SPCELocalHandlerSendInterceptor               localHandlerSendInterceptor      = new SPCELocalHandlerSendInterceptor();
 
-    private final Map<BridgeConnector, List<EventPredicate<?>>> predicates                  = new HashMap<>();
+    private final Map<BridgeConnector, List<EventPredicate<?>>> predicates                       = new HashMap<>();
 
     /**
      * Creates a new send predicate check extension.
@@ -79,10 +78,10 @@ public class DefaultSendPredicateCheckExtension extends AbstractBridgeModule imp
         bridge.getModule(HandlerModule.class).getGlobalHandleChannel().addInterceptor(globalHandleInterceptor, 50);
 
         // Connector send interceptor for stopping events which are not requested at the other side
-        bridge.getModule(SenderModule.class).getConnectorSendChannel().addInterceptor(connectorSendInterceptor, 50);
+        bridge.getModule(ConnectorSenderModule.class).getSpecificChannel().addInterceptor(specificConnectorSendInterceptor, 50);
 
         // Local handler send interceptor for stopping SetPredicatesEvents from being handled locally
-        bridge.getModule(SenderModule.class).getLocalHandlerSendChannel().addInterceptor(localHandlerSendInterceptor, 50);
+        bridge.getModule(LocalHandlerSenderModule.class).getChannel().addInterceptor(localHandlerSendInterceptor, 50);
     }
 
     @Override
@@ -91,8 +90,8 @@ public class DefaultSendPredicateCheckExtension extends AbstractBridgeModule imp
         getBridge().getModule(HandlerModule.class).removeModifyHandlerListListener(modifyHandlerListListener);
         getBridge().removeModifyConnectorListListener(modifyConnectorListListener);
         getBridge().getModule(HandlerModule.class).getGlobalHandleChannel().removeInterceptor(globalHandleInterceptor);
-        getBridge().getModule(SenderModule.class).getConnectorSendChannel().removeInterceptor(connectorSendInterceptor);
-        getBridge().getModule(SenderModule.class).getLocalHandlerSendChannel().removeInterceptor(localHandlerSendInterceptor);
+        getBridge().getModule(ConnectorSenderModule.class).getSpecificChannel().removeInterceptor(specificConnectorSendInterceptor);
+        getBridge().getModule(LocalHandlerSenderModule.class).getChannel().removeInterceptor(localHandlerSendInterceptor);
 
         super.remove();
     }
@@ -186,17 +185,17 @@ public class DefaultSendPredicateCheckExtension extends AbstractBridgeModule imp
 
     }
 
-    private class SPCEConnectorSendInterceptor implements ConnectorSendInterceptor {
+    private class SPCESpecificConnectorSendInterceptor implements SpecificConnectorSendInterceptor {
 
         @Override
-        public void send(ChannelInvocation<ConnectorSendInterceptor> invocation, BridgeConnector connector, Event event) {
+        public void send(ChannelInvocation<SpecificConnectorSendInterceptor> invocation, Event event, BridgeConnector connector) {
 
-            if (event instanceof SetPredicatesEvent || isInteresting(connector, event)) {
-                invocation.next().send(invocation, connector, event);
+            if (event instanceof SetPredicatesEvent || isInteresting(event, connector)) {
+                invocation.next().send(invocation, event, connector);
             }
         }
 
-        private boolean isInteresting(BridgeConnector connector, Event event) {
+        private boolean isInteresting(Event event, BridgeConnector connector) {
 
             for (EventPredicate<?> predicate : predicates.get(connector)) {
                 if (EventUtils.tryTest(predicate, event)) {

@@ -31,11 +31,11 @@ import org.junit.Test;
 import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
+import com.quartercode.eventbridge.bridge.ConnectorSenderModule;
+import com.quartercode.eventbridge.bridge.ConnectorSenderModule.SpecificConnectorSendInterceptor;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.HandlerModule;
-import com.quartercode.eventbridge.bridge.SenderModule;
-import com.quartercode.eventbridge.bridge.SenderModule.ConnectorSendInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.bridge.DefaultBridge;
 import com.quartercode.eventbridge.def.extra.extension.DefaultSendPredicateCheckExtension;
@@ -46,7 +46,7 @@ import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent2;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent3;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent4;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent5;
-import com.quartercode.eventbridge.test.DummyInterceptors.DummyConnectorSendInterceptor;
+import com.quartercode.eventbridge.test.DummyInterceptors.DummySpecificConnectorSendInterceptor;
 
 @SuppressWarnings ("unchecked")
 public class DefaultSendPredicateCheckExtensionTest {
@@ -77,7 +77,7 @@ public class DefaultSendPredicateCheckExtensionTest {
     private BridgeConnector                    bridge1To2Connector;
     private BridgeConnector                    bridge1To3Connector;
     @Mock
-    private ConnectorSendInterceptor           interceptor;
+    private SpecificConnectorSendInterceptor   interceptor;
 
     private DefaultSendPredicateCheckExtension bridge1Extension;
     private DefaultSendPredicateCheckExtension bridge2Extension;
@@ -94,13 +94,13 @@ public class DefaultSendPredicateCheckExtensionTest {
         bridge1To3Connector = new LocalBridgeConnector(bridge3);
 
         // Add the mocked connector send interceptor to bridge 1
-        bridge1.getModule(SenderModule.class).getConnectorSendChannel().addInterceptor(new DummyConnectorSendInterceptor(interceptor), 1);
+        bridge1.getModule(ConnectorSenderModule.class).getSpecificChannel().addInterceptor(new DummySpecificConnectorSendInterceptor(interceptor), 1);
 
         // Allow the internal events to flow through the interceptor
         // @formatter:off
         context.checking(new Expectations() {{
 
-            allowing(interceptor).send(with(any(ChannelInvocation.class)), with(any(BridgeConnector.class)), with(any(INTERNAL_EVENT_TYPE)));
+            allowing(interceptor).send(with(any(ChannelInvocation.class)), with(any(INTERNAL_EVENT_TYPE)), with(any(BridgeConnector.class)));
 
         }});
         // @formatter:on
@@ -131,7 +131,7 @@ public class DefaultSendPredicateCheckExtensionTest {
         context.checking(new Expectations() {{
 
             for (Pair<BridgeConnector, Event> expectedEvent : actualExpectedEvents) {
-                oneOf(interceptor).send(with(any(ChannelInvocation.class)), with(expectedEvent.getLeft()), with(expectedEvent.getRight()));
+                oneOf(interceptor).send(with(any(ChannelInvocation.class)), with(expectedEvent.getRight()), with(expectedEvent.getLeft()));
             }
 
         }});

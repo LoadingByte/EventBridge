@@ -22,94 +22,44 @@ import com.quartercode.eventbridge.channel.Channel;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 
 /**
- * The part of a {@link Bridge} which takes care of transporting {@link Event}s to the bridge's {@link HandlerModule} and connected bridges.
+ * The {@link BridgeModule} which takes care of transporting {@link Event}s to other modules that actually deliver the event.
+ * These other modules must hook into the module's channel ({@link #getChannel()}) in order to divert the sent events.
  * 
- * @see Bridge
  * @see Event
  */
 public interface SenderModule extends BridgeModule {
 
     /**
-     * Returns the {@link Channel} which delivers {@link Event}s to the local handler send channel and connector send channel of the module.
-     * It is invoked by the {@link #send(Event)} method.
-     * The local handler send channel and connector send channel can be accessed with {@link #getLocalHandlerSendChannel()} and {@link #getConnectorSendChannel()}.
+     * Returns the {@link Channel} which delivers {@link Event}s to other modules of the {@link Bridge}.
+     * These other modules must hook into this channel in order to divert the sent events.
+     * The channel is invoked by the {@link #send(Event)} method.
      * 
-     * @return The channel which delivers events to the local handler send channel and connector send channel.
+     * @return The channel which delivers events to other bridge modules.
      */
-    public Channel<GlobalSendInterceptor> getGlobalSendChannel();
+    public Channel<SendInterceptor> getChannel();
 
     /**
-     * Returns the {@link Channel} which delivers {@link Event}s to the global handle channel of the bridge's {@link HandlerModule}.
-     * It is invoked by the last interceptor of the global send channel ({@link #getGlobalSendChannel()}).
+     * Sends the given {@link Event} through the send channel ({@link #getChannel()}).
      * 
-     * @return The channel which delivers events to the {@link HandlerModule}.
-     */
-    public Channel<LocalHandlerSendInterceptor> getLocalHandlerSendChannel();
-
-    /**
-     * Returns the {@link Channel} which delivers {@link Event}s to a specific local {@link BridgeConnector}.
-     * It is invoked by the last interceptor of the global send channel ({@link #getGlobalSendChannel()}).
-     * 
-     * @return The channel which delivers events to a specific bridge connector.
-     */
-    public Channel<ConnectorSendInterceptor> getConnectorSendChannel();
-
-    /**
-     * Sends the given {@link Event} through the global send channel ({@link #getGlobalSendChannel()}).
-     * 
-     * @param event The event that should be sent through the global send channel.
+     * @param event The event which should be sent through the send channel.
      */
     public void send(Event event);
 
     /**
-     * The interceptor which is used in the global send channel of a {@link SenderModule}.
+     * The interceptor which is used in the send channel of a {@link SenderModule}.
      * 
-     * @see SenderModule#getGlobalSendChannel()
+     * @see SenderModule#getChannel()
      */
-    public static interface GlobalSendInterceptor {
+    public static interface SendInterceptor {
 
         /**
-         * Intercepts the delivery process of the given {@link Event} to the local handler send channel and connector send channel.
+         * Intercepts the delivery process of the given {@link Event} to other modules of the {@link SenderModule}'s {@link Bridge}.
          * 
          * @param invocation The {@link ChannelInvocation} object for the current invocation chain.
-         * @param event The event which is delivered to the local handler send channel and connector send channel.
+         * @param event The event which is transported through the channel.
+         *        It should be delivered to other modules of the module's bridge.
          */
-        public void send(ChannelInvocation<GlobalSendInterceptor> invocation, Event event);
-
-    }
-
-    /**
-     * The interceptor which is used in the local handler send channel of a {@link SenderModule}.
-     * 
-     * @see SenderModule#getLocalHandlerSendChannel()
-     */
-    public static interface LocalHandlerSendInterceptor {
-
-        /**
-         * Intercepts the delivery process of the given {@link Event} to the global handle channel of the bridge's {@link HandlerModule}.
-         * 
-         * @param invocation The {@link ChannelInvocation} object for the current invocation chain.
-         * @param event The event which should be sent to the {@link HandlerModule}.
-         */
-        public void send(ChannelInvocation<LocalHandlerSendInterceptor> invocation, Event event);
-
-    }
-
-    /**
-     * The interceptor which is used in the connector send channel of a {@link SenderModule}.
-     * 
-     * @see SenderModule#getConnectorSendChannel()
-     */
-    public static interface ConnectorSendInterceptor {
-
-        /**
-         * Intercepts the delivery process of the given {@link Event} to the given {@link BridgeConnector}.
-         * 
-         * @param invocation The {@link ChannelInvocation} object for the current invocation chain.
-         * @param connector The bridge connector through which the given event should be sent.
-         * @param event The event which should be sent through the given bridge connector.
-         */
-        public void send(ChannelInvocation<ConnectorSendInterceptor> invocation, BridgeConnector connector, Event event);
+        public void send(ChannelInvocation<SendInterceptor> invocation, Event event);
 
     }
 

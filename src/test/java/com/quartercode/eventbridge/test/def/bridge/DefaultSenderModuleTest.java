@@ -18,26 +18,19 @@
 
 package com.quartercode.eventbridge.test.def.bridge;
 
-import java.util.Arrays;
 import org.jmock.Expectations;
-import org.jmock.Sequence;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import com.quartercode.eventbridge.bridge.Bridge;
-import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
-import com.quartercode.eventbridge.bridge.SenderModule.ConnectorSendInterceptor;
-import com.quartercode.eventbridge.bridge.SenderModule.GlobalSendInterceptor;
-import com.quartercode.eventbridge.bridge.SenderModule.LocalHandlerSendInterceptor;
+import com.quartercode.eventbridge.bridge.SenderModule.SendInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.bridge.DefaultSenderModule;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
-import com.quartercode.eventbridge.test.DummyInterceptors.DummyConnectorSendInterceptor;
-import com.quartercode.eventbridge.test.DummyInterceptors.DummyGlobalSendInterceptor;
-import com.quartercode.eventbridge.test.DummyInterceptors.DummyLocalHandlerSendInterceptor;
+import com.quartercode.eventbridge.test.DummyInterceptors.DummySendInterceptor;
 
 public class DefaultSenderModuleTest {
 
@@ -46,13 +39,13 @@ public class DefaultSenderModuleTest {
 
     @Mock
     private Bridge              bridge;
-    private DefaultSenderModule senderModule;
+    private DefaultSenderModule module;
 
     @Before
     public void setUp() {
 
-        senderModule = new DefaultSenderModule();
-        senderModule.add(bridge);
+        module = new DefaultSenderModule();
+        module.add(bridge);
     }
 
     @SuppressWarnings ("unchecked")
@@ -61,58 +54,18 @@ public class DefaultSenderModuleTest {
 
         final EmptyEvent1 event = new EmptyEvent1();
 
-        final GlobalSendInterceptor globalInterceptor = context.mock(GlobalSendInterceptor.class);
-        senderModule.getGlobalSendChannel().addInterceptor(new DummyGlobalSendInterceptor(globalInterceptor), 1);
-
-        final LocalHandlerSendInterceptor localHandlerInterceptor = context.mock(LocalHandlerSendInterceptor.class);
-        senderModule.getLocalHandlerSendChannel().addInterceptor(new DummyLocalHandlerSendInterceptor(localHandlerInterceptor), 1);
-
-        final ConnectorSendInterceptor connectorInterceptor = context.mock(ConnectorSendInterceptor.class);
-        senderModule.getConnectorSendChannel().addInterceptor(new DummyConnectorSendInterceptor(connectorInterceptor), 1);
-
-        final BridgeConnector connector = context.mock(BridgeConnector.class);
+        final SendInterceptor interceptor = context.mock(SendInterceptor.class);
+        module.getChannel().addInterceptor(new DummySendInterceptor(interceptor), 1);
 
         // @formatter:off
         context.checking(new Expectations() {{
 
-            allowing(bridge).getConnectors();
-                will(returnValue(Arrays.asList(connector)));
-
-            final Sequence sendChain = context.sequence("sendChain");
-            oneOf(globalInterceptor).send(with(any(ChannelInvocation.class)), with(event)); inSequence(sendChain);
-            oneOf(localHandlerInterceptor).send(with(any(ChannelInvocation.class)), with(event)); inSequence(sendChain);
-            oneOf(bridge).handle(null, event); inSequence(sendChain);
-            oneOf(connectorInterceptor).send(with(any(ChannelInvocation.class)), with(connector), with(event)); inSequence(sendChain);
-            oneOf(connector).send(event); inSequence(sendChain);
+            oneOf(interceptor).send(with(any(ChannelInvocation.class)), with(event));
 
         }});
         // @formatter:on
 
-        senderModule.send(event);
-    }
-
-    @Test
-    public void testSendWithException() throws BridgeConnectorException {
-
-        final EmptyEvent1 event = new EmptyEvent1();
-
-        final BridgeConnector connector = context.mock(BridgeConnector.class);
-
-        // @formatter:off
-        context.checking(new Expectations() {{
-
-            allowing(bridge).getConnectors();
-                will(returnValue(Arrays.asList(connector)));
-
-            oneOf(connector).send(event);
-                will(throwException(new BridgeConnectorException(connector)));
-            allowing(bridge).handle(null, event);
-
-        }});
-        // @formatter:on
-
-        // Assert that the exception is suppressed by the sender module
-        senderModule.send(event);
+        module.send(event);
     }
 
 }

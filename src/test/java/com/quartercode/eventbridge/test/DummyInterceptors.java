@@ -19,31 +19,68 @@
 package com.quartercode.eventbridge.test;
 
 import com.quartercode.eventbridge.bridge.BridgeConnector;
+import com.quartercode.eventbridge.bridge.ConnectorSenderModule.GlobalConnectorSendInterceptor;
+import com.quartercode.eventbridge.bridge.ConnectorSenderModule.SpecificConnectorSendInterceptor;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.HandlerModule.GlobalHandleInterceptor;
 import com.quartercode.eventbridge.bridge.HandlerModule.HandlerHandleInterceptor;
-import com.quartercode.eventbridge.bridge.SenderModule.ConnectorSendInterceptor;
-import com.quartercode.eventbridge.bridge.SenderModule.GlobalSendInterceptor;
-import com.quartercode.eventbridge.bridge.SenderModule.LocalHandlerSendInterceptor;
+import com.quartercode.eventbridge.bridge.LocalHandlerSenderModule.LocalHandlerSendInterceptor;
+import com.quartercode.eventbridge.bridge.SenderModule.SendInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 
 public class DummyInterceptors {
 
-    public static class DummyGlobalSendInterceptor implements GlobalSendInterceptor {
+    public static class DummySendInterceptor implements SendInterceptor {
 
-        private final GlobalSendInterceptor dummy;
+        private final SendInterceptor dummy;
 
-        public DummyGlobalSendInterceptor(GlobalSendInterceptor dummy) {
+        public DummySendInterceptor(SendInterceptor dummy) {
 
             this.dummy = dummy;
         }
 
         @Override
-        public void send(ChannelInvocation<GlobalSendInterceptor> invocation, Event event) {
+        public void send(ChannelInvocation<SendInterceptor> invocation, Event event) {
 
             dummy.send(invocation, event);
             invocation.next().send(invocation, event);
+        }
+
+    }
+
+    public static class DummyGlobalConnectorSendInterceptor implements GlobalConnectorSendInterceptor {
+
+        private final GlobalConnectorSendInterceptor dummy;
+
+        public DummyGlobalConnectorSendInterceptor(GlobalConnectorSendInterceptor dummy) {
+
+            this.dummy = dummy;
+        }
+
+        @Override
+        public void send(ChannelInvocation<GlobalConnectorSendInterceptor> invocation, Event event) {
+
+            dummy.send(invocation, event);
+            invocation.next().send(invocation, event);
+        }
+
+    }
+
+    public static class DummySpecificConnectorSendInterceptor implements SpecificConnectorSendInterceptor {
+
+        private final SpecificConnectorSendInterceptor dummy;
+
+        public DummySpecificConnectorSendInterceptor(SpecificConnectorSendInterceptor dummy) {
+
+            this.dummy = dummy;
+        }
+
+        @Override
+        public void send(ChannelInvocation<SpecificConnectorSendInterceptor> invocation, Event event, BridgeConnector connector) {
+
+            dummy.send(invocation, event, connector);
+            invocation.next().send(invocation, event, connector);
         }
 
     }
@@ -62,24 +99,6 @@ public class DummyInterceptors {
 
             dummy.send(invocation, event);
             invocation.next().send(invocation, event);
-        }
-
-    }
-
-    public static class DummyConnectorSendInterceptor implements ConnectorSendInterceptor {
-
-        private final ConnectorSendInterceptor dummy;
-
-        public DummyConnectorSendInterceptor(ConnectorSendInterceptor dummy) {
-
-            this.dummy = dummy;
-        }
-
-        @Override
-        public void send(ChannelInvocation<ConnectorSendInterceptor> invocation, BridgeConnector connector, Event event) {
-
-            dummy.send(invocation, connector, event);
-            invocation.next().send(invocation, connector, event);
         }
 
     }

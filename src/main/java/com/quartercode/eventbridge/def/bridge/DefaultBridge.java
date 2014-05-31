@@ -49,6 +49,9 @@ public class DefaultBridge implements Bridge {
     public DefaultBridge() {
 
         addModule(new DefaultSenderModule());
+        addModule(new DefaultConnectorSenderModule());
+        addModule(new DefaultLocalHandlerSenderModule());
+
         addModule(new DefaultHandlerModule());
     }
 

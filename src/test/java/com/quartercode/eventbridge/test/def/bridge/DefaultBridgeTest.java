@@ -30,7 +30,9 @@ import com.quartercode.eventbridge.bridge.Bridge.ModifyConnectorListListener;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeConnectorException;
 import com.quartercode.eventbridge.bridge.BridgeModule;
+import com.quartercode.eventbridge.bridge.ConnectorSenderModule;
 import com.quartercode.eventbridge.bridge.HandlerModule;
+import com.quartercode.eventbridge.bridge.LocalHandlerSenderModule;
 import com.quartercode.eventbridge.bridge.SenderModule;
 import com.quartercode.eventbridge.def.bridge.DefaultBridge;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
@@ -177,9 +179,11 @@ public class DefaultBridgeTest {
     }
 
     @Test
-    public void testSenderModuleAdded() {
+    public void testSenderModulesAdded() {
 
         assertNotNull("New bridge doesn't have a sender module", bridge.getModule(SenderModule.class));
+        assertNotNull("New bridge doesn't have a connector sender module", bridge.getModule(ConnectorSenderModule.class));
+        assertNotNull("New bridge doesn't have a local handler sender module", bridge.getModule(LocalHandlerSenderModule.class));
     }
 
     @Test
