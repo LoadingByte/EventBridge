@@ -40,7 +40,7 @@ public class DefaultLocalHandlerSenderModule extends AbstractBridgeModule implem
     private final SendChannelDivertInterceptor         sendChannelDivertInterceptor = new SendChannelDivertInterceptor();
 
     /**
-     * Creates a new default sender module.
+     * Creates a new default local handler sender module.
      */
     public DefaultLocalHandlerSenderModule() {
 

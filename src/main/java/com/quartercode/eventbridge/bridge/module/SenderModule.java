@@ -25,7 +25,7 @@ import com.quartercode.eventbridge.channel.Channel;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 
 /**
- * The {@link BridgeModule} which takes care of transporting {@link Event}s to other modules that actually deliver the event.
+ * The {@link BridgeModule} which takes care of transporting sent {@link Event}s to other modules that actually deliver the event.
  * These other modules must hook into the module's channel ({@link #getChannel()}) in order to divert the sent events.
  * 
  * @see Event

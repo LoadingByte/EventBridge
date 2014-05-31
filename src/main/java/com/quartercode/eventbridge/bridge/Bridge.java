@@ -37,8 +37,8 @@ import java.util.List;
  * For example, a bridge module could be used to send events to other bridges, while a second module could handle incoming events.
  * 
  * @see Event
- * @see EventHandler
  * @see BridgeConnector
+ * @see BridgeModule
  */
 public interface Bridge {
 

@@ -47,7 +47,7 @@ public class DefaultConnectorSenderModule extends AbstractBridgeModule implement
     private final SendChannelDivertInterceptor              sendChannelDivertInterceptor = new SendChannelDivertInterceptor();
 
     /**
-     * Creates a new default sender module.
+     * Creates a new default connector sender module.
      */
     public DefaultConnectorSenderModule() {
 
