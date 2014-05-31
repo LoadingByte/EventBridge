@@ -116,10 +116,6 @@ public class DefaultSenderModule extends AbstractBridgeModule implements SenderM
 
     }
 
-    /*
-     * This class is static because it doesn't need a reference to DefaultSenderModule.
-     * -> Better performance
-     */
     private static class FinalConnectorSendInterceptor implements ConnectorSendInterceptor {
 
         @Override

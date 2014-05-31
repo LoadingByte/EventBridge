@@ -148,10 +148,6 @@ public class DefaultHandlerModule extends AbstractBridgeModule implements Handle
 
     }
 
-    /*
-     * This class is static because it doesn't need a reference to DefaultHandlerModule.
-     * -> Better performance
-     */
     private static class FinalHandlerHandleInterceptor implements HandlerHandleInterceptor {
 
         @Override
