@@ -33,7 +33,9 @@ import com.quartercode.eventbridge.bridge.BridgeModule;
 import com.quartercode.eventbridge.bridge.module.ConnectorSenderModule;
 import com.quartercode.eventbridge.bridge.module.HandlerModule;
 import com.quartercode.eventbridge.bridge.module.LocalHandlerSenderModule;
+import com.quartercode.eventbridge.bridge.module.LowLevelHandlerModule;
 import com.quartercode.eventbridge.bridge.module.SenderModule;
+import com.quartercode.eventbridge.bridge.module.StandardHandlerModule;
 import com.quartercode.eventbridge.def.bridge.DefaultBridge;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
 
@@ -187,9 +189,11 @@ public class DefaultBridgeTest {
     }
 
     @Test
-    public void testHandlerModuleAdded() {
+    public void testHandlerModulesAdded() {
 
         assertNotNull("New bridge doesn't have a handler module", bridge.getModule(HandlerModule.class));
+        assertNotNull("New bridge doesn't have a low-level handler module", bridge.getModule(LowLevelHandlerModule.class));
+        assertNotNull("New bridge doesn't have a standard handler module", bridge.getModule(StandardHandlerModule.class));
     }
 
     @Test
@@ -225,7 +229,7 @@ public class DefaultBridgeTest {
         context.checking(new Expectations() {{
 
             allowing(handlerModule).add(bridge);
-            oneOf(handlerModule).handle(source, event);
+            oneOf(handlerModule).handle(event, source);
 
         }});
         // @formatter:on
@@ -234,7 +238,7 @@ public class DefaultBridgeTest {
         bridge.removeModule(bridge.getModule(HandlerModule.class));
         bridge.addModule(handlerModule);
 
-        bridge.handle(source, event);
+        bridge.handle(event, source);
     }
 
     @Test

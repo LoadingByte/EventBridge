@@ -93,7 +93,7 @@ public class DefaultLocalHandlerSenderModule extends AbstractBridgeModule implem
         @Override
         public void send(ChannelInvocation<LocalHandlerSendInterceptor> invocation, Event event) {
 
-            getBridge().handle(null, event);
+            getBridge().handle(event, null);
 
             invocation.next().send(invocation, event);
         }

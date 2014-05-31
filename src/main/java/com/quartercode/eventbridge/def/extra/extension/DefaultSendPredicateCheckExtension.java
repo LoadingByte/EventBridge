@@ -19,7 +19,6 @@
 package com.quartercode.eventbridge.def.extra.extension;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,15 +29,15 @@ import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.Bridge.ModifyConnectorListListener;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.Event;
-import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.EventPredicate;
 import com.quartercode.eventbridge.bridge.module.ConnectorSenderModule;
 import com.quartercode.eventbridge.bridge.module.ConnectorSenderModule.SpecificConnectorSendInterceptor;
-import com.quartercode.eventbridge.bridge.module.HandlerModule;
-import com.quartercode.eventbridge.bridge.module.HandlerModule.GlobalHandleInterceptor;
-import com.quartercode.eventbridge.bridge.module.HandlerModule.ModifyHandlerListListener;
 import com.quartercode.eventbridge.bridge.module.LocalHandlerSenderModule;
 import com.quartercode.eventbridge.bridge.module.LocalHandlerSenderModule.LocalHandlerSendInterceptor;
+import com.quartercode.eventbridge.bridge.module.LowLevelHandler;
+import com.quartercode.eventbridge.bridge.module.LowLevelHandlerModule;
+import com.quartercode.eventbridge.bridge.module.LowLevelHandlerModule.GlobalLowLevelHandleInterceptor;
+import com.quartercode.eventbridge.bridge.module.LowLevelHandlerModule.ModifyLowLevelHandlerListListener;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.extra.extension.SendPredicateCheckExtension;
 
@@ -49,13 +48,13 @@ import com.quartercode.eventbridge.extra.extension.SendPredicateCheckExtension;
  */
 public class DefaultSendPredicateCheckExtension extends AbstractBridgeModule implements SendPredicateCheckExtension {
 
-    private final SPCEModifyHandlerListListener                 modifyHandlerListListener        = new SPCEModifyHandlerListListener();
-    private final SPCEModifyConnectorListListener               modifyConnectorListListener      = new SPCEModifyConnectorListListener();
-    private final SPCEGlobalHandleInterceptor                   globalHandleInterceptor          = new SPCEGlobalHandleInterceptor();
-    private final SPCESpecificConnectorSendInterceptor          specificConnectorSendInterceptor = new SPCESpecificConnectorSendInterceptor();
-    private final SPCELocalHandlerSendInterceptor               localHandlerSendInterceptor      = new SPCELocalHandlerSendInterceptor();
+    private final SPCEModifyLowLevelHandlerListListener         modifyLowLevelHandlerListListener = new SPCEModifyLowLevelHandlerListListener();
+    private final SPCEModifyConnectorListListener               modifyConnectorListListener       = new SPCEModifyConnectorListListener();
+    private final SPCEGlobalLowLevelHandleInterceptor           globalLowLevelHandleInterceptor   = new SPCEGlobalLowLevelHandleInterceptor();
+    private final SPCESpecificConnectorSendInterceptor          specificConnectorSendInterceptor  = new SPCESpecificConnectorSendInterceptor();
+    private final SPCELocalHandlerSendInterceptor               localHandlerSendInterceptor       = new SPCELocalHandlerSendInterceptor();
 
-    private final Map<BridgeConnector, List<EventPredicate<?>>> predicates                       = new HashMap<>();
+    private final Map<BridgeConnector, List<EventPredicate<?>>> predicates                        = new HashMap<>();
 
     /**
      * Creates a new send predicate check extension.
@@ -71,11 +70,11 @@ public class DefaultSendPredicateCheckExtension extends AbstractBridgeModule imp
         super.add(bridge);
 
         // Listeners for sending SetPredicatesEvents
-        bridge.getModule(HandlerModule.class).addModifyHandlerListListener(modifyHandlerListListener);
+        bridge.getModule(LowLevelHandlerModule.class).addModifyHandlerListListener(modifyLowLevelHandlerListListener);
         bridge.addModifyConnectorListListener(modifyConnectorListListener);
 
-        // Global handle interceptor for receiving SetPredicatesEvents
-        bridge.getModule(HandlerModule.class).getGlobalHandleChannel().addInterceptor(globalHandleInterceptor, 50);
+        // Global low-level handle interceptor for receiving SetPredicatesEvents
+        bridge.getModule(LowLevelHandlerModule.class).getGlobalChannel().addInterceptor(globalLowLevelHandleInterceptor, 50);
 
         // Connector send interceptor for stopping events which are not requested at the other side
         bridge.getModule(ConnectorSenderModule.class).getSpecificChannel().addInterceptor(specificConnectorSendInterceptor, 50);
@@ -87,27 +86,27 @@ public class DefaultSendPredicateCheckExtension extends AbstractBridgeModule imp
     @Override
     public void remove() {
 
-        getBridge().getModule(HandlerModule.class).removeModifyHandlerListListener(modifyHandlerListListener);
+        getBridge().getModule(LowLevelHandlerModule.class).removeModifyHandlerListListener(modifyLowLevelHandlerListListener);
         getBridge().removeModifyConnectorListListener(modifyConnectorListListener);
-        getBridge().getModule(HandlerModule.class).getGlobalHandleChannel().removeInterceptor(globalHandleInterceptor);
+        getBridge().getModule(LowLevelHandlerModule.class).getGlobalChannel().removeInterceptor(globalLowLevelHandleInterceptor);
         getBridge().getModule(ConnectorSenderModule.class).getSpecificChannel().removeInterceptor(specificConnectorSendInterceptor);
         getBridge().getModule(LocalHandlerSenderModule.class).getChannel().removeInterceptor(localHandlerSendInterceptor);
 
         super.remove();
     }
 
-    private static class SPCEModifyHandlerListListener implements ModifyHandlerListListener {
+    private static class SPCEModifyLowLevelHandlerListListener implements ModifyLowLevelHandlerListListener {
 
         @Override
-        public void onAddHandler(EventHandler<?> handler, EventPredicate<?> predicate, HandlerModule handlerModule) {
+        public void onAddHandler(LowLevelHandler handler, LowLevelHandlerModule module) {
 
-            handlerModule.getBridge().send(new SetPredicatesEvent(new EventPredicate<?>[] { predicate }, true));
+            module.getBridge().send(new SetPredicatesEvent(new EventPredicate<?>[] { handler.getPredicate() }, true));
         }
 
         @Override
-        public void onRemoveHandler(EventHandler<?> handler, EventPredicate<?> predicate, HandlerModule handlerModule) {
+        public void onRemoveHandler(LowLevelHandler handler, LowLevelHandlerModule module) {
 
-            handlerModule.getBridge().send(new SetPredicatesEvent(new EventPredicate<?>[] { predicate }, false));
+            module.getBridge().send(new SetPredicatesEvent(new EventPredicate<?>[] { handler.getPredicate() }, false));
         }
 
     }
@@ -117,8 +116,12 @@ public class DefaultSendPredicateCheckExtension extends AbstractBridgeModule imp
         @Override
         public void onAddConnector(BridgeConnector connector, Bridge bridge) {
 
-            Collection<EventPredicate<?>> predicateCollection = bridge.getModule(HandlerModule.class).getHandlers().values();
-            EventPredicate<?>[] predicateArray = predicateCollection.toArray(new EventPredicate<?>[predicateCollection.size()]);
+            List<LowLevelHandler> handlers = bridge.getModule(LowLevelHandlerModule.class).getHandlers();
+
+            EventPredicate<?>[] predicateArray = new EventPredicate<?>[handlers.size()];
+            for (int index = 0; index < predicateArray.length; index++) {
+                predicateArray[index] = handlers.get(index).getPredicate();
+            }
 
             bridge.send(new SetPredicatesEvent(predicateArray, true));
         }
@@ -131,17 +134,17 @@ public class DefaultSendPredicateCheckExtension extends AbstractBridgeModule imp
 
     }
 
-    private class SPCEGlobalHandleInterceptor implements GlobalHandleInterceptor {
+    private class SPCEGlobalLowLevelHandleInterceptor implements GlobalLowLevelHandleInterceptor {
 
         @Override
-        public void handle(ChannelInvocation<GlobalHandleInterceptor> invocation, BridgeConnector source, Event event) {
+        public void handle(ChannelInvocation<GlobalLowLevelHandleInterceptor> invocation, Event event, BridgeConnector source) {
 
             if (! (event instanceof SetPredicatesEvent)) {
-                invocation.next().handle(invocation, source, event);
+                invocation.next().handle(invocation, event, source);
                 return;
             }
 
-            // Source cannot be null since SetPredicatesEvents are not handled locally.
+            // Source cannot be null since SetPredicatesEvents are not handled locally
             handle(source, (SetPredicatesEvent) event);
         }
 
@@ -222,7 +225,7 @@ public class DefaultSendPredicateCheckExtension extends AbstractBridgeModule imp
 
     private static class SetPredicatesEvent extends EventBase {
 
-        private static final long         serialVersionUID = 5988984260797972075L;
+        private static final long         serialVersionUID = 7382589662643796833L;
 
         private final EventPredicate<?>[] predicates;
         private final boolean             add;

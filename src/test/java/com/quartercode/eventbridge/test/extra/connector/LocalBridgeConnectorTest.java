@@ -124,14 +124,14 @@ public class LocalBridgeConnectorTest {
             final Sequence handleCalls = context.sequence("handleCalls");
 
             // Bridge 1 -> Bridge 2 events
-            oneOf(bridge2).handle(bridge2To1Connector.get(), bridge1To2Events[0]); inSequence(handleCalls);
-            oneOf(bridge2).handle(bridge2To1Connector.get(), bridge1To2Events[1]); inSequence(handleCalls);
-            oneOf(bridge2).handle(bridge2To1Connector.get(), bridge1To2Events[2]); inSequence(handleCalls);
+            oneOf(bridge2).handle(bridge1To2Events[0], bridge2To1Connector.get()); inSequence(handleCalls);
+            oneOf(bridge2).handle(bridge1To2Events[1], bridge2To1Connector.get()); inSequence(handleCalls);
+            oneOf(bridge2).handle(bridge1To2Events[2], bridge2To1Connector.get()); inSequence(handleCalls);
 
             // Bridge 2 -> Bridge 1 events
-            oneOf(bridge1).handle(bridge1To2Connector, bridge2To1Events[0]); inSequence(handleCalls);
-            oneOf(bridge1).handle(bridge1To2Connector, bridge2To1Events[1]); inSequence(handleCalls);
-            oneOf(bridge1).handle(bridge1To2Connector, bridge2To1Events[2]); inSequence(handleCalls);
+            oneOf(bridge1).handle(bridge2To1Events[0], bridge1To2Connector); inSequence(handleCalls);
+            oneOf(bridge1).handle(bridge2To1Events[1], bridge1To2Connector); inSequence(handleCalls);
+            oneOf(bridge1).handle(bridge2To1Events[2], bridge1To2Connector); inSequence(handleCalls);
 
         }});
         // @formatter:on

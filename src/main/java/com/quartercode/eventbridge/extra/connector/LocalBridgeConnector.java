@@ -82,7 +82,7 @@ public class LocalBridgeConnector extends AbstractBridgeConnector {
 
     private void handle(Event event) {
 
-        getLocalBridge().handle(this, event);
+        getLocalBridge().handle(event, this);
     }
 
     private void disconnect() throws BridgeConnectorException {

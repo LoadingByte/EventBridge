@@ -21,8 +21,8 @@ package com.quartercode.eventbridge.test.basic;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.quartercode.eventbridge.basic.EventUtils;
-import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.EventPredicate;
+import com.quartercode.eventbridge.bridge.module.EventHandler;
 import com.quartercode.eventbridge.test.DummyEvents.CallableEvent;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
 

@@ -19,8 +19,8 @@
 package com.quartercode.eventbridge.basic;
 
 import com.quartercode.eventbridge.bridge.Event;
-import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.bridge.EventPredicate;
+import com.quartercode.eventbridge.bridge.module.EventHandler;
 
 /**
  * The event utils class provides some utility methods that are related to {@link Event}s and their environment ({@link EventPredicate}, {@link EventHandler} etc.).

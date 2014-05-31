@@ -24,7 +24,7 @@ import java.util.List;
  * Bridges allow to connect two parts of an application that must not run on the same vm or machine.
  * The connection between bridges can be changed without much effort.
  * Generally, bridges communicate with {@link Event}s that are sent between the bridges.
- * Events are sent by the first bridge, received by the second bridge and finally processed by some {@link EventHandler}s.
+ * Events are sent by the first bridge, received by the second bridge and finally processed by some high-level event handlers.
  * However, events can also be sent to one bridge which then hands them over to its local handlers.<br>
  * <br>
  * {@link BridgeConnector}s are used for connecting a bridge with some other bridges.
@@ -82,11 +82,11 @@ public interface Bridge {
     /**
      * Passes the given {@link Event} to the bridge's handler module.
      * 
-     * @param source The {@link BridgeConnector} which received the event.
-     *        May be {@code null} if the handled event was sent from the same bridge which is handling it.
      * @param event The event that should be passed to the handler module.
+     * @param source The {@link BridgeConnector} which received the event.
+     *        May be {@code null} if the handled event was sent from the same bridge as the one which is handling it.
      */
-    public void handle(BridgeConnector source, Event event);
+    public void handle(Event event, BridgeConnector source);
 
     // ----- Connectors -----
 

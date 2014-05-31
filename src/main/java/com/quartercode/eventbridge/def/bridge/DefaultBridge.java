@@ -32,7 +32,9 @@ import com.quartercode.eventbridge.bridge.module.SenderModule;
 import com.quartercode.eventbridge.def.bridge.module.DefaultConnectorSenderModule;
 import com.quartercode.eventbridge.def.bridge.module.DefaultHandlerModule;
 import com.quartercode.eventbridge.def.bridge.module.DefaultLocalHandlerSenderModule;
+import com.quartercode.eventbridge.def.bridge.module.DefaultLowLevelHandlerModule;
 import com.quartercode.eventbridge.def.bridge.module.DefaultSenderModule;
+import com.quartercode.eventbridge.def.bridge.module.DefaultStandardHandlerModule;
 
 /**
  * The default implementation of the {@link Bridge} interface.
@@ -57,6 +59,8 @@ public class DefaultBridge implements Bridge {
         addModule(new DefaultLocalHandlerSenderModule());
 
         addModule(new DefaultHandlerModule());
+        addModule(new DefaultLowLevelHandlerModule());
+        addModule(new DefaultStandardHandlerModule());
     }
 
     // ----- Modules -----
@@ -105,9 +109,9 @@ public class DefaultBridge implements Bridge {
     }
 
     @Override
-    public void handle(BridgeConnector source, Event event) {
+    public void handle(Event event, BridgeConnector source) {
 
-        getModule(HandlerModule.class).handle(source, event);
+        getModule(HandlerModule.class).handle(event, source);
     }
 
     // ----- Connectors -----

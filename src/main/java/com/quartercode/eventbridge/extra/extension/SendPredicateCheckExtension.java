@@ -22,7 +22,7 @@ import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeModule;
 import com.quartercode.eventbridge.bridge.Event;
-import com.quartercode.eventbridge.bridge.EventHandler;
+import com.quartercode.eventbridge.bridge.module.EventHandler;
 
 /**
  * The send predicate check extension prevents all {@link Event}s, which the receiver {@link Bridge} does hot have any {@link EventHandler} for, from being sent.

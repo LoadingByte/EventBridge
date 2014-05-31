@@ -22,22 +22,21 @@ import com.quartercode.eventbridge.bridge.Bridge;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.BridgeModule;
 import com.quartercode.eventbridge.bridge.Event;
-import com.quartercode.eventbridge.bridge.EventHandler;
 import com.quartercode.eventbridge.channel.Channel;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 
 /**
- * The {@link BridgeModule} which takes care of delivering {@link Event}s to the {@link Bridge#handle(BridgeConnector, Event)} method of the module's bridge.
+ * The {@link BridgeModule} which takes care of delivering {@link Event}s to the {@link Bridge#handle(Event, BridgeConnector)} method of the module's bridge.
  * It hooks into the {@link SenderModule}'s channel for diverting sent events into its local handler send channel ({@link #getChannel()}).
  * The module allows to handle sent events locally using {@link EventHandler}s.
  * 
  * @see Event
- * @see Bridge#handle(BridgeConnector, Event)
+ * @see Bridge#handle(Event, BridgeConnector)
  */
 public interface LocalHandlerSenderModule extends BridgeModule {
 
     /**
-     * Returns the {@link Channel} which delivers {@link Event}s to the {@link Bridge#handle(BridgeConnector, Event)} method of the module's bridge.
+     * Returns the {@link Channel} which delivers {@link Event}s to the {@link Bridge#handle(Event, BridgeConnector)} method of the module's bridge.
      * The last interceptor calls the that method.
      * The channel is invoked by the {@link #send(Event)} method.
      * 
@@ -60,7 +59,7 @@ public interface LocalHandlerSenderModule extends BridgeModule {
     public static interface LocalHandlerSendInterceptor {
 
         /**
-         * Intercepts the delivery process of the given {@link Event} to the {@link Bridge#handle(BridgeConnector, Event)} method
+         * Intercepts the delivery process of the given {@link Event} to the {@link Bridge#handle(Event, BridgeConnector)} method
          * of the {@link LocalHandlerSenderModule}'s bridge.
          * 
          * @param invocation The {@link ChannelInvocation} object for the current invocation chain.

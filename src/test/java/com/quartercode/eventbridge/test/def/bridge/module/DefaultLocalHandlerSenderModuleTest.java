@@ -86,7 +86,7 @@ public class DefaultLocalHandlerSenderModuleTest {
 
             final Sequence sendChain = context.sequence("sendChain");
             oneOf(interceptor).send(with(any(ChannelInvocation.class)), with(event)); inSequence(sendChain);
-            oneOf(bridge).handle(null, event); inSequence(sendChain);
+            oneOf(bridge).handle(event, null); inSequence(sendChain);
 
         }});
         // @formatter:on
