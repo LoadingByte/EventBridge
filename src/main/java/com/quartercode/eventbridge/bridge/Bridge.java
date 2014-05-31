@@ -19,8 +19,6 @@
 package com.quartercode.eventbridge.bridge;
 
 import java.util.List;
-import com.quartercode.eventbridge.bridge.module.HandlerModule;
-import com.quartercode.eventbridge.bridge.module.SenderModule;
 
 /**
  * Bridges allow to connect two parts of an application that must not run on the same vm or machine.
@@ -41,7 +39,6 @@ import com.quartercode.eventbridge.bridge.module.SenderModule;
  * @see Event
  * @see EventHandler
  * @see BridgeConnector
- * @see SenderModule
  */
 public interface Bridge {
 
@@ -76,16 +73,14 @@ public interface Bridge {
     // ----- Shortcuts -----
 
     /**
-     * Passes the given {@link Event} to the bridge's {@link SenderModule}.
-     * This method is basically a shortcut for the {@link SenderModule#send(Event)} method.
+     * Passes the given {@link Event} to the bridge's sender module.
      * 
      * @param event The event that should be passed to the sender module.
      */
     public void send(Event event);
 
     /**
-     * Passes the given {@link Event} to the bridge's {@link HandlerModule}.
-     * This method is basically a shortcut for the {@link HandlerModule#handle(BridgeConnector, Event)} method.
+     * Passes the given {@link Event} to the bridge's handler module.
      * 
      * @param source The {@link BridgeConnector} which received the event.
      *        May be {@code null} if the handled event was sent from the same bridge which is handling it.
