@@ -144,15 +144,17 @@ public class DefaultBridge implements Bridge {
     @Override
     public void removeConnector(BridgeConnector connector) throws BridgeConnectorException {
 
-        for (ModifyConnectorListListener listener : modifyConnectorListListeners) {
-            listener.onRemoveConnector(connector, this);
-        }
+        if (connectors.contains(connector)) {
+            for (ModifyConnectorListListener listener : modifyConnectorListListeners) {
+                listener.onRemoveConnector(connector, this);
+            }
 
-        try {
-            connector.stop();
-        } finally {
-            connectors.remove(connector);
-            connectorsUnmodifiableCache = null;
+            try {
+                connector.stop();
+            } finally {
+                connectors.remove(connector);
+                connectorsUnmodifiableCache = null;
+            }
         }
     }
 

@@ -254,6 +254,11 @@ public class DefaultBridgeTest {
         }});
         // @formatter:on
 
+        // Remove connector which wasn't added before
+        assertTrue("There are connectors stored inside the bridge although none were added", bridge.getConnectors().isEmpty());
+        bridge.removeConnector(connector1);
+        assertTrue("There are connectors stored inside the bridge although none were added", bridge.getConnectors().isEmpty());
+
         bridge.addConnector(connector1);
         assertListEquals("Connectors that are stored inside the bridge are not correct", bridge.getConnectors(), connector1);
         assertListEquals("Connectors that are stored inside the bridge changed on the second retrieval", bridge.getConnectors(), connector1);
