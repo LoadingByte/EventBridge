@@ -30,7 +30,7 @@ public class ExtraActions {
         return new RecordValueActionBuilder(parameter);
     }
 
-    public ExtraActions() {
+    private ExtraActions() {
 
     }
 

@@ -76,6 +76,21 @@ public class DefaultConnectorSenderModuleTest {
         module.add(bridge);
     }
 
+    @Test
+    public void testRemove() {
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+            
+            // The module should remove its hook from the sender module's channel
+            oneOf(senderModuleChannel).removeInterceptor(with(any(SendInterceptor.class)));
+            
+        }});
+        // @formatter:on
+
+        module.remove();
+    }
+
     @SuppressWarnings ("unchecked")
     @Test
     public void testSend() throws BridgeConnectorException {
@@ -131,21 +146,6 @@ public class DefaultConnectorSenderModuleTest {
 
         // Assert that the exception is suppressed by the sender module
         module.send(event);
-    }
-
-    @Test
-    public void testRemove() throws BridgeConnectorException {
-
-        // @formatter:off
-        context.checking(new Expectations() {{
-
-            // The module should remove its hook from the sender module's channel
-            oneOf(senderModuleChannel).removeInterceptor(with(any(SendInterceptor.class)));
-
-        }});
-        // @formatter:on
-
-        module.remove();
     }
 
 }

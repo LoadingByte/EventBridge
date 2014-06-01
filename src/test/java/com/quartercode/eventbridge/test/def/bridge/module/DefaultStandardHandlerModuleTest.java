@@ -216,6 +216,7 @@ public class DefaultStandardHandlerModuleTest {
         module.getChannel().addInterceptor(new DummyStandardHandleInterceptor(interceptor), 1);
 
         final AtomicReference<LowLevelHandler> lowLevelHandler = new AtomicReference<>();
+
         // @formatter:off
         context.checking(new Expectations() {{
 
@@ -263,6 +264,7 @@ public class DefaultStandardHandlerModuleTest {
         };
 
         final AtomicReference<LowLevelHandler> lowLevelHandler = new AtomicReference<>();
+
         // @formatter:off
         context.checking(new Expectations() {{
 
