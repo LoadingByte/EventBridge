@@ -205,7 +205,7 @@ public class DefaultReturnEventExtensionReturner extends AbstractBridgeModule im
 
             private final BridgeConnector connector;
 
-            public BridgeConnectorReturnEventSender(BridgeConnector connector) {
+            private BridgeConnectorReturnEventSender(BridgeConnector connector) {
 
                 this.connector = connector;
             }

@@ -30,6 +30,12 @@ import com.quartercode.eventbridge.extra.extension.ReturnEventExtensionReturner;
 import com.quartercode.eventbridge.extra.extension.SendPredicateCheckExtension;
 import com.quartercode.eventbridge.factory.FactoryManager;
 
+/**
+ * The event bridge factory class stores a {@link FactoryManager} and makes it publicly accessible.
+ * It also provides several default factories for the default abstract classes, like {@link Bridge}.
+ * 
+ * @see FactoryManager
+ */
 public class EventBridgeFactory {
 
     private static FactoryManager factoryManager = new FactoryManager();
@@ -51,11 +57,26 @@ public class EventBridgeFactory {
 
     }
 
+    /**
+     * Returns the {@link FactoryManager} manager which is internally used by the static class.
+     * New factory mappings should be added here.
+     * 
+     * @return The internal factory manager.
+     */
     public static FactoryManager getFactoryManager() {
 
         return factoryManager;
     }
 
+    /**
+     * Creates a new object of the given abstract type.
+     * This method uses the internal {@link FactoryManager} ({@link #getFactoryManager()}).
+     * 
+     * @param type The type of the object that should be created.
+     * @return The newly created object.
+     * @throws IllegalArgumentException There is no factory mapped for the given type.
+     * @see FactoryManager#create(Class)
+     */
     public static <T> T create(Class<T> type) {
 
         return factoryManager.create(type);
