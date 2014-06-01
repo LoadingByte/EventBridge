@@ -20,13 +20,10 @@ package com.quartercode.eventbridge.test.def.bridge.module;
 
 import static com.quartercode.eventbridge.test.ExtraActions.recordArgument;
 import static com.quartercode.eventbridge.test.ExtraAssert.assertMapEquals;
+import static com.quartercode.eventbridge.test.ExtraMatchers.aLowLevelHandlerWithThePredicate;
 import static org.junit.Assert.assertTrue;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hamcrest.Description;
-import org.hamcrest.Factory;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
 import org.jmock.auto.Mock;
@@ -51,12 +48,6 @@ import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent2;
 import com.quartercode.eventbridge.test.DummyInterceptors.DummyStandardHandleInterceptor;
 
 public class DefaultStandardHandlerModuleTest {
-
-    @Factory
-    private static Matcher<LowLevelHandler> aLowLevelHandlerWithThePredicate(EventPredicate<?> predicate) {
-
-        return new LowLevelHandlerPredicateMatcher(predicate);
-    }
 
     @Rule
     public JUnitRuleMockery              context = new JUnitRuleMockery();
@@ -277,29 +268,6 @@ public class DefaultStandardHandlerModuleTest {
         module.addHandler(handler, predicate);
 
         lowLevelHandler.get().handle(new EmptyEvent1(), null);
-    }
-
-    private static class LowLevelHandlerPredicateMatcher extends TypeSafeMatcher<LowLevelHandler> {
-
-        private final EventPredicate<?> predicate;
-
-        private LowLevelHandlerPredicateMatcher(EventPredicate<?> predicate) {
-
-            this.predicate = predicate;
-        }
-
-        @Override
-        protected boolean matchesSafely(LowLevelHandler item) {
-
-            return item.getPredicate().equals(predicate);
-        }
-
-        @Override
-        public void describeTo(Description description) {
-
-            description.appendText("a low-level handler with the predicate ").appendValue(predicate);
-        }
-
     }
 
 }
