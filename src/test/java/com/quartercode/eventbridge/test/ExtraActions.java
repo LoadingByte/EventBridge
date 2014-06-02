@@ -25,38 +25,39 @@ import org.jmock.lib.action.CustomAction;
 
 public class ExtraActions {
 
-    public static RecordValueActionBuilder recordArgument(int parameter) {
+    public static StoreArgumentActionBuilder storeArgument(int parameter) {
 
-        return new RecordValueActionBuilder(parameter);
+        return new StoreArgumentActionBuilder(parameter);
     }
 
     private ExtraActions() {
 
     }
 
-    public static class RecordValueActionBuilder {
+    public static class StoreArgumentActionBuilder {
 
         private final int parameter;
 
-        private RecordValueActionBuilder(int parameter) {
+        private StoreArgumentActionBuilder(int parameter) {
 
             this.parameter = parameter;
         }
 
-        public Action to(AtomicReference<?> storage) {
+        public Action in(AtomicReference<?> storage) {
 
-            return new RecordValueAction<>(parameter, storage);
+            return new StoreArgumentAction<>(parameter, storage);
         }
+
     }
 
-    private static class RecordValueAction<T> extends CustomAction {
+    private static class StoreArgumentAction<T> extends CustomAction {
 
         private final int                parameter;
         private final AtomicReference<T> storage;
 
-        private RecordValueAction(int parameter, AtomicReference<T> storage) {
+        private StoreArgumentAction(int parameter, AtomicReference<T> storage) {
 
-            super("stores LowLevelHandler in atomic reference");
+            super("stores objects in atomic reference");
 
             this.parameter = parameter;
             this.storage = storage;
@@ -70,7 +71,7 @@ public class ExtraActions {
             try {
                 storage.set((T) argument);
             } catch (ClassCastException e) {
-                throw new RuntimeException("Method argument '" + argument + "' cannot be recorded");
+                throw new RuntimeException("Method argument '" + argument + "' cannot be stored");
             }
 
             return null;

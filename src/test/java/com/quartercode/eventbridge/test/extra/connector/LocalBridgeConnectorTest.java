@@ -18,7 +18,7 @@
 
 package com.quartercode.eventbridge.test.extra.connector;
 
-import static com.quartercode.eventbridge.test.ExtraActions.recordArgument;
+import static com.quartercode.eventbridge.test.ExtraActions.storeArgument;
 import static org.junit.Assert.assertNotNull;
 import java.util.concurrent.atomic.AtomicReference;
 import org.jmock.Expectations;
@@ -66,7 +66,7 @@ public class LocalBridgeConnectorTest {
 
             oneOf(bridge2).addConnector(with(any(LocalBridgeConnector.class)));
                 will(doAll(
-                    recordArgument(0).to(bridge2To1Connector),
+                    storeArgument(0).in(bridge2To1Connector),
                     startConnectorOnBridge(bridge2)
                 ));
 

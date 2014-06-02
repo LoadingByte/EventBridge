@@ -18,7 +18,7 @@
 
 package com.quartercode.eventbridge.test.def.bridge.module;
 
-import static com.quartercode.eventbridge.test.ExtraActions.recordArgument;
+import static com.quartercode.eventbridge.test.ExtraActions.storeArgument;
 import static com.quartercode.eventbridge.test.ExtraAssert.assertListEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.concurrent.atomic.AtomicReference;
@@ -80,7 +80,7 @@ public class DefaultLowLevelHandlerModuleTest {
 
             // The module should add a hook to the handler module's channel
             oneOf(handlerModuleChannel).addInterceptor(with(any(HandleInterceptor.class)), with(100));
-                will(recordArgument(0).to(hookInterceptor));
+                will(storeArgument(0).in(hookInterceptor));
 
         }});
         // @formatter:on

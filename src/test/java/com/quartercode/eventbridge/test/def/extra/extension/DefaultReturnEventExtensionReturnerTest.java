@@ -18,7 +18,7 @@
 
 package com.quartercode.eventbridge.test.def.extra.extension;
 
-import static com.quartercode.eventbridge.test.ExtraActions.recordArgument;
+import static com.quartercode.eventbridge.test.ExtraActions.storeArgument;
 import static com.quartercode.eventbridge.test.ExtraAssert.assertMapEquals;
 import static com.quartercode.eventbridge.test.ExtraMatchers.aLowLevelHandlerWithThePredicate;
 import static org.junit.Assert.assertTrue;
@@ -219,7 +219,7 @@ public class DefaultReturnEventExtensionReturnerTest {
                 will(returnValue(false));
 
             oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(predicate)));
-                will(recordArgument(0).to(lowLevelHandler));
+                will(storeArgument(0).in(lowLevelHandler));
 
             final Sequence handleChain = context.sequence("handleChain");
             // Regular event
@@ -262,7 +262,7 @@ public class DefaultReturnEventExtensionReturnerTest {
         context.checking(new Expectations() {{
 
             oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(predicate)));
-                will(recordArgument(0).to(lowLevelHandler));
+                will(storeArgument(0).in(lowLevelHandler));
 
         }});
         // @formatter:on
@@ -296,15 +296,15 @@ public class DefaultReturnEventExtensionReturnerTest {
         context.checking(new Expectations() {{
 
             oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(predicate)));
-                will(recordArgument(0).to(lowLevelHandler));
+                will(storeArgument(0).in(lowLevelHandler));
 
             final Sequence handlerCalls = context.sequence("handlerCalls");
             oneOf(handler).handle(with(any(EmptyEvent1.class)), with(any(ReturnEventSender.class))); inSequence(handlerCalls);
-                will(recordArgument(1).to(returnEventSender1));
+                will(storeArgument(1).in(returnEventSender1));
             oneOf(handler).handle(with(any(EmptyEvent2.class)), with(any(ReturnEventSender.class))); inSequence(handlerCalls);
-                will(recordArgument(1).to(returnEventSender2));
+                will(storeArgument(1).in(returnEventSender2));
             oneOf(handler).handle(with(any(EmptyEvent3.class)), with(any(ReturnEventSender.class))); inSequence(handlerCalls);
-                will(recordArgument(1).to(returnEventSender3));
+                will(storeArgument(1).in(returnEventSender3));
 
             final Sequence returnSenderCalls = context.sequence("returnSenderCalls");
             oneOf(bridge).handle(returnEvent1, null); inSequence(returnSenderCalls);

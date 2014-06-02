@@ -18,7 +18,7 @@
 
 package com.quartercode.eventbridge.test.def.extra.extension;
 
-import static com.quartercode.eventbridge.test.ExtraActions.recordArgument;
+import static com.quartercode.eventbridge.test.ExtraActions.storeArgument;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -77,7 +77,7 @@ public class DefaultReturnEventExtensionRequesterTest {
 
             // The module should add a hook to the handler module's channel
             allowing(handlerModuleChannel).addInterceptor(with(any(HandleInterceptor.class)), with(500));
-                will(recordArgument(0).to(hookInterceptor));
+                will(storeArgument(0).in(hookInterceptor));
 
         }});
         // @formatter:on
@@ -118,7 +118,7 @@ public class DefaultReturnEventExtensionRequesterTest {
             final Sequence sendChain = context.sequence("sendChain");
             oneOf(requestSendInterceptor).sendRequest(with(any(ChannelInvocation.class)), with(requestEvent), with(returnHandler)); inSequence(sendChain);
             oneOf(bridge).send(with(any(ReturnEventExtensionWrapper.class)));
-                will(recordArgument(0).to(requestWrapper));
+                will(storeArgument(0).in(requestWrapper));
 
         }});
         // @formatter:on
@@ -158,7 +158,7 @@ public class DefaultReturnEventExtensionRequesterTest {
         context.checking(new Expectations() {{
 
             oneOf(bridge).send(with(any(ReturnEventExtensionWrapper.class)));
-                will(recordArgument(0).to(requestWrapper));
+                will(storeArgument(0).in(requestWrapper));
 
         }});
         // @formatter:on

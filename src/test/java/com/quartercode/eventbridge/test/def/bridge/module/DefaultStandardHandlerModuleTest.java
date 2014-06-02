@@ -18,7 +18,7 @@
 
 package com.quartercode.eventbridge.test.def.bridge.module;
 
-import static com.quartercode.eventbridge.test.ExtraActions.recordArgument;
+import static com.quartercode.eventbridge.test.ExtraActions.storeArgument;
 import static com.quartercode.eventbridge.test.ExtraAssert.assertMapEquals;
 import static com.quartercode.eventbridge.test.ExtraMatchers.aLowLevelHandlerWithThePredicate;
 import static org.junit.Assert.assertTrue;
@@ -217,7 +217,7 @@ public class DefaultStandardHandlerModuleTest {
                 will(returnValue(false));
 
             oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(predicate)));
-                will(recordArgument(0).to(lowLevelHandler));
+                will(storeArgument(0).in(lowLevelHandler));
 
             final Sequence handleChain = context.sequence("handleChain");
             // Regular event
@@ -260,7 +260,7 @@ public class DefaultStandardHandlerModuleTest {
         context.checking(new Expectations() {{
 
             oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(predicate)));
-                will(recordArgument(0).to(lowLevelHandler));
+                will(storeArgument(0).in(lowLevelHandler));
 
         }});
         // @formatter:on
