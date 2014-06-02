@@ -35,6 +35,7 @@ import com.quartercode.eventbridge.bridge.module.LowLevelHandlerModule;
 import com.quartercode.eventbridge.channel.Channel;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.channel.DefaultChannel;
+import com.quartercode.eventbridge.def.extra.extension.ReturnEventExtensionWrapper.ReturnEventExtensionWrapperPredicate;
 import com.quartercode.eventbridge.extra.extension.RequestEventHandler;
 import com.quartercode.eventbridge.extra.extension.ReturnEventExtensionReturner;
 import com.quartercode.eventbridge.extra.extension.ReturnEventSender;
@@ -90,7 +91,8 @@ public class DefaultReturnEventExtensionReturner extends AbstractBridgeModule im
         requestHandlers.put(requestHandler, predicate);
         requestHandlersUnmodifiableCache = null;
 
-        LowLevelHandler lowLevelHandler = new LowLevelHandlerAdapter(requestHandler, predicate);
+        EventPredicate<?> wrapperPredicate = new ReturnEventExtensionWrapperPredicate(predicate);
+        LowLevelHandler lowLevelHandler = new LowLevelHandlerAdapter(requestHandler, wrapperPredicate);
         lowLevelRequestHandlers.put(requestHandler, lowLevelHandler);
         getBridge().getModule(LowLevelHandlerModule.class).addHandler(lowLevelHandler);
 
@@ -157,8 +159,57 @@ public class DefaultReturnEventExtensionReturner extends AbstractBridgeModule im
         @Override
         public void handle(Event event, BridgeConnector source) {
 
+            ReturnEventExtensionWrapper wrapper = (ReturnEventExtensionWrapper) event;
+
+            ReturnEventSender returnSender = null;
+            if (source == null) {
+                returnSender = new LocalBridgeReturnEventSender(wrapper.getRequestId());
+            } else {
+                returnSender = new BridgeConnectorReturnEventSender(wrapper.getRequestId(), source);
+            }
+
             ChannelInvocation<RequestHandleInterceptor> invocation = requestHandleChannel.invoke();
-            invocation.next().handleRequest(invocation, event, source, requestHandler);
+            invocation.next().handleRequest(invocation, wrapper.getEvent(), source, requestHandler, returnSender);
+        }
+
+        private class LocalBridgeReturnEventSender implements ReturnEventSender {
+
+            private final long requestId;
+
+            private LocalBridgeReturnEventSender(long requestId) {
+
+                this.requestId = requestId;
+            }
+
+            @Override
+            public void send(Event event) {
+
+                getBridge().handle(new ReturnEventExtensionWrapper(event, requestId, false), null);
+            }
+
+        }
+
+        private class BridgeConnectorReturnEventSender implements ReturnEventSender {
+
+            private final long            requestId;
+            private final BridgeConnector connector;
+
+            private BridgeConnectorReturnEventSender(long requestId, BridgeConnector connector) {
+
+                this.requestId = requestId;
+                this.connector = connector;
+            }
+
+            @Override
+            public void send(Event event) {
+
+                try {
+                    connector.send(new ReturnEventExtensionWrapper(event, requestId, false));
+                } catch (BridgeConnectorException e) {
+                    LOGGER.error("Can't send return event '{}' back through bridge connector '{}'", event, connector, e);
+                }
+            }
+
         }
 
     }
@@ -166,18 +217,11 @@ public class DefaultReturnEventExtensionReturner extends AbstractBridgeModule im
     private class LastRequestHandleInterceptor implements RequestHandleInterceptor {
 
         @Override
-        public void handleRequest(ChannelInvocation<RequestHandleInterceptor> invocation, Event event, BridgeConnector source, RequestEventHandler<?> requestHandler) {
+        public void handleRequest(ChannelInvocation<RequestHandleInterceptor> invocation, Event request, BridgeConnector source, RequestEventHandler<?> requestHandler, ReturnEventSender returnSender) {
 
-            ReturnEventSender sender = null;
-            if (source == null) {
-                sender = new LocalBridgeReturnEventSender();
-            } else {
-                sender = new BridgeConnectorReturnEventSender(source);
-            }
+            tryHandle(requestHandler, request, returnSender);
 
-            tryHandle(requestHandler, event, sender);
-
-            invocation.next().handleRequest(invocation, event, source, requestHandler);
+            invocation.next().handleRequest(invocation, request, source, requestHandler, returnSender);
         }
 
         private <T extends Event> void tryHandle(RequestEventHandler<T> handler, Event event, ReturnEventSender sender) {
@@ -189,37 +233,6 @@ public class DefaultReturnEventExtensionReturner extends AbstractBridgeModule im
             } catch (ClassCastException e) {
                 // Do nothing
             }
-        }
-
-        private class LocalBridgeReturnEventSender implements ReturnEventSender {
-
-            @Override
-            public void send(Event event) {
-
-                getBridge().handle(event, null);
-            }
-
-        }
-
-        private class BridgeConnectorReturnEventSender implements ReturnEventSender {
-
-            private final BridgeConnector connector;
-
-            private BridgeConnectorReturnEventSender(BridgeConnector connector) {
-
-                this.connector = connector;
-            }
-
-            @Override
-            public void send(Event event) {
-
-                try {
-                    connector.send(event);
-                } catch (BridgeConnectorException e) {
-                    LOGGER.error("Can't send return event '{}' back through bridge connector '{}'", event, connector, e);
-                }
-            }
-
         }
 
     }

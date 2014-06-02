@@ -254,15 +254,18 @@ public class DefaultReturnEventExtensionRequesterTest {
 
     @SuppressWarnings ("unchecked")
     @Test
-    public void testOtherEventsPassHandleChannel() {
+    public void testNonReturnWrapperAndOtherEventsPassHandleChannel() {
 
-        final EmptyEvent1 event = new EmptyEvent1();
-        final HandleInterceptor lasInterceptor = context.mock(HandleInterceptor.class);
+        final ReturnEventExtensionWrapper nonReturnWrapper = new ReturnEventExtensionWrapper(new EmptyEvent1(), 0, true);
+        final EmptyEvent2 otherEvent = new EmptyEvent2();
+
+        final HandleInterceptor lastInterceptor = context.mock(HandleInterceptor.class);
 
         // @formatter:off
         context.checking(new Expectations() {{
 
-            oneOf(lasInterceptor).handle(with(any(ChannelInvocation.class)), with(event), with(nullValue(BridgeConnector.class)));
+            oneOf(lastInterceptor).handle(with(any(ChannelInvocation.class)), with(nonReturnWrapper), with(nullValue(BridgeConnector.class)));
+            oneOf(lastInterceptor).handle(with(any(ChannelInvocation.class)), with(otherEvent), with(nullValue(BridgeConnector.class)));
 
         }});
         // @formatter:on
@@ -270,11 +273,14 @@ public class DefaultReturnEventExtensionRequesterTest {
         // Create a dummy channel for the hook interceptor
         Channel<HandleInterceptor> dummyChannel = new DefaultChannel<>(HandleInterceptor.class);
         dummyChannel.addInterceptor(hookInterceptor.get(), 1);
-        dummyChannel.addInterceptor(lasInterceptor, 0);
+        dummyChannel.addInterceptor(lastInterceptor, 0);
 
         // Invoke the hook
-        ChannelInvocation<HandleInterceptor> dummyChannelInvocation = dummyChannel.invoke();
-        dummyChannelInvocation.next().handle(dummyChannelInvocation, event, null);
+        ChannelInvocation<HandleInterceptor> dummyChannelInvocation1 = dummyChannel.invoke();
+        dummyChannelInvocation1.next().handle(dummyChannelInvocation1, nonReturnWrapper, null);
+
+        ChannelInvocation<HandleInterceptor> dummyChannelInvocation2 = dummyChannel.invoke();
+        dummyChannelInvocation2.next().handle(dummyChannelInvocation2, otherEvent, null);
     }
 
     private static class DummyRequestSendInterceptor implements RequestSendInterceptor {

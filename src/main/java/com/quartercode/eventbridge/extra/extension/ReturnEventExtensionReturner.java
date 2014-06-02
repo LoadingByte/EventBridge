@@ -151,8 +151,9 @@ public interface ReturnEventExtensionReturner extends BridgeModule {
          * @param source The {@link BridgeConnector} which received the request event.
          *        May be {@code null} if the handled event was sent from the same bridge as the one which is handling it.
          * @param requestHandler The request event handler the request given event is delivered to.
+         * @param returnSender A {@link ReturnEventSender} that can be used by the request handler for sending its return event back.
          */
-        public void handleRequest(ChannelInvocation<RequestHandleInterceptor> invocation, Event request, BridgeConnector source, RequestEventHandler<?> requestHandler);
+        public void handleRequest(ChannelInvocation<RequestHandleInterceptor> invocation, Event request, BridgeConnector source, RequestEventHandler<?> requestHandler, ReturnEventSender returnSender);
 
     }
 

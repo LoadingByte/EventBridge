@@ -23,6 +23,8 @@ import static com.quartercode.eventbridge.test.ExtraAssert.assertMapEquals;
 import static com.quartercode.eventbridge.test.ExtraMatchers.aLowLevelHandlerWithThePredicate;
 import static org.junit.Assert.assertTrue;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
@@ -40,6 +42,8 @@ import com.quartercode.eventbridge.bridge.module.LowLevelHandler;
 import com.quartercode.eventbridge.bridge.module.LowLevelHandlerModule;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.extra.extension.DefaultReturnEventExtensionReturner;
+import com.quartercode.eventbridge.def.extra.extension.ReturnEventExtensionWrapper;
+import com.quartercode.eventbridge.def.extra.extension.ReturnEventExtensionWrapper.ReturnEventExtensionWrapperPredicate;
 import com.quartercode.eventbridge.extra.extension.RequestEventHandler;
 import com.quartercode.eventbridge.extra.extension.ReturnEventExtensionReturner.ModifyRequestHandlerListListener;
 import com.quartercode.eventbridge.extra.extension.ReturnEventExtensionReturner.RequestHandleInterceptor;
@@ -87,15 +91,18 @@ public class DefaultReturnEventExtensionReturnerTest {
         final EventPredicate<EmptyEvent1> predicate1 = context.mock(EventPredicate.class, "predicate1");
         final EventPredicate<EmptyEvent2> predicate2 = context.mock(EventPredicate.class, "predicate2");
 
+        final EventPredicate<?> wrapperPredicate1 = new ReturnEventExtensionWrapperPredicate(predicate1);
+        final EventPredicate<?> wrapperPredicate2 = new ReturnEventExtensionWrapperPredicate(predicate2);
+
         // @formatter:off
         context.checking(new Expectations() {{
 
             // Add
-            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(predicate1)));
-            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(predicate2)));
+            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(wrapperPredicate1)));
+            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(wrapperPredicate2)));
             // Automatic removal
-            oneOf(lowLevelHandlerModule).removeHandler(with(aLowLevelHandlerWithThePredicate(predicate1)));
-            oneOf(lowLevelHandlerModule).removeHandler(with(aLowLevelHandlerWithThePredicate(predicate2)));
+            oneOf(lowLevelHandlerModule).removeHandler(with(aLowLevelHandlerWithThePredicate(wrapperPredicate1)));
+            oneOf(lowLevelHandlerModule).removeHandler(with(aLowLevelHandlerWithThePredicate(wrapperPredicate2)));
 
         }});
         // @formatter:on
@@ -117,21 +124,25 @@ public class DefaultReturnEventExtensionReturnerTest {
         final EventPredicate<EmptyEvent2> predicate2 = context.mock(EventPredicate.class, "predicate2");
         final EventPredicate<EmptyEvent2> predicate3 = context.mock(EventPredicate.class, "predicate3");
 
-        Pair<RequestEventHandler<EmptyEvent1>, EventPredicate<EmptyEvent1>> pair1 = Pair.of(handler1, predicate1);
-        Pair<RequestEventHandler<EmptyEvent2>, EventPredicate<EmptyEvent2>> pair2 = Pair.of(handler2, predicate2);
-        Pair<RequestEventHandler<EmptyEvent2>, EventPredicate<EmptyEvent2>> pair3 = Pair.of(handler3, predicate3);
+        final EventPredicate<?> wrapperPredicate1 = new ReturnEventExtensionWrapperPredicate(predicate1);
+        final EventPredicate<?> wrapperPredicate2 = new ReturnEventExtensionWrapperPredicate(predicate2);
+        final EventPredicate<?> wrapperPredicate3 = new ReturnEventExtensionWrapperPredicate(predicate3);
 
         // @formatter:off
         context.checking(new Expectations() {{
 
             final Sequence handlerListModifications = context.sequence("handlerListModifications");
-            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(predicate1))); inSequence(handlerListModifications);
-            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(predicate2))); inSequence(handlerListModifications);
-            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(predicate3))); inSequence(handlerListModifications);
-            oneOf(lowLevelHandlerModule).removeHandler(with(aLowLevelHandlerWithThePredicate(predicate2))); inSequence(handlerListModifications);
+            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(wrapperPredicate1))); inSequence(handlerListModifications);
+            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(wrapperPredicate2))); inSequence(handlerListModifications);
+            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(wrapperPredicate3))); inSequence(handlerListModifications);
+            oneOf(lowLevelHandlerModule).removeHandler(with(aLowLevelHandlerWithThePredicate(wrapperPredicate2))); inSequence(handlerListModifications);
 
         }});
         // @formatter:on
+
+        Pair<RequestEventHandler<EmptyEvent1>, EventPredicate<EmptyEvent1>> pair1 = Pair.of(handler1, predicate1);
+        Pair<RequestEventHandler<EmptyEvent2>, EventPredicate<EmptyEvent2>> pair2 = Pair.of(handler2, predicate2);
+        Pair<RequestEventHandler<EmptyEvent2>, EventPredicate<EmptyEvent2>> pair3 = Pair.of(handler3, predicate3);
 
         assertRequestHandlerListEmpty();
 
@@ -204,6 +215,7 @@ public class DefaultReturnEventExtensionReturnerTest {
 
         final RequestEventHandler<Event> handler = context.mock(RequestEventHandler.class, "handler");
         final EventPredicate<Event> predicate = context.mock(EventPredicate.class, "predicate");
+        final EventPredicate<?> wrapperPredicate = new ReturnEventExtensionWrapperPredicate(predicate);
 
         final RequestHandleInterceptor interceptor = context.mock(RequestHandleInterceptor.class);
         extension.getRequestHandleChannel().addInterceptor(new DummyRequestHandleInterceptor(interceptor), 1);
@@ -218,17 +230,17 @@ public class DefaultReturnEventExtensionReturnerTest {
             allowing(predicate).test(otherEvent);
                 will(returnValue(false));
 
-            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(predicate)));
+            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(wrapperPredicate)));
                 will(storeArgument(0).in(lowLevelHandler));
 
             final Sequence handleChain = context.sequence("handleChain");
             // Regular event
-            oneOf(interceptor).handleRequest(with(any(ChannelInvocation.class)), with(regularEvent), with(source), with(handler)); inSequence(handleChain);
+            oneOf(interceptor).handleRequest(with(any(ChannelInvocation.class)), with(regularEvent), with(source), with(handler), with(any(ReturnEventSender.class))); inSequence(handleChain);
             oneOf(handler).handle(with(regularEvent), with(any(ReturnEventSender.class))); inSequence(handleChain);
             // Other event
             // Expect the unwanted event to be invoked since the predicate is not tested by the StandardHandlerModule
             // In fact, the predicate is tested by the LowLevelHandlerModule
-            oneOf(interceptor).handleRequest(with(any(ChannelInvocation.class)), with(otherEvent), with(source), with(handler)); inSequence(handleChain);
+            oneOf(interceptor).handleRequest(with(any(ChannelInvocation.class)), with(otherEvent), with(source), with(handler), with(any(ReturnEventSender.class))); inSequence(handleChain);
             oneOf(handler).handle(with(otherEvent), with(any(ReturnEventSender.class))); inSequence(handleChain);
 
         }});
@@ -236,8 +248,8 @@ public class DefaultReturnEventExtensionReturnerTest {
 
         extension.addRequestHandler(handler, predicate);
 
-        lowLevelHandler.get().handle(regularEvent, source);
-        lowLevelHandler.get().handle(otherEvent, source);
+        lowLevelHandler.get().handle(new ReturnEventExtensionWrapper(regularEvent, 0, true), source);
+        lowLevelHandler.get().handle(new ReturnEventExtensionWrapper(otherEvent, 0, true), source);
     }
 
     @SuppressWarnings ("unchecked")
@@ -245,6 +257,7 @@ public class DefaultReturnEventExtensionReturnerTest {
     public void testCallRequestHandlerWrongTypeInPredicate() {
 
         final EventPredicate<Event> predicate = context.mock(EventPredicate.class);
+        final EventPredicate<?> wrapperPredicate = new ReturnEventExtensionWrapperPredicate(predicate);
         final RequestEventHandler<CallableEvent> handler = new RequestEventHandler<CallableEvent>() {
 
             @Override
@@ -261,7 +274,7 @@ public class DefaultReturnEventExtensionReturnerTest {
         // @formatter:off
         context.checking(new Expectations() {{
 
-            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(predicate)));
+            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(wrapperPredicate)));
                 will(storeArgument(0).in(lowLevelHandler));
 
         }});
@@ -269,12 +282,14 @@ public class DefaultReturnEventExtensionReturnerTest {
 
         extension.addRequestHandler(handler, predicate);
 
-        lowLevelHandler.get().handle(new EmptyEvent1(), null);
+        lowLevelHandler.get().handle(new ReturnEventExtensionWrapper(new EmptyEvent1(), 0, true), null);
     }
 
     @SuppressWarnings ("unchecked")
     @Test
-    public void testCallRequestHandlerReturnEventSenders() throws BridgeConnectorException {
+    public void testReturnEventSenders() throws BridgeConnectorException {
+
+        ToStringBuilder.setDefaultStyle(ToStringStyle.SHORT_PREFIX_STYLE);
 
         final BridgeConnector source1 = null;
         final BridgeConnector source2 = context.mock(BridgeConnector.class, "source2");
@@ -283,34 +298,52 @@ public class DefaultReturnEventExtensionReturnerTest {
         final EmptyEvent1 returnEvent1 = new EmptyEvent1();
         final EmptyEvent2 returnEvent2 = new EmptyEvent2();
         final EmptyEvent3 returnEvent3 = new EmptyEvent3();
+        final ReturnEventExtensionWrapper returnEvent1Wrapper = new ReturnEventExtensionWrapper(returnEvent1, 0, false);
+        final ReturnEventExtensionWrapper returnEvent2Wrapper = new ReturnEventExtensionWrapper(returnEvent2, 1, false);
+        final ReturnEventExtensionWrapper returnEvent3Wrapper = new ReturnEventExtensionWrapper(returnEvent3, 2, false);
+
+        final RequestHandleInterceptor interceptor = context.mock(RequestHandleInterceptor.class);
+        extension.getRequestHandleChannel().addInterceptor(new DummyRequestHandleInterceptor(interceptor), 1);
 
         final RequestEventHandler<Event> handler = context.mock(RequestEventHandler.class, "handler");
         final EventPredicate<Event> predicate = context.mock(EventPredicate.class, "predicate");
+        final EventPredicate<?> wrapperPredicate = new ReturnEventExtensionWrapperPredicate(predicate);
 
         final AtomicReference<LowLevelHandler> lowLevelHandler = new AtomicReference<>();
-        final AtomicReference<ReturnEventSender> returnEventSender1 = new AtomicReference<>();
-        final AtomicReference<ReturnEventSender> returnEventSender2 = new AtomicReference<>();
-        final AtomicReference<ReturnEventSender> returnEventSender3 = new AtomicReference<>();
+        final AtomicReference<ReturnEventSender> returnEventSender1FromInterceptor = new AtomicReference<>();
+        final AtomicReference<ReturnEventSender> returnEventSender2FromInterceptor = new AtomicReference<>();
+        final AtomicReference<ReturnEventSender> returnEventSender3FromInterceptor = new AtomicReference<>();
+        final AtomicReference<ReturnEventSender> returnEventSender1FromHandler = new AtomicReference<>();
+        final AtomicReference<ReturnEventSender> returnEventSender2FromHandler = new AtomicReference<>();
+        final AtomicReference<ReturnEventSender> returnEventSender3FromHandler = new AtomicReference<>();
 
         // @formatter:off
         context.checking(new Expectations() {{
 
-            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(predicate)));
+            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(wrapperPredicate)));
                 will(storeArgument(0).in(lowLevelHandler));
+
+            final Sequence interceptorCalls = context.sequence("interceptorCalls");
+            oneOf(interceptor).handleRequest(with(any(ChannelInvocation.class)), with(any(EmptyEvent1.class)), with(source1), with(handler), with(any(ReturnEventSender.class))); inSequence(interceptorCalls);
+                will(storeArgument(4).in(returnEventSender1FromInterceptor));
+            oneOf(interceptor).handleRequest(with(any(ChannelInvocation.class)), with(any(EmptyEvent2.class)), with(source2), with(handler), with(any(ReturnEventSender.class))); inSequence(interceptorCalls);
+                will(storeArgument(4).in(returnEventSender2FromInterceptor));
+            oneOf(interceptor).handleRequest(with(any(ChannelInvocation.class)), with(any(EmptyEvent3.class)), with(source3), with(handler), with(any(ReturnEventSender.class))); inSequence(interceptorCalls);
+                will(storeArgument(4).in(returnEventSender3FromInterceptor));
 
             final Sequence handlerCalls = context.sequence("handlerCalls");
             oneOf(handler).handle(with(any(EmptyEvent1.class)), with(any(ReturnEventSender.class))); inSequence(handlerCalls);
-                will(storeArgument(1).in(returnEventSender1));
+                will(storeArgument(1).in(returnEventSender1FromHandler));
             oneOf(handler).handle(with(any(EmptyEvent2.class)), with(any(ReturnEventSender.class))); inSequence(handlerCalls);
-                will(storeArgument(1).in(returnEventSender2));
+                will(storeArgument(1).in(returnEventSender2FromHandler));
             oneOf(handler).handle(with(any(EmptyEvent3.class)), with(any(ReturnEventSender.class))); inSequence(handlerCalls);
-                will(storeArgument(1).in(returnEventSender3));
+                will(storeArgument(1).in(returnEventSender3FromHandler));
 
             final Sequence returnSenderCalls = context.sequence("returnSenderCalls");
-            oneOf(bridge).handle(returnEvent1, null); inSequence(returnSenderCalls);
-            oneOf(source2).send(returnEvent2); inSequence(handlerCalls);
+            oneOf(bridge).handle(returnEvent1Wrapper, source1); inSequence(returnSenderCalls);
+            oneOf(source2).send(returnEvent2Wrapper); inSequence(handlerCalls);
             // Test exception suppression
-            oneOf(source3).send(returnEvent3); inSequence(handlerCalls);
+            oneOf(source3).send(returnEvent3Wrapper); inSequence(handlerCalls);
                 will(throwException(new BridgeConnectorException(source3)));
 
         }});
@@ -318,13 +351,17 @@ public class DefaultReturnEventExtensionReturnerTest {
 
         extension.addRequestHandler(handler, predicate);
 
-        lowLevelHandler.get().handle(new EmptyEvent1(), source1);
-        lowLevelHandler.get().handle(new EmptyEvent2(), source2);
-        lowLevelHandler.get().handle(new EmptyEvent3(), source3);
+        lowLevelHandler.get().handle(new ReturnEventExtensionWrapper(new EmptyEvent1(), 0, true), source1);
+        lowLevelHandler.get().handle(new ReturnEventExtensionWrapper(new EmptyEvent2(), 1, true), source2);
+        lowLevelHandler.get().handle(new ReturnEventExtensionWrapper(new EmptyEvent3(), 2, true), source3);
 
-        returnEventSender1.get().send(returnEvent1);
-        returnEventSender2.get().send(returnEvent2);
-        returnEventSender3.get().send(returnEvent3);
+        assertTrue("Return event sender changes over time", returnEventSender1FromInterceptor.get() == returnEventSender1FromHandler.get());
+        assertTrue("Return event sender changes over time", returnEventSender2FromInterceptor.get() == returnEventSender2FromHandler.get());
+        assertTrue("Return event sender changes over time", returnEventSender3FromInterceptor.get() == returnEventSender3FromHandler.get());
+
+        returnEventSender1FromInterceptor.get().send(returnEvent1);
+        returnEventSender2FromInterceptor.get().send(returnEvent2);
+        returnEventSender3FromInterceptor.get().send(returnEvent3);
     }
 
     private static class DummyRequestHandleInterceptor implements RequestHandleInterceptor {
@@ -337,10 +374,10 @@ public class DefaultReturnEventExtensionReturnerTest {
         }
 
         @Override
-        public void handleRequest(ChannelInvocation<RequestHandleInterceptor> invocation, Event event, BridgeConnector source, RequestEventHandler<?> requestHandler) {
+        public void handleRequest(ChannelInvocation<RequestHandleInterceptor> invocation, Event request, BridgeConnector source, RequestEventHandler<?> requestHandler, ReturnEventSender returnSender) {
 
-            dummy.handleRequest(invocation, event, source, requestHandler);
-            invocation.next().handleRequest(invocation, event, source, requestHandler);
+            dummy.handleRequest(invocation, request, source, requestHandler, returnSender);
+            invocation.next().handleRequest(invocation, request, source, requestHandler, returnSender);
         }
 
     }

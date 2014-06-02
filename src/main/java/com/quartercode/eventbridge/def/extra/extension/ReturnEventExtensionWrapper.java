@@ -19,11 +19,16 @@
 package com.quartercode.eventbridge.def.extra.extension;
 
 import com.quartercode.eventbridge.basic.EventBase;
+import com.quartercode.eventbridge.basic.EventPredicateBase;
+import com.quartercode.eventbridge.basic.EventUtils;
 import com.quartercode.eventbridge.bridge.Event;
+import com.quartercode.eventbridge.bridge.EventPredicate;
 
 /**
  * The return event extension wrapper wraps around an {@link Event} and stores a {@code requestId}.
  * It is used by the {@link DefaultReturnEventExtensionRequester} and {@link DefaultReturnEventExtensionReturner} classes.
+ * 
+ * @see ReturnEventExtensionWrapperPredicate
  */
 public class ReturnEventExtensionWrapper extends EventBase {
 
@@ -77,6 +82,42 @@ public class ReturnEventExtensionWrapper extends EventBase {
     public boolean isRequest() {
 
         return request;
+    }
+
+    /**
+     * The return event extension wrapper predicate tests the {@link Event} which is wrapped by a {@link ReturnEventExtensionWrapper}.
+     * For doing that, it takes another {@link EventPredicate} which takes care of testing the wrapped event.
+     * 
+     * @see ReturnEventExtensionWrapper
+     */
+    public static class ReturnEventExtensionWrapperPredicate extends EventPredicateBase<ReturnEventExtensionWrapper> {
+
+        private static final long       serialVersionUID = 8044226686785560676L;
+
+        private final EventPredicate<?> wrappedPredicate;
+
+        /**
+         * Creates a new return event extension wrapper predicate.
+         * 
+         * @param wrappedPredicate The {@link EventPredicate} that tests the {@link Event} which is wrapped inside a {@link ReturnEventExtensionWrapper}.
+         */
+        public ReturnEventExtensionWrapperPredicate(EventPredicate<?> wrappedPredicate) {
+
+            this.wrappedPredicate = wrappedPredicate;
+        }
+
+        @Override
+        public boolean test(ReturnEventExtensionWrapper event) {
+
+            Event wrappedEvent = event.getEvent();
+
+            if (wrappedEvent != null) {
+                return EventUtils.tryTest(wrappedPredicate, wrappedEvent);
+            } else {
+                return false;
+            }
+        }
+
     }
 
 }

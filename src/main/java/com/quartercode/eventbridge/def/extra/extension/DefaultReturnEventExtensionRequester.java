@@ -129,17 +129,25 @@ public class DefaultReturnEventExtensionRequester extends AbstractBridgeModule i
         @Override
         public void handle(ChannelInvocation<HandleInterceptor> invocation, Event event, BridgeConnector source) {
 
-            if (! (event instanceof ReturnEventExtensionWrapper)) {
-                invocation.next().handle(invocation, event, source);
-                return;
+            if (event instanceof ReturnEventExtensionWrapper) {
+                ReturnEventExtensionWrapper returnWrapper = (ReturnEventExtensionWrapper) event;
+
+                if (!returnWrapper.isRequest()) {
+                    handleReturnEvent(returnWrapper, source);
+                    return;
+                }
             }
 
-            ReturnEventExtensionWrapper returnWrapper = (ReturnEventExtensionWrapper) event;
-            long requestId = returnWrapper.getRequestId();
+            invocation.next().handle(invocation, event, source);
+        }
+
+        private void handleReturnEvent(ReturnEventExtensionWrapper returnEvent, BridgeConnector source) {
+
+            long requestId = returnEvent.getRequestId();
 
             EventHandler<?> handler = returnHandlers.get(requestId);
             if (handler != null) {
-                invokeReturnHandleChannel(returnWrapper.getEvent(), source, handler);
+                invokeReturnHandleChannel(returnEvent.getEvent(), source, handler);
                 returnHandlers.remove(requestId);
             }
         }
