@@ -71,7 +71,7 @@ public class TypePredicateTest {
     }
 
     @Test
-    public void testMatches() {
+    public void test() {
 
         TypePredicate<Event> predicate = new TypePredicate<>(type);
         assertEquals("Result for event of type " + event.getClass().getName() + " and matching type " + type.getName(), result, predicate.test(event));

@@ -74,7 +74,6 @@ public class DefaultReturnEventExtensionRequesterTest {
             allowing(handlerModule).getChannel();
                 will(returnValue(handlerModuleChannel));
 
-
             // The module should add a hook to the handler module's channel
             allowing(handlerModuleChannel).addInterceptor(with(any(HandleInterceptor.class)), with(500));
                 will(storeArgument(0).in(hookInterceptor));
