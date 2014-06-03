@@ -214,7 +214,7 @@ public class DefaultReturnEventExtensionReturner extends AbstractBridgeModule im
 
     }
 
-    private class LastRequestHandleInterceptor implements RequestHandleInterceptor {
+    private static class LastRequestHandleInterceptor implements RequestHandleInterceptor {
 
         @Override
         public void handleRequest(ChannelInvocation<RequestHandleInterceptor> invocation, Event request, BridgeConnector source, RequestEventHandler<?> requestHandler, ReturnEventSender returnSender) {
