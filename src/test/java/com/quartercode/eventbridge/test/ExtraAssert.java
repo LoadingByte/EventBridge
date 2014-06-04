@@ -27,12 +27,12 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public class ExtraAssert {
 
-    public static void assertListEquals(String message, List<?> list, Object... elements) {
+    public static void assertListEquals(String message, List<?> actualList, Object... expectedElements) {
 
-        assertTrue(message, list.size() == elements.length);
+        assertTrue(message, actualList.size() == expectedElements.length);
 
-        for (int index = 0; index < list.size(); index++) {
-            assertTrue(message, Objects.equals(elements[index], list.get(index)));
+        for (int index = 0; index < actualList.size(); index++) {
+            assertTrue(message, Objects.equals(expectedElements[index], actualList.get(index)));
         }
     }
 
