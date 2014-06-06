@@ -59,7 +59,7 @@ public class FactoryManagerTest {
         factoryManager.setFactory(Abstract.class, factory);
 
         Abstract actualResult = factoryManager.create(Abstract.class);
-        assertTrue("Factory manager created correct object", Objects.equals(result, actualResult));
+        assertTrue("Factory manager didn't create correct object", Objects.equals(result, actualResult));
     }
 
     @Test (expected = IllegalArgumentException.class)
