@@ -8,7 +8,7 @@
     <packaging>jar</packaging>
 
     <name>EventBridge</name>
-    <url>http://maven.apache.org</url>
+    <url>http://www.quartercode.com</url>
     <description>EventBridge is a flexible event framework that can be used for local and network communication.</description>
     <inceptionYear>2014</inceptionYear>
 
