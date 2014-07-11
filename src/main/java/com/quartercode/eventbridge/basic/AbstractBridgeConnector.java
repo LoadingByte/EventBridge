@@ -35,13 +35,6 @@ public abstract class AbstractBridgeConnector implements BridgeConnector {
     private boolean consumed;
 
     /**
-     * Creates a new abstract bridge connector.
-     */
-    public AbstractBridgeConnector() {
-
-    }
-
-    /**
      * Returns the local {@link Bridge} which this bridge connector connects with some second bridge.
      * The return value of this method is set during the {@link #start(Bridge)} call.
      * 

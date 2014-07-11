@@ -32,13 +32,6 @@ public abstract class AbstractBridgeModule implements BridgeModule {
     private Bridge  bridge;
     private boolean consumed;
 
-    /**
-     * Creates a new abstract bridge module.
-     */
-    public AbstractBridgeModule() {
-
-    }
-
     @Override
     public Bridge getBridge() {
 

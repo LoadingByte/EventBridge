@@ -34,13 +34,6 @@ public class DefaultSenderModule extends AbstractBridgeModule implements SenderM
 
     private final Channel<SendInterceptor> channel = new DefaultChannel<>(SendInterceptor.class);
 
-    /**
-     * Creates a new default sender module.
-     */
-    public DefaultSenderModule() {
-
-    }
-
     @Override
     public Channel<SendInterceptor> getChannel() {
 

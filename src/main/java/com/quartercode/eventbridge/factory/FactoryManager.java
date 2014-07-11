@@ -33,13 +33,6 @@ public class FactoryManager {
     private final Map<Class<?>, Factory> factories = new HashMap<>();
 
     /**
-     * Creates a new factory manager.
-     */
-    public FactoryManager() {
-
-    }
-
-    /**
      * Assigns the given {@link Factory} to the given abstract type.
      * The type must not be abstract, but it's recommended that only interfaces are added here.
      * The given factory then creates objects when the {@link #create(Class)} method is called with the given type.

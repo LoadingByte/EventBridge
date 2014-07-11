@@ -56,14 +56,6 @@ public class DefaultSendPredicateCheckExtension extends AbstractBridgeModule imp
 
     private final Map<BridgeConnector, List<EventPredicate<?>>> predicates                        = new HashMap<>();
 
-    /**
-     * Creates a new send predicate check extension.
-     * See the {@link SendPredicateCheckExtension} javadoc for more details on how to use the extension.
-     */
-    public DefaultSendPredicateCheckExtension() {
-
-    }
-
     @Override
     public void add(Bridge bridge) {
 

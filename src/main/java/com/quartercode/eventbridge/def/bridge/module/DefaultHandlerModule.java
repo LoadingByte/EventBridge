@@ -35,13 +35,6 @@ public class DefaultHandlerModule extends AbstractBridgeModule implements Handle
 
     private final Channel<HandleInterceptor> channel = new DefaultChannel<>(HandleInterceptor.class);
 
-    /**
-     * Creates a new default handler module.
-     */
-    public DefaultHandlerModule() {
-
-    }
-
     @Override
     public Channel<HandleInterceptor> getChannel() {
 
