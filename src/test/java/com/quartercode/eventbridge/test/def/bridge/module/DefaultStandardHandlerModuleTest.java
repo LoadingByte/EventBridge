@@ -22,7 +22,8 @@ import static com.quartercode.eventbridge.test.ExtraActions.storeArgument;
 import static com.quartercode.eventbridge.test.ExtraAssert.assertMapEquals;
 import static com.quartercode.eventbridge.test.ExtraMatchers.aLowLevelHandlerWithThePredicate;
 import static org.junit.Assert.assertTrue;
-import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang3.mutable.Mutable;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
@@ -206,7 +207,7 @@ public class DefaultStandardHandlerModuleTest {
         final StandardHandleInterceptor interceptor = context.mock(StandardHandleInterceptor.class);
         module.getChannel().addInterceptor(new DummyStandardHandleInterceptor(interceptor), 1);
 
-        final AtomicReference<LowLevelHandler> lowLevelHandler = new AtomicReference<>();
+        final Mutable<LowLevelHandler> lowLevelHandler = new MutableObject<>();
 
         // @formatter:off
         context.checking(new Expectations() {{
@@ -234,8 +235,8 @@ public class DefaultStandardHandlerModuleTest {
 
         module.addHandler(handler, predicate);
 
-        lowLevelHandler.get().handle(regularEvent, source);
-        lowLevelHandler.get().handle(otherEvent, source);
+        lowLevelHandler.getValue().handle(regularEvent, source);
+        lowLevelHandler.getValue().handle(otherEvent, source);
     }
 
     @SuppressWarnings ("unchecked")
@@ -254,7 +255,7 @@ public class DefaultStandardHandlerModuleTest {
 
         };
 
-        final AtomicReference<LowLevelHandler> lowLevelHandler = new AtomicReference<>();
+        final Mutable<LowLevelHandler> lowLevelHandler = new MutableObject<>();
 
         // @formatter:off
         context.checking(new Expectations() {{
@@ -267,7 +268,7 @@ public class DefaultStandardHandlerModuleTest {
 
         module.addHandler(handler, predicate);
 
-        lowLevelHandler.get().handle(new EmptyEvent1(), null);
+        lowLevelHandler.getValue().handle(new EmptyEvent1(), null);
     }
 
 }

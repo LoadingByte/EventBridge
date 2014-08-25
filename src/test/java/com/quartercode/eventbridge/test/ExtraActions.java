@@ -18,7 +18,7 @@
 
 package com.quartercode.eventbridge.test;
 
-import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang3.mutable.Mutable;
 import org.jmock.api.Action;
 import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
@@ -43,7 +43,7 @@ public class ExtraActions {
             this.parameter = parameter;
         }
 
-        public Action in(AtomicReference<?> storage) {
+        public Action in(Mutable<?> storage) {
 
             return new StoreArgumentAction<>(parameter, storage);
         }
@@ -52,12 +52,12 @@ public class ExtraActions {
 
     private static class StoreArgumentAction<T> extends CustomAction {
 
-        private final int                parameter;
-        private final AtomicReference<T> storage;
+        private final int        parameter;
+        private final Mutable<T> storage;
 
-        private StoreArgumentAction(int parameter, AtomicReference<T> storage) {
+        private StoreArgumentAction(int parameter, Mutable<T> storage) {
 
-            super("stores objects in atomic reference");
+            super("stores objects in mutable wrapper");
 
             this.parameter = parameter;
             this.storage = storage;
@@ -69,7 +69,7 @@ public class ExtraActions {
 
             Object argument = invocation.getParameter(parameter);
             try {
-                storage.set((T) argument);
+                storage.setValue((T) argument);
             } catch (ClassCastException e) {
                 throw new RuntimeException("Method argument '" + argument + "' cannot be stored");
             }

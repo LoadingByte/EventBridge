@@ -21,7 +21,8 @@ package com.quartercode.eventbridge.test.def.bridge.module;
 import static com.quartercode.eventbridge.test.ExtraActions.storeArgument;
 import static com.quartercode.eventbridge.test.ExtraAssert.assertListEquals;
 import static org.junit.Assert.assertTrue;
-import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang3.mutable.Mutable;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
 import org.jmock.auto.Mock;
@@ -53,17 +54,17 @@ import com.quartercode.eventbridge.test.DummyInterceptors.DummySpecificLowLevelH
 public class DefaultLowLevelHandlerModuleTest {
 
     @Rule
-    public JUnitRuleMockery                          context         = new JUnitRuleMockery();
+    public JUnitRuleMockery                  context         = new JUnitRuleMockery();
 
     @Mock
-    private Bridge                                   bridge;
+    private Bridge                           bridge;
     @Mock
-    private HandlerModule                            handlerModule;
+    private HandlerModule                    handlerModule;
     @Mock
-    private Channel<HandleInterceptor>               handlerModuleChannel;
+    private Channel<HandleInterceptor>       handlerModuleChannel;
 
-    private DefaultLowLevelHandlerModule             module;
-    private final AtomicReference<HandleInterceptor> hookInterceptor = new AtomicReference<>();
+    private DefaultLowLevelHandlerModule     module;
+    private final Mutable<HandleInterceptor> hookInterceptor = new MutableObject<>();
 
     @Before
     public void setUp() {
@@ -255,7 +256,7 @@ public class DefaultLowLevelHandlerModuleTest {
 
         // Create a dummy channel for the hook interceptor
         Channel<HandleInterceptor> dummyChannel = new DefaultChannel<>(HandleInterceptor.class);
-        dummyChannel.addInterceptor(hookInterceptor.get(), 0);
+        dummyChannel.addInterceptor(hookInterceptor.getValue(), 0);
 
         // Don't use a dummy wrapper in order to STOP the channel invocation
         // We don't want to trigger anything else in the module

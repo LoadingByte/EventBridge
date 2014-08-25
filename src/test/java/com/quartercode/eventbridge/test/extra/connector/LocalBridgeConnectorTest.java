@@ -20,7 +20,8 @@ package com.quartercode.eventbridge.test.extra.connector;
 
 import static com.quartercode.eventbridge.test.ExtraActions.storeArgument;
 import static org.junit.Assert.assertNotNull;
-import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang3.mutable.Mutable;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
 import org.jmock.api.Action;
@@ -45,13 +46,13 @@ public class LocalBridgeConnectorTest {
     }
 
     @Rule
-    public JUnitRuleMockery                             context             = new JUnitRuleMockery();
+    public JUnitRuleMockery                     context             = new JUnitRuleMockery();
 
-    private Bridge                                      bridge1;
-    private Bridge                                      bridge2;
+    private Bridge                              bridge1;
+    private Bridge                              bridge2;
 
-    private LocalBridgeConnector                        bridge1To2Connector;
-    private final AtomicReference<LocalBridgeConnector> bridge2To1Connector = new AtomicReference<>();
+    private LocalBridgeConnector                bridge1To2Connector;
+    private final Mutable<LocalBridgeConnector> bridge2To1Connector = new MutableObject<>();
 
     @Before
     public void setUp() throws BridgeConnectorException {
@@ -79,7 +80,7 @@ public class LocalBridgeConnectorTest {
     @Test
     public void testStart() throws BridgeConnectorException {
 
-        assertNotNull("Local bridge connector didn't add reverse connection", bridge2To1Connector.get());
+        assertNotNull("Local bridge connector didn't add reverse connection", bridge2To1Connector.getValue());
     }
 
     @Test
@@ -89,7 +90,7 @@ public class LocalBridgeConnectorTest {
         context.checking(new Expectations() {{
 
             // Stop
-            oneOf(bridge2).removeConnector(bridge2To1Connector.get());
+            oneOf(bridge2).removeConnector(bridge2To1Connector.getValue());
 
         }});
         // @formatter:on
@@ -109,7 +110,7 @@ public class LocalBridgeConnectorTest {
         }});
         // @formatter:on
 
-        bridge2To1Connector.get().stop();
+        bridge2To1Connector.getValue().stop();
     }
 
     @Test
@@ -124,9 +125,9 @@ public class LocalBridgeConnectorTest {
             final Sequence handleCalls = context.sequence("handleCalls");
 
             // Bridge 1 -> Bridge 2 events
-            oneOf(bridge2).handle(bridge1To2Events[0], bridge2To1Connector.get()); inSequence(handleCalls);
-            oneOf(bridge2).handle(bridge1To2Events[1], bridge2To1Connector.get()); inSequence(handleCalls);
-            oneOf(bridge2).handle(bridge1To2Events[2], bridge2To1Connector.get()); inSequence(handleCalls);
+            oneOf(bridge2).handle(bridge1To2Events[0], bridge2To1Connector.getValue()); inSequence(handleCalls);
+            oneOf(bridge2).handle(bridge1To2Events[1], bridge2To1Connector.getValue()); inSequence(handleCalls);
+            oneOf(bridge2).handle(bridge1To2Events[2], bridge2To1Connector.getValue()); inSequence(handleCalls);
 
             // Bridge 2 -> Bridge 1 events
             oneOf(bridge1).handle(bridge2To1Events[0], bridge1To2Connector); inSequence(handleCalls);
@@ -142,9 +143,9 @@ public class LocalBridgeConnectorTest {
         bridge1To2Connector.send(bridge1To2Events[2]);
 
         // Bridge 2 -> Bridge 1 events
-        bridge2To1Connector.get().send(bridge2To1Events[0]);
-        bridge2To1Connector.get().send(bridge2To1Events[1]);
-        bridge2To1Connector.get().send(bridge2To1Events[2]);
+        bridge2To1Connector.getValue().send(bridge2To1Events[0]);
+        bridge2To1Connector.getValue().send(bridge2To1Events[1]);
+        bridge2To1Connector.getValue().send(bridge2To1Events[2]);
     }
 
     private static class StartConnectorAction extends CustomAction {

@@ -22,9 +22,10 @@ import static com.quartercode.eventbridge.test.ExtraActions.storeArgument;
 import static com.quartercode.eventbridge.test.ExtraAssert.assertMapEquals;
 import static com.quartercode.eventbridge.test.ExtraMatchers.aLowLevelHandlerWithThePredicate;
 import static org.junit.Assert.assertTrue;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.lang3.mutable.Mutable;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
@@ -220,7 +221,7 @@ public class DefaultReturnEventExtensionReturnerTest {
         final RequestHandleInterceptor interceptor = context.mock(RequestHandleInterceptor.class);
         extension.getRequestHandleChannel().addInterceptor(new DummyRequestHandleInterceptor(interceptor), 1);
 
-        final AtomicReference<LowLevelHandler> lowLevelHandler = new AtomicReference<>();
+        final Mutable<LowLevelHandler> lowLevelHandler = new MutableObject<>();
 
         // @formatter:off
         context.checking(new Expectations() {{
@@ -248,8 +249,8 @@ public class DefaultReturnEventExtensionReturnerTest {
 
         extension.addRequestHandler(handler, predicate);
 
-        lowLevelHandler.get().handle(new ReturnEventExtensionWrapper(regularEvent, 0, true), source);
-        lowLevelHandler.get().handle(new ReturnEventExtensionWrapper(otherEvent, 0, true), source);
+        lowLevelHandler.getValue().handle(new ReturnEventExtensionWrapper(regularEvent, 0, true), source);
+        lowLevelHandler.getValue().handle(new ReturnEventExtensionWrapper(otherEvent, 0, true), source);
     }
 
     @SuppressWarnings ("unchecked")
@@ -269,7 +270,7 @@ public class DefaultReturnEventExtensionReturnerTest {
 
         };
 
-        final AtomicReference<LowLevelHandler> lowLevelHandler = new AtomicReference<>();
+        final Mutable<LowLevelHandler> lowLevelHandler = new MutableObject<>();
 
         // @formatter:off
         context.checking(new Expectations() {{
@@ -282,7 +283,7 @@ public class DefaultReturnEventExtensionReturnerTest {
 
         extension.addRequestHandler(handler, predicate);
 
-        lowLevelHandler.get().handle(new ReturnEventExtensionWrapper(new EmptyEvent1(), 0, true), null);
+        lowLevelHandler.getValue().handle(new ReturnEventExtensionWrapper(new EmptyEvent1(), 0, true), null);
     }
 
     @SuppressWarnings ("unchecked")
@@ -309,13 +310,13 @@ public class DefaultReturnEventExtensionReturnerTest {
         final EventPredicate<Event> predicate = context.mock(EventPredicate.class, "predicate");
         final EventPredicate<?> wrapperPredicate = new ReturnEventExtensionWrapperPredicate(predicate);
 
-        final AtomicReference<LowLevelHandler> lowLevelHandler = new AtomicReference<>();
-        final AtomicReference<ReturnEventSender> returnEventSender1FromInterceptor = new AtomicReference<>();
-        final AtomicReference<ReturnEventSender> returnEventSender2FromInterceptor = new AtomicReference<>();
-        final AtomicReference<ReturnEventSender> returnEventSender3FromInterceptor = new AtomicReference<>();
-        final AtomicReference<ReturnEventSender> returnEventSender1FromHandler = new AtomicReference<>();
-        final AtomicReference<ReturnEventSender> returnEventSender2FromHandler = new AtomicReference<>();
-        final AtomicReference<ReturnEventSender> returnEventSender3FromHandler = new AtomicReference<>();
+        final Mutable<LowLevelHandler> lowLevelHandler = new MutableObject<>();
+        final Mutable<ReturnEventSender> returnEventSender1FromInterceptor = new MutableObject<>();
+        final Mutable<ReturnEventSender> returnEventSender2FromInterceptor = new MutableObject<>();
+        final Mutable<ReturnEventSender> returnEventSender3FromInterceptor = new MutableObject<>();
+        final Mutable<ReturnEventSender> returnEventSender1FromHandler = new MutableObject<>();
+        final Mutable<ReturnEventSender> returnEventSender2FromHandler = new MutableObject<>();
+        final Mutable<ReturnEventSender> returnEventSender3FromHandler = new MutableObject<>();
 
         // @formatter:off
         context.checking(new Expectations() {{
@@ -351,17 +352,17 @@ public class DefaultReturnEventExtensionReturnerTest {
 
         extension.addRequestHandler(handler, predicate);
 
-        lowLevelHandler.get().handle(new ReturnEventExtensionWrapper(new EmptyEvent1(), 0, true), source1);
-        lowLevelHandler.get().handle(new ReturnEventExtensionWrapper(new EmptyEvent2(), 1, true), source2);
-        lowLevelHandler.get().handle(new ReturnEventExtensionWrapper(new EmptyEvent3(), 2, true), source3);
+        lowLevelHandler.getValue().handle(new ReturnEventExtensionWrapper(new EmptyEvent1(), 0, true), source1);
+        lowLevelHandler.getValue().handle(new ReturnEventExtensionWrapper(new EmptyEvent2(), 1, true), source2);
+        lowLevelHandler.getValue().handle(new ReturnEventExtensionWrapper(new EmptyEvent3(), 2, true), source3);
 
-        assertTrue("Return event sender changes over time", returnEventSender1FromInterceptor.get() == returnEventSender1FromHandler.get());
-        assertTrue("Return event sender changes over time", returnEventSender2FromInterceptor.get() == returnEventSender2FromHandler.get());
-        assertTrue("Return event sender changes over time", returnEventSender3FromInterceptor.get() == returnEventSender3FromHandler.get());
+        assertTrue("Return event sender changes over time", returnEventSender1FromInterceptor.getValue() == returnEventSender1FromHandler.getValue());
+        assertTrue("Return event sender changes over time", returnEventSender2FromInterceptor.getValue() == returnEventSender2FromHandler.getValue());
+        assertTrue("Return event sender changes over time", returnEventSender3FromInterceptor.getValue() == returnEventSender3FromHandler.getValue());
 
-        returnEventSender1FromInterceptor.get().send(returnEvent1);
-        returnEventSender2FromInterceptor.get().send(returnEvent2);
-        returnEventSender3FromInterceptor.get().send(returnEvent3);
+        returnEventSender1FromInterceptor.getValue().send(returnEvent1);
+        returnEventSender2FromInterceptor.getValue().send(returnEvent2);
+        returnEventSender3FromInterceptor.getValue().send(returnEvent3);
     }
 
     private static class DummyRequestHandleInterceptor implements RequestHandleInterceptor {

@@ -21,7 +21,8 @@ package com.quartercode.eventbridge.test.def.extra.extension;
 import static com.quartercode.eventbridge.test.ExtraActions.storeArgument;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.*;
-import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.lang3.mutable.Mutable;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
 import org.jmock.auto.Mock;
@@ -49,17 +50,17 @@ import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent2;
 public class DefaultReturnEventExtensionRequesterTest {
 
     @Rule
-    public JUnitRuleMockery                          context         = new JUnitRuleMockery();
+    public JUnitRuleMockery                      context         = new JUnitRuleMockery();
 
     @Mock
-    private Bridge                                   bridge;
+    private Bridge                               bridge;
     @Mock
-    private HandlerModule                            handlerModule;
+    private HandlerModule                        handlerModule;
     @Mock
-    private Channel<HandleInterceptor>               handlerModuleChannel;
+    private Channel<HandleInterceptor>           handlerModuleChannel;
 
-    private DefaultReturnEventExtensionRequester     extension;
-    private final AtomicReference<HandleInterceptor> hookInterceptor = new AtomicReference<>();
+    private DefaultReturnEventExtensionRequester extension;
+    private final Mutable<HandleInterceptor>     hookInterceptor = new MutableObject<>();
 
     @Before
     public void setUp() {
@@ -109,7 +110,7 @@ public class DefaultReturnEventExtensionRequesterTest {
         final RequestSendInterceptor requestSendInterceptor = context.mock(RequestSendInterceptor.class);
         extension.getRequestSendChannel().addInterceptor(new DummyRequestSendInterceptor(requestSendInterceptor), 1);
 
-        final AtomicReference<ReturnEventExtensionWrapper> requestWrapper = new AtomicReference<>();
+        final Mutable<ReturnEventExtensionWrapper> requestWrapper = new MutableObject<>();
 
         // @formatter:off
         context.checking(new Expectations() {{
@@ -124,9 +125,9 @@ public class DefaultReturnEventExtensionRequesterTest {
 
         extension.sendRequest(requestEvent, returnHandler);
 
-        assertNotNull("Extension didn't send wrapper request event", requestWrapper.get());
-        assertEquals("Wrapper request event doesn't contain correct request event", requestEvent, requestWrapper.get().getEvent());
-        assertTrue("Wrapper request event isn't an actual request", requestWrapper.get().isRequest());
+        assertNotNull("Extension didn't send wrapper request event", requestWrapper.getValue());
+        assertEquals("Wrapper request event doesn't contain correct request event", requestEvent, requestWrapper.getValue().getEvent());
+        assertTrue("Wrapper request event isn't an actual request", requestWrapper.getValue().isRequest());
     }
 
     @SuppressWarnings ("unchecked")
@@ -151,7 +152,7 @@ public class DefaultReturnEventExtensionRequesterTest {
 
     private ReturnEventExtensionWrapper sendAndCatchRequest(Event requestEvent, EventHandler<?> returnHandler) {
 
-        final AtomicReference<ReturnEventExtensionWrapper> requestWrapper = new AtomicReference<>();
+        final Mutable<ReturnEventExtensionWrapper> requestWrapper = new MutableObject<>();
 
         // @formatter:off
         context.checking(new Expectations() {{
@@ -164,14 +165,14 @@ public class DefaultReturnEventExtensionRequesterTest {
 
         extension.sendRequest(requestEvent, returnHandler);
 
-        return requestWrapper.get();
+        return requestWrapper.getValue();
     }
 
     private void invokeHook(ReturnEventExtensionWrapper returnWrapper) {
 
         // Create a dummy channel for the hook interceptor
         Channel<HandleInterceptor> dummyChannel = new DefaultChannel<>(HandleInterceptor.class);
-        dummyChannel.addInterceptor(hookInterceptor.get(), 0);
+        dummyChannel.addInterceptor(hookInterceptor.getValue(), 0);
 
         // Invoke the hook
         ChannelInvocation<HandleInterceptor> dummyChannelInvocation = dummyChannel.invoke();
@@ -271,7 +272,7 @@ public class DefaultReturnEventExtensionRequesterTest {
 
         // Create a dummy channel for the hook interceptor
         Channel<HandleInterceptor> dummyChannel = new DefaultChannel<>(HandleInterceptor.class);
-        dummyChannel.addInterceptor(hookInterceptor.get(), 1);
+        dummyChannel.addInterceptor(hookInterceptor.getValue(), 1);
         dummyChannel.addInterceptor(lastInterceptor, 0);
 
         // Invoke the hook
