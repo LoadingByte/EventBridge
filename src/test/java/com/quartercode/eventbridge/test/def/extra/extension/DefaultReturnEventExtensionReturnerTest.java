@@ -22,8 +22,6 @@ import static com.quartercode.eventbridge.test.ExtraActions.storeArgument;
 import static com.quartercode.eventbridge.test.ExtraAssert.assertMapEquals;
 import static com.quartercode.eventbridge.test.ExtraMatchers.aLowLevelHandlerWithThePredicate;
 import static org.junit.Assert.assertTrue;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.commons.lang3.tuple.Pair;
@@ -289,8 +287,6 @@ public class DefaultReturnEventExtensionReturnerTest {
     @SuppressWarnings ("unchecked")
     @Test
     public void testReturnEventSenders() throws BridgeConnectorException {
-
-        ToStringBuilder.setDefaultStyle(ToStringStyle.SHORT_PREFIX_STYLE);
 
         final BridgeConnector source1 = null;
         final BridgeConnector source2 = context.mock(BridgeConnector.class, "source2");
