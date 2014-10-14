@@ -27,7 +27,7 @@ import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.channel.DefaultChannel;
 
 /**
- * The default default implementation of the {@link DefaultHandlerModule} interface.
+ * The default default implementation of the {@link HandlerModule} interface.
  * 
  * @see HandlerModule
  */

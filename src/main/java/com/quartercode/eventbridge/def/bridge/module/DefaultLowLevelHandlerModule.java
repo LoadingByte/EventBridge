@@ -36,9 +36,9 @@ import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.channel.DefaultChannel;
 
 /**
- * The default default implementation of the {@link DefaultLowLevelHandlerModule} interface.
+ * The default default implementation of the {@link LowLevelHandlerModule} interface.
  * 
- * @see HandlerModule
+ * @see LowLevelHandlerModule
  */
 public class DefaultLowLevelHandlerModule extends AbstractBridgeModule implements LowLevelHandlerModule {
 

@@ -48,7 +48,7 @@ public interface StandardHandlerModule extends BridgeModule {
      * It'll start listening for incoming {@link Event}s that match the given {@link EventPredicate}.
      * 
      * @param handler The new event handler that should start listening on the standard handler module.
-     * @param predicate An event predicate that decides which events pass into the handler.
+     * @param predicate An event predicate that decides which events are passed into the handler.
      */
     public void addHandler(EventHandler<?> handler, EventPredicate<?> predicate);
 

@@ -29,7 +29,6 @@ import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventPredicate;
 import com.quartercode.eventbridge.bridge.module.EventHandler;
-import com.quartercode.eventbridge.bridge.module.HandlerModule;
 import com.quartercode.eventbridge.bridge.module.LowLevelHandler;
 import com.quartercode.eventbridge.bridge.module.LowLevelHandlerModule;
 import com.quartercode.eventbridge.bridge.module.StandardHandlerModule;
@@ -38,9 +37,9 @@ import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.channel.DefaultChannel;
 
 /**
- * The default default implementation of the {@link DefaultStandardHandlerModule} interface.
+ * The default default implementation of the {@link StandardHandlerModule} interface.
  * 
- * @see HandlerModule
+ * @see StandardHandlerModule
  */
 public class DefaultStandardHandlerModule extends AbstractBridgeModule implements StandardHandlerModule {
 
