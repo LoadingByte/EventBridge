@@ -115,7 +115,7 @@ public interface ReturnEventExtensionReturner extends BridgeModule {
 
         /**
          * This method is invoked when the given {@link RequestEventHandler} is being added to the given {@link ReturnEventExtensionReturner}.
-         * It is called after the request handler is added.
+         * It is called after the request handler was added.
          * 
          * @param requestHandler The request event handler that is added to the return event extension returner.
          * @param predicate The {@link EventPredicate} matcher that belongs to the request handler.

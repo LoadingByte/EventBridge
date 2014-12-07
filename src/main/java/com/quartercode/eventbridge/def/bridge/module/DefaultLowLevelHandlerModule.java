@@ -160,14 +160,14 @@ public class DefaultLowLevelHandlerModule extends AbstractBridgeModule implement
 
             for (LowLevelHandler handler : handlers) {
                 if (EventUtils.tryTest(handler.getPredicate(), event)) {
-                    invokeHandlerHandleChannel(event, source, handler);
+                    invokeSpecificLowLevelHandleChannel(event, source, handler);
                 }
             }
 
             invocation.next().handle(invocation, event, source);
         }
 
-        private void invokeHandlerHandleChannel(Event event, BridgeConnector source, LowLevelHandler handler) {
+        private void invokeSpecificLowLevelHandleChannel(Event event, BridgeConnector source, LowLevelHandler handler) {
 
             ChannelInvocation<SpecificLowLevelHandleInterceptor> invocation = specificChannel.invoke();
             invocation.next().handle(invocation, event, source, handler);

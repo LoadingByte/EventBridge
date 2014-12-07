@@ -112,7 +112,7 @@ public interface LowLevelHandlerModule extends BridgeModule {
 
         /**
          * This method is invoked when the given {@link LowLevelHandler} is being added to the given {@link LowLevelHandlerModule}.
-         * It is called after the handler is added.
+         * It is called after the handler was added.
          * 
          * @param handler The low-level handler that is added to the low-level handler module.
          * @param module The low-level handler module the given handler is added to.

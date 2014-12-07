@@ -142,7 +142,7 @@ public interface StandardHandlerModule extends BridgeModule {
 
         /**
          * This method is invoked when the given {@link EventHandler} is being added to the given {@link StandardHandlerModule}.
-         * It is called after the handler is added.
+         * It is called after the handler was added.
          * 
          * @param handler The event handler that is added to the standard handler module.
          * @param predicate The {@link EventPredicate} matcher that belongs to the handler.

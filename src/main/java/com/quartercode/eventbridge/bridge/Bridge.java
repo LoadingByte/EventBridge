@@ -139,7 +139,7 @@ public interface Bridge {
 
         /**
          * This method is invoked when the given {@link BridgeConnector} is being added to the given {@link Bridge}.
-         * It is called after the connector is added and started.
+         * It is called after the connector was added and started.
          * 
          * @param connector The bridge connector that is added to the bridge.
          * @param bridge The bridge the given connector is added to.

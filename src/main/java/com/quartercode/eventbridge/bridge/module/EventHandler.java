@@ -21,7 +21,7 @@ package com.quartercode.eventbridge.bridge.module;
 import com.quartercode.eventbridge.bridge.Event;
 
 /**
- * High level event handlers are classes that take an {@link Event} and do something depending on the event.
+ * High-level event handlers are classes that take an {@link Event} and do something depending on the event.
  * Since events are immutable, event handlers may not modify the event.<br>
  * <br>
  * The generic parameter {@code <T>} defines the type of event the handler can handle.
