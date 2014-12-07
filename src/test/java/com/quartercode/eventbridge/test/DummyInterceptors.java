@@ -29,6 +29,7 @@ import com.quartercode.eventbridge.bridge.module.LowLevelHandler;
 import com.quartercode.eventbridge.bridge.module.LowLevelHandlerModule.GlobalLowLevelHandleInterceptor;
 import com.quartercode.eventbridge.bridge.module.LowLevelHandlerModule.SpecificLowLevelHandleInterceptor;
 import com.quartercode.eventbridge.bridge.module.SenderModule.SendInterceptor;
+import com.quartercode.eventbridge.bridge.module.StandardHandlerModule.StandardHandleExceptionInterceptor;
 import com.quartercode.eventbridge.bridge.module.StandardHandlerModule.StandardHandleInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 
@@ -174,6 +175,24 @@ public class DummyInterceptors {
 
             dummy.handle(invocation, event, source, handler);
             invocation.next().handle(invocation, event, source, handler);
+        }
+
+    }
+
+    public static class DummyStandardHandleExceptionInterceptor implements StandardHandleExceptionInterceptor {
+
+        private final StandardHandleExceptionInterceptor dummy;
+
+        public DummyStandardHandleExceptionInterceptor(StandardHandleExceptionInterceptor dummy) {
+
+            this.dummy = dummy;
+        }
+
+        @Override
+        public void handle(ChannelInvocation<StandardHandleExceptionInterceptor> invocation, RuntimeException exception, EventHandler<?> handler, Event event, BridgeConnector source) {
+
+            dummy.handle(invocation, exception, handler, event, source);
+            invocation.next().handle(invocation, exception, handler, event, source);
         }
 
     }

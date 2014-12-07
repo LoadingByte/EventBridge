@@ -19,6 +19,7 @@
 package com.quartercode.eventbridge.test.def.bridge.module;
 
 import static com.quartercode.eventbridge.test.ExtraActions.storeArgument;
+import static com.quartercode.eventbridge.test.ExtraAssert.assertListEquals;
 import static com.quartercode.eventbridge.test.ExtraAssert.assertMapEquals;
 import static com.quartercode.eventbridge.test.ExtraMatchers.aLowLevelHandlerWithThePredicate;
 import static org.junit.Assert.assertTrue;
@@ -37,15 +38,19 @@ import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventPredicate;
 import com.quartercode.eventbridge.bridge.module.EventHandler;
+import com.quartercode.eventbridge.bridge.module.EventHandlerExceptionCatcher;
 import com.quartercode.eventbridge.bridge.module.LowLevelHandler;
 import com.quartercode.eventbridge.bridge.module.LowLevelHandlerModule;
+import com.quartercode.eventbridge.bridge.module.StandardHandlerModule.ModifyStandardExceptionCatcherListListener;
 import com.quartercode.eventbridge.bridge.module.StandardHandlerModule.ModifyStandardHandlerListListener;
+import com.quartercode.eventbridge.bridge.module.StandardHandlerModule.StandardHandleExceptionInterceptor;
 import com.quartercode.eventbridge.bridge.module.StandardHandlerModule.StandardHandleInterceptor;
 import com.quartercode.eventbridge.channel.ChannelInvocation;
 import com.quartercode.eventbridge.def.bridge.module.DefaultStandardHandlerModule;
 import com.quartercode.eventbridge.test.DummyEvents.CallableEvent;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent1;
 import com.quartercode.eventbridge.test.DummyEvents.EmptyEvent2;
+import com.quartercode.eventbridge.test.DummyInterceptors.DummyStandardHandleExceptionInterceptor;
 import com.quartercode.eventbridge.test.DummyInterceptors.DummyStandardHandleInterceptor;
 
 public class DefaultStandardHandlerModuleTest {
@@ -205,7 +210,7 @@ public class DefaultStandardHandlerModuleTest {
         final EventPredicate<Event> predicate = context.mock(EventPredicate.class, "predicate");
 
         final StandardHandleInterceptor interceptor = context.mock(StandardHandleInterceptor.class);
-        module.getChannel().addInterceptor(new DummyStandardHandleInterceptor(interceptor), 1);
+        module.getHandleChannel().addInterceptor(new DummyStandardHandleInterceptor(interceptor), 1);
 
         final Mutable<LowLevelHandler> lowLevelHandler = new MutableObject<>();
 
@@ -269,6 +274,119 @@ public class DefaultStandardHandlerModuleTest {
         module.addHandler(handler, predicate);
 
         lowLevelHandler.getValue().handle(new EmptyEvent1(), null);
+    }
+
+    @Test
+    public void testExceptionCatcherStorage() {
+
+        final EventHandlerExceptionCatcher catcher1 = context.mock(EventHandlerExceptionCatcher.class, "catcher1");
+        final EventHandlerExceptionCatcher catcher2 = context.mock(EventHandlerExceptionCatcher.class, "catcher2");
+        final EventHandlerExceptionCatcher catcher3 = context.mock(EventHandlerExceptionCatcher.class, "catcher3");
+
+        assertExceptionCatcherListEmpty();
+
+        module.removeExceptionCatcher(catcher1);
+        assertExceptionCatcherListEmpty();
+
+        module.addExceptionCatcher(catcher1);
+        assertListEquals("Exception catchers that are stored inside the module are not correct", module.getExceptionCatchers(), catcher1);
+        assertListEquals("Exception catchers that are stored inside the module changed on the second retrieval", module.getExceptionCatchers(), catcher1);
+
+        module.addExceptionCatcher(catcher2);
+        assertListEquals("Exception catchers that are stored inside the module are not correct", module.getExceptionCatchers(), catcher1, catcher2);
+        assertListEquals("Exception catchers that are stored inside the module changed on the second retrieval", module.getExceptionCatchers(), catcher1, catcher2);
+
+        module.addExceptionCatcher(catcher3);
+        assertListEquals("Exception catchers that are stored inside the module are not correct", module.getExceptionCatchers(), catcher1, catcher2, catcher3);
+        assertListEquals("Exception catchers that are stored inside the module changed on the second retrieval", module.getExceptionCatchers(), catcher1, catcher2, catcher3);
+
+        module.removeExceptionCatcher(catcher2);
+        assertListEquals("Exception catchers that are stored inside the module are not correct", module.getExceptionCatchers(), catcher1, catcher3);
+        assertListEquals("Exception catchers that are stored inside the module changed on the second retrieval", module.getExceptionCatchers(), catcher1, catcher3);
+    }
+
+    private void assertExceptionCatcherListEmpty() {
+
+        assertTrue("There are exception catchers stored inside the module although none were added", module.getExceptionCatchers().isEmpty());
+        assertTrue("Exception catchers that are stored inside the module changed on the second retrieval", module.getExceptionCatchers().isEmpty());
+    }
+
+    @Test
+    public void testExceptionCatcherStorageListeners() {
+
+        final EventHandlerExceptionCatcher catcher = context.mock(EventHandlerExceptionCatcher.class, "catcher");
+        final ModifyStandardExceptionCatcherListListener listener = context.mock(ModifyStandardExceptionCatcherListListener.class);
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            final Sequence listenerCalls = context.sequence("listenerCalls");
+            oneOf(listener).onAddCatcher(catcher, module); inSequence(listenerCalls);
+            oneOf(listener).onRemoveCatcher(catcher, module); inSequence(listenerCalls);
+
+        }});
+        // @formatter:on
+
+        // Calls with listener
+        module.addModifyExceptionCatcherListListener(listener);
+        module.addExceptionCatcher(catcher);
+        module.removeExceptionCatcher(catcher);
+
+        // Calls without listener
+        module.removeModifyExceptionCatcherListListener(listener);
+        module.addExceptionCatcher(catcher);
+        module.removeExceptionCatcher(catcher);
+    }
+
+    @SuppressWarnings ("unchecked")
+    @Test
+    public void testExceptionInHandler() {
+
+        final BridgeConnector source = context.mock(BridgeConnector.class);
+
+        final EmptyEvent1 regularEvent = new EmptyEvent1();
+        final EmptyEvent2 exceptionEvent = new EmptyEvent2();
+
+        final EventHandler<Event> handler = context.mock(EventHandler.class, "handler");
+        final EventPredicate<Event> predicate = context.mock(EventPredicate.class, "predicate");
+
+        final EventHandlerExceptionCatcher catcher1 = context.mock(EventHandlerExceptionCatcher.class, "exceptionCatcher1");
+        final EventHandlerExceptionCatcher catcher2 = context.mock(EventHandlerExceptionCatcher.class, "exceptionCatcher2");
+        module.addExceptionCatcher(catcher1);
+        module.addExceptionCatcher(catcher2);
+
+        final StandardHandleExceptionInterceptor interceptor = context.mock(StandardHandleExceptionInterceptor.class);
+        module.getExceptionChannel().addInterceptor(new DummyStandardHandleExceptionInterceptor(interceptor), 1);
+
+        final Mutable<LowLevelHandler> lowLevelHandler = new MutableObject<>();
+
+        // @formatter:off
+        context.checking(new Expectations() {{
+
+            allowing(predicate).test(with(any(Event.class)));
+                will(returnValue(true));
+
+            oneOf(lowLevelHandlerModule).addHandler(with(aLowLevelHandlerWithThePredicate(predicate)));
+                will(storeArgument(0).in(lowLevelHandler));
+
+            final Sequence handleChain = context.sequence("handleChain");
+            // Regular event
+            oneOf(handler).handle(regularEvent); inSequence(handleChain);
+            // Exception event
+            final RuntimeException exception = new RuntimeException();
+            oneOf(handler).handle(exceptionEvent); inSequence(handleChain);
+                will(throwException(exception));
+            oneOf(interceptor).handle(with(any(ChannelInvocation.class)), with(exception), with(handler), with(exceptionEvent), with(source)); inSequence(handleChain);
+            oneOf(catcher1).handle(exception, handler, exceptionEvent, source); inSequence(handleChain);
+            oneOf(catcher2).handle(exception, handler, exceptionEvent, source); inSequence(handleChain);
+
+        }});
+        // @formatter:on
+
+        module.addHandler(handler, predicate);
+
+        lowLevelHandler.getValue().handle(regularEvent, source);
+        lowLevelHandler.getValue().handle(exceptionEvent, source);
     }
 
 }

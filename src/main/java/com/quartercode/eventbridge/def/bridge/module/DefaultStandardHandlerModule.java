@@ -23,12 +23,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import com.quartercode.eventbridge.basic.AbstractBridgeModule;
 import com.quartercode.eventbridge.basic.EventUtils;
 import com.quartercode.eventbridge.bridge.BridgeConnector;
 import com.quartercode.eventbridge.bridge.Event;
 import com.quartercode.eventbridge.bridge.EventPredicate;
 import com.quartercode.eventbridge.bridge.module.EventHandler;
+import com.quartercode.eventbridge.bridge.module.EventHandlerExceptionCatcher;
 import com.quartercode.eventbridge.bridge.module.LowLevelHandler;
 import com.quartercode.eventbridge.bridge.module.LowLevelHandlerModule;
 import com.quartercode.eventbridge.bridge.module.StandardHandlerModule;
@@ -43,19 +45,24 @@ import com.quartercode.eventbridge.def.channel.DefaultChannel;
  */
 public class DefaultStandardHandlerModule extends AbstractBridgeModule implements StandardHandlerModule {
 
-    private final Channel<StandardHandleInterceptor>      channel                    = new DefaultChannel<>(StandardHandleInterceptor.class);
+    private final Channel<StandardHandleInterceptor>               handleChannel                       = new DefaultChannel<>(StandardHandleInterceptor.class);
+    private final Channel<StandardHandleExceptionInterceptor>      exceptionChannel                    = new DefaultChannel<>(StandardHandleExceptionInterceptor.class);
 
-    private final Map<EventHandler<?>, EventPredicate<?>> handlers                   = new ConcurrentHashMap<>();
-    private final Map<EventHandler<?>, LowLevelHandler>   lowLevelHandlers           = new ConcurrentHashMap<>();
-    private final List<ModifyStandardHandlerListListener> modifyHandlerListListeners = new ArrayList<>();
-    private Map<EventHandler<?>, EventPredicate<?>>       handlersUnmodifiableCache;
+    private final Map<EventHandler<?>, EventPredicate<?>>          handlers                            = new ConcurrentHashMap<>();
+    private final Map<EventHandler<?>, LowLevelHandler>            lowLevelHandlers                    = new ConcurrentHashMap<>();
+    private final List<ModifyStandardHandlerListListener>          modifyHandlerListListeners          = new ArrayList<>();
+    private Map<EventHandler<?>, EventPredicate<?>>                handlersUnmodifiableCache;
+
+    private final List<EventHandlerExceptionCatcher>               exceptionCatchers                   = new CopyOnWriteArrayList<>();
+    private final List<ModifyStandardExceptionCatcherListListener> modifyExceptionCatcherListListeners = new ArrayList<>();
 
     /**
      * Creates a new default standard handler module.
      */
     public DefaultStandardHandlerModule() {
 
-        channel.addInterceptor(new LastStandardHandleInterceptor(), 0);
+        handleChannel.addInterceptor(new LastStandardHandleInterceptor(), 0);
+        exceptionChannel.addInterceptor(new LastStandardHandleExceptionInterceptor(), 0);
     }
 
     @Override
@@ -114,6 +121,32 @@ public class DefaultStandardHandlerModule extends AbstractBridgeModule implement
     }
 
     @Override
+    public List<EventHandlerExceptionCatcher> getExceptionCatchers() {
+
+        return Collections.unmodifiableList(exceptionCatchers);
+    }
+
+    @Override
+    public void addExceptionCatcher(EventHandlerExceptionCatcher catcher) {
+
+        exceptionCatchers.add(catcher);
+
+        for (ModifyStandardExceptionCatcherListListener listener : modifyExceptionCatcherListListeners) {
+            listener.onAddCatcher(catcher, this);
+        }
+    }
+
+    @Override
+    public void removeExceptionCatcher(EventHandlerExceptionCatcher catcher) {
+
+        for (ModifyStandardExceptionCatcherListListener listener : modifyExceptionCatcherListListeners) {
+            listener.onRemoveCatcher(catcher, this);
+        }
+
+        exceptionCatchers.remove(catcher);
+    }
+
+    @Override
     public void addModifyHandlerListListener(ModifyStandardHandlerListListener listener) {
 
         modifyHandlerListListeners.add(listener);
@@ -126,14 +159,32 @@ public class DefaultStandardHandlerModule extends AbstractBridgeModule implement
     }
 
     @Override
-    public Channel<StandardHandleInterceptor> getChannel() {
+    public void addModifyExceptionCatcherListListener(ModifyStandardExceptionCatcherListListener listener) {
 
-        return channel;
+        modifyExceptionCatcherListListeners.add(listener);
+    }
+
+    @Override
+    public void removeModifyExceptionCatcherListListener(ModifyStandardExceptionCatcherListListener listener) {
+
+        modifyExceptionCatcherListListeners.remove(listener);
+    }
+
+    @Override
+    public Channel<StandardHandleInterceptor> getHandleChannel() {
+
+        return handleChannel;
+    }
+
+    @Override
+    public Channel<StandardHandleExceptionInterceptor> getExceptionChannel() {
+
+        return exceptionChannel;
     }
 
     private void handle(Event event, BridgeConnector source, EventHandler<?> handler) {
 
-        ChannelInvocation<StandardHandleInterceptor> invocation = channel.invoke();
+        ChannelInvocation<StandardHandleInterceptor> invocation = handleChannel.invoke();
         invocation.next().handle(invocation, event, source, handler);
     }
 
@@ -162,14 +213,38 @@ public class DefaultStandardHandlerModule extends AbstractBridgeModule implement
 
     }
 
-    private static class LastStandardHandleInterceptor implements StandardHandleInterceptor {
+    private class LastStandardHandleInterceptor implements StandardHandleInterceptor {
 
         @Override
         public void handle(ChannelInvocation<StandardHandleInterceptor> invocation, Event event, BridgeConnector source, EventHandler<?> handler) {
 
-            EventUtils.tryHandle(handler, event);
+            try {
+                EventUtils.tryHandle(handler, event);
+            } catch (RuntimeException e) {
+                invokeExceptionChannel(e, handler, event, source);
+            }
 
             invocation.next().handle(invocation, event, source, handler);
+        }
+
+        private void invokeExceptionChannel(RuntimeException exception, EventHandler<?> handler, Event event, BridgeConnector source) {
+
+            ChannelInvocation<StandardHandleExceptionInterceptor> invocation = exceptionChannel.invoke();
+            invocation.next().handle(invocation, exception, handler, event, source);
+        }
+
+    }
+
+    private class LastStandardHandleExceptionInterceptor implements StandardHandleExceptionInterceptor {
+
+        @Override
+        public void handle(ChannelInvocation<StandardHandleExceptionInterceptor> invocation, RuntimeException exception, EventHandler<?> handler, Event event, BridgeConnector source) {
+
+            for (EventHandlerExceptionCatcher catcher : exceptionCatchers) {
+                catcher.handle(exception, handler, event, source);
+            }
+
+            invocation.next().handle(invocation, exception, handler, event, source);
         }
 
     }
