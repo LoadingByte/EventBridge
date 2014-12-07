@@ -1,3 +1,9 @@
+0.2.0
+-----
+
+### Additions
+* Added hooks for high-level event handler exception catchers. Such catchers can be used to handle RuntimeExceptions thrown by high-level event handlers.
+
 0.1.0
 -----
 
