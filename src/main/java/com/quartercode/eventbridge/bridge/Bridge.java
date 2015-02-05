@@ -32,7 +32,7 @@ import java.util.List;
  * while the {@link #removeConnector(BridgeConnector)} method does the opposite.
  * The usage of bridge connectors inverts the dependency on details and decouples the bridge from the event transport logic.<br>
  * <br>
- * Bridge modules are used to seperate the bridge concerns.
+ * Bridge modules are used to separate the bridge concerns.
  * They are generally provided by the bridge implementation and take care of a specific aspect of bridges.
  * For example, a bridge module could be used to send events to other bridges, while a second module could handle incoming events.
  * 
