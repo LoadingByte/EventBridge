@@ -1,6 +1,6 @@
 /*
  * This file is part of EventBridge.
- * Copyright (c) 2014 QuarterCode <http://www.quartercode.com/>
+ * Copyright (c) 2014 QuarterCode <http://quartercode.com/>
  *
  * EventBridge is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
@@ -54,7 +54,7 @@ public class BridgeConnectorException extends Exception {
     }
 
     /**
-     * Creates a new bridge connector exception whith the exception which caused the error.
+     * Creates a new bridge connector exception with the exception which caused the error.
      * 
      * @param connector The {@link BridgeConnector} that threw or caused the exception.
      * @param cause The cause exception which caused the error in the first place.

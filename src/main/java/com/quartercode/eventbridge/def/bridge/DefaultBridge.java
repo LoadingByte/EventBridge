@@ -1,6 +1,6 @@
 /*
  * This file is part of EventBridge.
- * Copyright (c) 2014 QuarterCode <http://www.quartercode.com/>
+ * Copyright (c) 2014 QuarterCode <http://quartercode.com/>
  *
  * EventBridge is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as

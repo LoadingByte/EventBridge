@@ -2,12 +2,12 @@ EventBridge
 ===========
 
 EventBridge is a flexible event framework that can be used for local and network communication.
-More information can be found on the [wiki page](http://quartercode.com/wiki/index.php?title=EventBridge).
+More information can be found on the [wiki page](http://quartercode.com/wiki/EventBridge).
 
 License
 -------
 
-Copyright (c) 2014 QuarterCode <http://www.quartercode.com/>
+Copyright (c) 2014 QuarterCode <http://quartercode.com/>
 
 EventBridge may be used under the terms of the GNU Lesser General Public License (LGPL) v3.0. See the LICENSE.md file or https://www.gnu.org/licenses/lgpl-3.0.txt for details.
 
